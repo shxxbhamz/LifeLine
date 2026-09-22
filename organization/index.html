@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lifeline- Organization Staff Dashboard</title>
+    <!-- Linking the centralized stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-facility-type="hospital"> <!-- Dynamic switcher: change to 'blood_bank' if needed -->
+
+    <!-- Top Navigation Bar -->
+    <header>
+        <a href="index.html" class="logo-link">
+            <img src="img/lifeline-logo.png" alt="LifeLine Logo" class="brand-logo">
+        </a>
+    
+        <div class="nav-right">
+            <!-- Emergency Create Action Button -->
+            <button class="btn-emergency-create" onclick="openEmergencyModal()">+ Emergency Create</button>
+            
+            <!-- Three-Dash Hamburger Dropdown Menu -->
+            <div class="dropdown">
+                <button class="hamburger-btn" onclick="toggleDropdown()" aria-label="Menu">
+                    &#9776;
+                </button>
+                <div class="dropdown-content" id="navDropdown">
+                    <a href="#profile">Edit Profile</a>
+                    <a href="#notifications">Notifications <span class="badge-count">3</span></a>
+                    <div class="dropdown-divider"></div>
+                    <a href="../login.html" class="logout-link">Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sub Navigation Bar / Quick Links -->
+    <nav class="sub-nav">
+        <ul>
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="appointment.html">Appointments</a></li>
+            <li><a href="emergency.html">Active Emergency Dispatches</a></li>
+            <li><a href="inventory.html">Blood & Plasma Inventory</a></li>
+            <li><a href="audit_log.html">Broadcast Audit Log</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main>
+        <!-- Welcome Banner -->
+        <section class="hero-section">
+            <h1 id="welcomeTitle">Government of Saskatchewan</h1>
+        </section>
+
+        <!-- Dashboard Grid Layout -->
+        <div class="dashboard-grid">
+            
+            <!-- Left Column: Inventory & Appointments -->
+            <div class="dash-column">
+                
+                <!-- Blood & Plasma Inventory Module -->
+                <section class="dash-card" id="inventory">
+                    <div class="card-header">
+                        <h3>Inventory Management</h3>
+                        <span class="status-indicator optimal">Stock Stable</span>
+                    </div>
+                    
+                    <div class="inventory-table-container">
+                        <table class="inventory-table">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Whole Blood (Units)</th>
+                                    <th>Plasma (Units)</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><strong>A+</strong></td><td>18</td><td>12</td><td><span class="badge green">Normal</span></td></tr>
+                                <tr><td><strong>A-</strong></td><td>4</td><td>2</td><td><span class="badge yellow">Low</span></td></tr>
+                                <tr><td><strong>B+</strong></td><td>14</td><td>9</td><td><span class="badge green">Normal</span></td></tr>
+                                <tr><td><strong>B-</strong></td><td>3</td><td>1</td><td><span class="badge red">Critical</span></td></tr>
+                                <tr><td><strong>O+</strong></td><td>22</td><td>15</td><td><span class="badge green">Normal</span></td></tr>
+                                <tr><td><strong>O-</strong></td><td>2</td><td>1</td><td><span class="badge red">Critical</span></td></tr>
+                                <tr><td><strong>AB+</strong></td><td>9</td><td>6</td><td><span class="badge green">Normal</span></td></tr>
+                                <tr><td><strong>AB-</strong></td><td>5</td><td>3</td><td><span class="badge yellow">Low</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Donor Appointments Module -->
+                <section class="dash-card" id="appointments">
+                    <div class="card-header">
+                        <h3>Scheduled Donor Appointments</h3>
+                        <span class="badge-count">4 Incoming Today</span>
+                    </div>
+                    
+                    <div class="appointment-list">
+                        <div class="appointment-item">
+                            <div class="appt-info">
+                                <strong>Marcus Vance</strong> (O-Positive)
+                                <small>Verified Pre-Screening • Slot: 10:30 AM</small>
+                            </div>
+                        </div>
+                        <div class="appointment-item">
+                            <div class="appt-info">
+                                <strong>Sarah Jenkins</strong> (A-Negative)
+                                <small>Emergency Response Slot • Slot: 11:15 AM</small>
+                            </div>
+                        </div>
+                        <div class="appointment-item">
+                            <div class="appt-info">
+                                <strong>David Ross</strong> (O-Negative)
+                                <small>Walk-in Match • Slot: 01:00 PM</small>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- Right Column: Emergency Dispatches & Proximity Map -->
+            <div class="dash-column">
+                
+                <!-- Active Emergency Requests & Live Proximity Map Module -->
+                <section class="dash-card map-card" id="dispatches">
+                    <div class="card-header">
+                        <h3>Active Emergency Dispatches & Proximity Map</h3>
+                        <span class="badge red-pulse">Live Broadcast Active</span>
+                    </div>
+                    
+                    <!-- Simulated Interactive Map Container -->
+                    <div class="map-container">
+                        
+                    </div>
+
+                </section>
+
+                <!-- Broadcast Audit & History Log -->
+                <section class="dash-card" id="audit-log">
+                    <div class="card-header">
+                        <h3>Recent Emergency History</h3>
+                    </div>
+                    <ul class="history-list">
+                        <li class="history-item">
+                            <strong>Marcus Vance</strong>
+                            <div class="history-details">
+                                <span>1850 Lorne St, Regina, SK</span>
+                                <span>Blood (Group: O-Positive)</span>
+                            </div>
+                        </li>
+                        <li class="history-item">
+                            <strong>Sarah Jenkins</strong>
+                            <div class="history-details">
+                                <span>2125 11th Ave, Regina, SK</span>
+                                <span>Plasma (Group: A-Negative)</span>
+                            </div>
+                        </li>
+                        <li class="history-item">
+                            <strong>David Ross</strong>
+                            <div class="history-details">
+                                <span>4400 4th Ave, Regina, SK</span>
+                                <span>Blood (Group: O-Negative)</span>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Lifeline. Secure Medical Staff Console. All rights reserved.</p>
+    </footer>
+
+    <!-- Emergency Request Modal Popup -->
+    <div id="globalEmergencyModal" class="emergency-modal-overlay">
+        <div class="emergency-modal-content">
+            <h3>Create Emergency Donation Request</h3>
+            
+            <form id="emergencyRequestForm" onsubmit="submitEmergencyRequest(event)">
+                
+                <!-- Component Type Selection (Mutually Exclusive Radio Buttons) -->
+                <div class="em-form-group">
+                    <label>Select Component Type (Choose Exactly One):</label>
+                    <div class="component-options">
+                        <label><input type="radio" name="componentType" value="Blood" onclick="updateBloodGroupOptions('Blood')" checked> Blood</label>
+                        <label><input type="radio" name="componentType" value="Plasma" onclick="updateBloodGroupOptions('Plasma')"> Plasma</label>
+                        <label><input type="radio" name="componentType" value="Platelets" onclick="updateBloodGroupOptions('Platelets')"> Platelets</label>
+                    </div>
+                </div>
+
+                <!-- Blood Group Dropdown with Dynamic Label Update -->
+                <div class="em-form-group">
+                    <label for="emBloodGroup" id="bloodGroupLabel">Target Blood Group (Blood):</label>
+                    <select id="emBloodGroup" required>
+                        <option value="" disabled selected>Select blood group</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
+                </div>
+
+                <!-- Description Box -->
+                <div class="em-form-group">
+                    <label for="emDescription">Emergency Description / Case Details:</label>
+                    <textarea id="emDescription" placeholder="e.g., Critical trauma surgery requiring immediate units..." required></textarea>
+                </div>
+
+                <!-- Centered Submit Button & Cancel Action -->
+                <div class="em-modal-actions">
+                    <button type="button" class="em-btn-secondary" onclick="closeEmergencyModal()">Cancel</button>
+                    <button type="submit" class="em-btn-danger">Broadcast Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- JavaScript for Dropdown, Modal, and Actions -->
+    <script>
+        function toggleDropdown() {
+            document.getElementById("navDropdown").classList.toggle("show");
+        }
+
+        // Close dropdown when clicking outside
+        window.onclick = function(event) {
+            if (!event.target.matches('.hamburger-btn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+
+            // Close modal when clicking outside the modal content window
+            const modal = document.getElementById("globalEmergencyModal");
+            if (event.target === modal) {
+                closeEmergencyModal();
+            }
+        }
+
+        function openEmergencyModal() {
+            document.getElementById("globalEmergencyModal").style.display = "flex";
+        }
+
+        function closeEmergencyModal() {
+            document.getElementById("globalEmergencyModal").style.display = "none";
+            document.getElementById("emergencyRequestForm").reset();
+            document.getElementById("bloodGroupLabel").innerText = "Target Blood Group (Blood):";
+        }
+
+        function updateBloodGroupOptions(componentType) {
+            const label = document.getElementById("bloodGroupLabel");
+            label.innerText = `Target Blood Group (${componentType}):`;
+        }
+
+        function submitEmergencyRequest(event) {
+            event.preventDefault();
+            
+            const description = document.getElementById("emDescription").value;
+            const selectedComponent = document.querySelector('input[name="componentType"]:checked').value;
+            const bloodGroup = document.getElementById("emBloodGroup").value;
+
+            console.log("Broadcasting Emergency Request:", {
+                description,
+                component: selectedComponent,
+                bloodGroup
+            });
+
+            alert(`Emergency broadcast successfully dispatched for ${selectedComponent} (${bloodGroup})!`);
+            closeEmergencyModal();
+        }
+    </script>
+</body>
+</html>

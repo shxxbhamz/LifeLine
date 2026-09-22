@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lifeline - Scheduled Donor Appointments</title>
+    <!-- Linking the centralized stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-facility-type="hospital">
+
+    <!-- Top Navigation Bar -->
+    <header>
+        <a href="index.html" class="logo-link">
+            <img src="img/lifeline-logo.png" alt="LifeLine Logo" class="brand-logo">
+        </a>
+    
+        <div class="nav-right">
+            <!-- Emergency Create Action Button -->
+            <button class="btn-emergency-create" onclick="openEmergencyModal()">+ Emergency Create</button>
+            
+            <!-- Three-Dash Hamburger Dropdown Menu -->
+            <div class="dropdown">
+                <button class="hamburger-btn" onclick="toggleDropdown()" aria-label="Menu">
+                    &#9776;
+                </button>
+                <div class="dropdown-content" id="navDropdown">
+                    <a href="#profile">Edit Profile</a>
+                    <a href="#notifications">Notifications <span class="badge-count">3</span></a>
+                    <div class="dropdown-divider"></div>
+                    <a href="../login.html" class="logout-link">Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sub Navigation Bar / Quick Links -->
+    <nav class="sub-nav">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="appointment.html" class="active">Appointments</a></li>
+            <li><a href="emergency.html">Active Emergency Dispatches</a></li>
+            <li><a href="inventory.html">Blood & Plasma Inventory</a></li>
+            <li><a href="audit_log.html">Broadcast Audit Log</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main>
+        <!-- Welcome Banner -->
+        <section class="hero-section">
+            <h1>Scheduled Donor Appointments</h1>
+        </section>
+
+        <!-- Dashboard Grid Layout -->
+        <div class="dashboard-grid" style="grid-template-columns: 1fr;">
+            
+            <section class="dash-card" id="appointments">
+                <div class="card-header">
+                    <h3>Incoming Schedule Today</h3>
+                    <span class="badge-count">4 Incoming Today</span>
+                </div>
+                
+                <div class="appointment-list">
+
+                    <div class="appointment-item">
+                        <div class="donor-profile-group">
+                            <img src="#profileimg" alt="donor name" class="donor-avatar">
+                            <div class="appt-info">
+                                <strong>Marcus Vance <span class="badge blood-badge">O-Positive</span></strong>
+                                <div>
+                                    <span class="donor-contact">(306) 555-0142</span>
+                                    <span class="donation-type-tag">Blood Donation</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="appointment-item" style="border-left: 4px solid var(--primary-red);">
+                        <div class="donor-profile-group">
+                            <img src="#profileimg" alt="donor name" class="donor-avatar">
+                            <div class="appt-info">
+                                <strong>Sarah Jenkins <span class="badge blood-badge">A-Negative</span></strong>
+                                <div>
+                                    <span class="donor-contact">(306) 555-0198</span>
+                                    <span class="donation-type-tag">Emergency Blood</span>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="badge emergency-appt-badge">Emergency Appointment</span>
+                    </div>
+
+                    <div class="appointment-item">
+                        <div class="donor-profile-group">
+                            <img src="#profileimg" alt="donor name" class="donor-avatar">
+                            <div class="appt-info">
+                                <strong>David Ross <span class="badge plasma-badge">AB-Positive</span></strong>
+                                <div>
+                                    <span class="donor-contact">(306) 555-0234</span>
+                                    <span class="donation-type-tag" style="background:#eeffef; color:#27ae60;">Plasma Donation</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="appointment-item">
+                        <div class="donor-profile-group">
+                            <img src="#profileimg" alt="donor name" class="donor-avatar">
+                            <div class="appt-info">
+                                <strong>Elena Rostova <span class="badge blood-badge">B-Negative</span></strong>
+                                <div>
+                                    <span class="donor-contact">(306) 555-0871</span>
+                                    <span class="donation-type-tag" style="background:#eaf2f8; color:#2980b9;">Platelets</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Lifeline. Secure Medical Staff Console. All rights reserved.</p>
+    </footer>
+
+    <!-- Emergency Request Modal Popup -->
+    <div id="globalEmergencyModal" class="emergency-modal-overlay">
+        <div class="emergency-modal-content">
+            <h3>Create Emergency Donation Request</h3>
+            
+            <form id="emergencyRequestForm" onsubmit="submitEmergencyRequest(event)">
+                
+                <!-- Component Type Selection -->
+                <div class="em-form-group">
+                    <label>Select Component Type (Choose Exactly One):</label>
+                    <div class="component-options">
+                        <label><input type="radio" name="componentType" value="Blood" onclick="updateBloodGroupOptions('Blood')" checked> Blood</label>
+                        <label><input type="radio" name="componentType" value="Plasma" onclick="updateBloodGroupOptions('Plasma')"> Plasma</label>
+                        <label><input type="radio" name="componentType" value="Platelets" onclick="updateBloodGroupOptions('Platelets')"> Platelets</label>
+                    </div>
+                </div>
+
+                <!-- Blood Group Dropdown with Dynamic Label Update -->
+                <div class="em-form-group">
+                    <label for="emBloodGroup" id="bloodGroupLabel">Target Blood Group (Blood):</label>
+                    <select id="emBloodGroup" required>
+                        <option value="" disabled selected>Select blood group</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
+                </div>
+
+                <!-- Description Box -->
+                <div class="em-form-group">
+                    <label for="emDescription">Emergency Description / Case Details:</label>
+                    <textarea id="emDescription" placeholder="e.g., Critical trauma surgery requiring immediate units..." required></textarea>
+                </div>
+
+                <!-- Centered Submit Button & Cancel Action -->
+                <div class="em-modal-actions">
+                    <button type="button" class="em-btn-secondary" onclick="closeEmergencyModal()">Cancel</button>
+                    <button type="submit" class="em-btn-danger">Broadcast Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript for Dropdown, Modal, and Form Actions -->
+    <script>
+        function toggleDropdown() {
+            document.getElementById("navDropdown").classList.toggle("show");
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.hamburger-btn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+
+            // Close modal when clicking outside the modal content window
+            const modal = document.getElementById("globalEmergencyModal");
+            if (event.target === modal) {
+                closeEmergencyModal();
+            }
+        }
+
+        function openEmergencyModal() {
+            document.getElementById("globalEmergencyModal").style.display = "flex";
+        }
+
+        function closeEmergencyModal() {
+            document.getElementById("globalEmergencyModal").style.display = "none";
+            document.getElementById("emergencyRequestForm").reset();
+            document.getElementById("bloodGroupLabel").innerText = "Target Blood Group (Blood):";
+        }
+
+        function updateBloodGroupOptions(componentType) {
+            const label = document.getElementById("bloodGroupLabel");
+            label.innerText = `Target Blood Group (${componentType}):`;
+        }
+
+        function submitEmergencyRequest(event) {
+            event.preventDefault();
+            
+            const description = document.getElementById("emDescription").value;
+            const selectedComponent = document.querySelector('input[name="componentType"]:checked').value;
+            const bloodGroup = document.getElementById("emBloodGroup").value;
+
+            console.log("Broadcasting Emergency Request:", {
+                description,
+                component: selectedComponent,
+                bloodGroup
+            });
+
+            alert(`Emergency broadcast successfully dispatched for ${selectedComponent} (${bloodGroup})!`);
+            closeEmergencyModal();
+        }
+    </script>
+</body>
+</html>
