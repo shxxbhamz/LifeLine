@@ -1,0 +1,427 @@
+/* Colour Palette Variables */
+:root {
+  --teal: #3AAFA9;
+  --teal-dark: #2B7A78;
+  --red: #D9534F;
+  --white: #FFFFFF;
+  --off-white: #F7F9FB;
+  --text-color: #333333;
+  --border-color: #E0E0E0;
+}
+
+/* Reset & Base Styling */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: var(--off-white);
+  color: var(--text-color);
+}
+
+/* Header Styling - Compact Height */
+.main-header {
+  background-color: var(--teal);
+  padding: 6px 30px;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header Actions Wrapper (Donor Name + Dropdown Alignment) */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+.donor-name {
+  color: var(--white);
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Custom Logo Image Scaling */
+.logo a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo-img {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Dropdown Menu (3-lines hamburger) */
+.dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.hamburger-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 22px;
+  height: 16px;
+  padding: 0;
+  margin: 0;
+}
+
+.hamburger-btn span {
+  display: block;
+  height: 3px;
+  width: 100%;
+  background-color: var(--white);
+  border-radius: 2px;
+  transition: 0.3s;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: var(--white);
+  min-width: 160px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  z-index: 100;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.dropdown-content a {
+  color: var(--teal-dark);
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.dropdown-content a:hover {
+  background-color: var(--teal);
+  color: var(--white);
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+/* Navigation Bar Styling */
+.main-nav {
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 15px;
+}
+
+.nav-item {
+  text-decoration: none;
+  color: var(--teal-dark);
+  font-weight: bold;
+  font-size: 16px;
+  padding: 12px 24px;
+  border-radius: 4px;
+  background-color: var(--white);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+/* Active Class Highlight for Multi-Page Navigation */
+.nav-item.active {
+  background-color: var(--red);
+  color: var(--white);
+  box-shadow: 0 2px 6px rgba(217, 83, 79, 0.4);
+}
+
+.nav-item:hover {
+  background-color: var(--red);
+  color: var(--white);
+  transform: translateY(-2px);
+}
+
+/* Main Content Area Styling */
+.content {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+.section {
+  background-color: var(--white);
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Multi-Page Section Display (Ensures visibility across separate HTML files) */
+main .section {
+  display: block;
+}
+
+.section-header {
+  margin-bottom: 25px;
+}
+
+.section h1 {
+  color: var(--red);
+  margin-bottom: 5px;
+}
+
+.section-subtitle {
+  color: #666;
+  font-size: 15px;
+}
+
+/* Facility Grid & Card Layout */
+.facility-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.facility-card {
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  border-left: 6px solid var(--teal);
+  border-radius: 6px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.facility-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.facility-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.facility-header h3 {
+  color: var(--teal-dark);
+  font-size: 18px;
+}
+
+.distance-badge {
+  background-color: #E6F4F3;
+  color: var(--teal-dark);
+  font-weight: bold;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.facility-address {
+  color: #555;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.facility-hours {
+  color: #666;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.component-tags {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tag {
+  background-color: var(--off-white);
+  border: 1px solid #DDD;
+  color: #444;
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.next-slot {
+  font-size: 13px;
+  color: var(--red);
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.facility-footer {
+  border-top: 1px solid #F0F0F0;
+  padding-top: 15px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-book {
+  background-color: var(--red);
+  color: var(--white);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-book:hover {
+  background-color: #C9302C;
+  transform: translateY(-1px);
+}
+
+
+
+/* Edit Profile Page Form Styles */
+
+/* Show section for multi-page setup */
+#edit-profile-page main .section,
+#edit-profile-section {
+  display: block;
+}
+.section-header {
+  text-align: center;
+}
+
+/* Form Container */
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* Two-column Row Layout */
+.form-row {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+}
+
+/* Form Group & Alignment */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 6px;
+}
+
+/* Full Width Form Group */
+.form-group.full-width {
+  width: 100%;
+}
+
+/* Empty Spacer (Keeps single items aligned to half-width on desktop) */
+.empty-spacer {
+  visibility: hidden;
+}
+
+/* Labels */
+.form-group label {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--teal-dark, #2B7A78);
+}
+
+/* Inputs & Select Elements */
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 15px;
+  color: var(--text-color, #333333);
+  background-color: var(--off-white, #F7F9FB);
+  border: 1px solid var(--border-color, #E0E0E0);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Focus State */
+.form-group input:focus,
+.form-group select:focus {
+  border-color: var(--teal, #3AAFA9);
+  box-shadow: 0 0 0 3px rgba(58, 175, 169, 0.2);
+  background-color: var(--white, #FFFFFF);
+}
+
+/* Button & Action Bar Alignment */
+.form-actions {
+  display: flex;
+  justify-content: center; /* <--- Change flex-end to center */
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-color, #E0E0E0);
+}
+
+.btn-save {
+  background-color: var(--red, #D9534F);
+  color: var(--white, #FFFFFF);
+  border: none;
+  padding: 12px 28px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-save:hover {
+  background-color: #c9302c;
+  transform: translateY(-1px);
+}
+
+.btn-save:active {
+  transform: translateY(0);
+}
+/* Responsive Mobile Layout */
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .empty-spacer {
+    display: none;
+  }
+
+  .form-actions {
+    justify-content: center;
+  }
+
+  .btn-save {
+    width: 100%;
+  }
+}
