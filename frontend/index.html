@@ -1,0 +1,92 @@
+<!--
+  File Name: index.html
+  Project: Lifeline - Emergency Blood & Plasma Dispatch System
+  
+  Description: 
+  This file serves as the core Home / Landing Page of the Lifeline web 
+  application. It acts as the primary public entry point, featuring:
+  1. A professional navigation bar with a plasma teal background and your custom logo image.
+  2. A central Hero section outlining the emergency rapid-response mission.
+  3. Dual-pathway action cards separating users into the "Donor Portal" 
+     (styled with plasma teal accents) and the "Hospital Portal" (staff login).
+  4. An 'About Us' value proposition breakdown highlighting zero-latency dispatch.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Standard HTML5 Metadata for Charset and Mobile Responsiveness -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lifeline - Emergency Blood & Plasma Dispatch</title>
+    
+    <!-- Link to the centralized global stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+
+    <!-- NAVIGATION BAR-->
+    <!-- Contains custom logo image and sign in -->
+    <header>
+        <!-- Custom logo image replacing the text version -->
+        <a href="index.html" class="logo-link">
+            <img src="img/lifeline-logo.png" alt="LifeLine Logo" class="brand-logo">
+        </a>
+        <nav>
+            <ul>
+                <li><a href="#about">About Us</a></li>
+                <!-- Clean top-right entry point for logging in -->
+                <li><a href="login.html" class="btn-nav-auth">Sign In</a></li>
+            </ul>
+        </nav>
+    </header>
+
+
+    <!-- MAIN CONTENT CONTAINER-->
+    <main>
+        
+        <!-- Hero Section: Introduces platform value statement -->
+        <section class="hero-section">
+            <h1>Emergency Rapid-Response Network</h1>
+            <p>Instant localized blood and plasma alerts dispatched directly to matching donors when every second counts.</p>
+        </section>
+
+        <!-- Mid-Center Dual Pathway Cards: Routes new users to respective roles -->
+        <div class="action-grid">
+            
+            <!-- Donor Pathway Card (Uses Plasma Teal Accents) -->
+            <div class="action-card donor-card">
+                <h3>I Want to Donate</h3>
+                <p>Register as a certified donor, receive instant geographic emergency alerts, and complete secure digital pre-screenings.</p>
+                <a href="donar_signup.html" class="btn-action">Register / Donor Portal</a>
+            </div>
+
+            <!-- Hospital / Staff Pathway Card (Uses Emergency Red Accents) -->
+            <div class="action-card">
+                <h3>Hospital / Blood Bank Portal</h3>
+                <p>Authorized medical personnel login to initiate acute emergency broadcast requests and track live donor responses.</p>
+                <a href="orgarnization_signup.html" class="btn-action btn-action-alt">Staff Portal</a>
+            </div>
+            
+        </div>
+
+        <!-- Value Proposition Section: Why Lifeline stands out -->
+        <section class="value-section" id="about">
+            <h3>Why Choose Lifeline Over Traditional Models?</h3>
+            <ul>
+                <li><strong>Zero Latency:</strong> Bypasses conventional centralized appointment and scheduling delays through immediate proximity-based notifications.</li>
+                <li><strong>Secure Pre-Screening:</strong> Built-in digital clearance checklist verifying health requirements before travel.</li>
+                <li><strong>Precision Matching:</strong> Instantly identifies optimal local donors to streamline emergency response when every second counts.</li>
+            </ul>
+        </section>
+        
+    </main>
+
+
+    <!-- FOOTER SECTION-->
+    <footer>
+        <p>&copy; 2026 LifeLine. Emergency Rapid-Response Blood Dispatch System. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

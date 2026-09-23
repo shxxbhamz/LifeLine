@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeLine - Donation History</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body id="history-page">
+
+  <!-- Shared Header Section -->
+  <header class="main-header">
+    <div class="header-container">
+      <div class="logo">
+        <a href="index.html">
+          <img src="./image/logo.png" alt="LifeLine Logo" class="logo-img">
+        </a>
+      </div>
+
+      <!-- User Profile & Hamburger Menu Container -->
+      <div class="header-actions">
+        <span class="donor-name">Donor Name</span>
+
+        <div class="dropdown">
+          <button class="hamburger-btn" aria-label="Toggle Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <div class="dropdown-content">
+            <a href="#edit-profile">Edit Profile</a>
+            <a href="../login.html">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Bar -->
+  <nav class="main-nav">
+    <ul class="nav-links">
+      <li><a href="index.html" class="nav-item">Home</a></li>
+      <li><a href="active_requests.html" class="nav-item">Active Requests</a></li>
+      <li><a href="book_an_appointment.html" class="nav-item">Book An Appointment</a></li>
+      <li><a href="history.html" class="nav-item active">History</a></li>
+    </ul>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="content">
+
+    <!-- History Section -->
+    <section id="history" class="section">
+      <div class="section-header">
+        <h1>Donation History</h1>
+        <p class="section-subtitle">A record of your past blood donations and ongoing contributions.</p>
+      </div>
+
+      <!-- History Cards Container -->
+      <div class="facility-grid">
+
+        <!-- History Card 1 -->
+        <div class="facility-card">
+          <div class="facility-header">
+            <h3>Whole Blood Donation</h3>
+            <span class="distance-badge">Completed</span>
+          </div>
+          <div class="facility-body">
+            <p class="facility-address">City General Hospital Blood Bank</p>
+            <p class="facility-hours"><strong>Date & Time:</strong> August 12, 2026 at 10:30 AM</p>
+          </div>
+        </div>
+
+        <!-- History Card 2 -->
+        <div class="facility-card">
+          <div class="facility-header">
+            <h3>Platelet Donation</h3>
+            <span class="distance-badge">Completed</span>
+          </div>
+          <div class="facility-body">
+            <p class="facility-address">St. Jude Community Blood Center</p>
+            <p class="facility-hours"><strong>Date & Time:</strong> May 04, 2026 at 2:15 PM</p>
+          </div>
+        </div>
+
+        <!-- History Card 3 -->
+        <div class="facility-card">
+          <div class="facility-header">
+            <h3>Whole Blood Donation</h3>
+            <span class="distance-badge">Completed</span>
+          </div>
+          <div class="facility-body">
+            <p class="facility-address">Metro Health Regional Donation Hub</p>
+            <p class="facility-hours"><strong>Date & Time:</strong> January 15, 2026 at 9:00 AM</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+</body>
+</html>

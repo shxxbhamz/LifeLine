@@ -1,0 +1,83 @@
+<!--
+
+  File Name: login.html
+  Project: Lifeline - Emergency Blood & Plasma Dispatch System
+  
+  Description: 
+  Unified login portal utilizing smart prefix detection ('DO' for donors 
+  and 'ST' for staff) to route users securely without a dropdown menu.
+
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Standard HTML5 Metadata -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lifeline - Secure Sign In</title>
+    
+    <!-- Link to the centralized global stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+
+    <!-- NAVIGATION BAR -->                 
+    <header>
+        <a href="index.html" class="logo-link">
+            <img src="img/lifeline-logo.png" alt="LifeLine Logo" class="brand-logo">
+        </a>
+        <nav>
+            <ul>
+                <li><a href="index.html#about">About Us</a></li>
+                <li><a href="index.html" class="btn-nav-auth">Home</a></li>
+            </ul>
+        </nav>
+    </header>
+
+
+    <!-- MAIN CONTENT AREA: LOGIN FORM-->
+
+    <main>
+        <div class="auth-container login-card-container">
+            <h2>Sign In to Lifeline</h2>
+            
+            <form action="#" method="POST" class="auth-form">
+                
+                <!-- Smart Username / ID Input Field (Expects 'do...' or 'st...') -->
+                <div class="form-group">
+                    <label for="username">Username or ID:</label>
+                    <input type="text" id="username" name="username" placeholder="e.g. dousername or stusername" required>
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+
+                <!-- Submit Button -->
+                <div>
+                    <button type="submit" class="btn-submit">Sign In</button>
+                </div>
+
+                <!-- Registration Prompts Footer -->
+                <div class="auth-footer login-footer-links">
+                    <p>New to Lifeline?</p>
+                    <div class="registration-links-group">
+                        <a href="donar_signup.html" class="sub-link-donor">Register as Donor</a> | 
+                        <a href="orgarnization_signup.html" class="sub-link-staff">Register as Hospital Staff</a>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </main>
+
+    <!-- FOOTER SECTION -->  
+    <footer>
+        <p>&copy; 2026 LifeLine. Emergency Rapid-Response Blood Dispatch System. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
