@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeLine - Active Requests</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body id="active-requests-page">
+
+  <!-- Shared Header Section -->
+  <header class="main-header">
+    <div class="header-container">
+      <div class="logo">
+        <a href="index.html">
+          <img src="./image/logo.png" alt="LifeLine Logo" class="logo-img">
+        </a>
+      </div>
+
+      <!-- User Profile & Hamburger Menu Container -->
+      <div class="header-actions">
+        <span class="donor-name">Donor Name</span>
+
+        <div class="dropdown">
+          <button class="hamburger-btn" aria-label="Toggle Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <div class="dropdown-content">
+            <a href="#edit-profile">Edit Profile</a>
+            <a href="../login.html">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Bar -->
+  <nav class="main-nav">
+    <ul class="nav-links">
+        <li><a href="index.html" class="nav-item">Home</a></li>
+        <li><a href="active_requests.html" class="nav-item active">Active Requests</a></li>
+        <li><a href="book_an_appointment.html" class="nav-item">Book An Appointment</a></li>
+        <li><a href="history.html" class="nav-item">History</a></li>
+    </ul>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="content">
+
+    <!-- Active Requests Section -->
+    <section id="active-requests" class="section">
+      <div class="section-header">
+        <h1>Active Blood Requests</h1>
+        <p class="section-subtitle">Urgent hospital emergency alerts and ongoing blood bank drive requests.</p>
+      </div>
+
+      <!-- Request Cards Container -->
+      <div class="facility-grid">
+
+        <!-- TYPE 1: Emergency Hospital Request -->
+        <div class="facility-card">
+          <div class="facility-header">
+            <h3>Urgent: O-Negative Needed</h3>
+          </div>
+          <div class="facility-body">
+            <p class="facility-address">City General Hospital – Trauma Center</p>
+            <p class="facility-hours"><strong>Needed By:</strong> Today, before 5:00 PM</p>
+            <p class="facility-hours"><strong>Progress:</strong> 1 of 3 units collected</p>
+          </div>
+          <div class="facility-footer">
+            <button class="btn btn-book">Respond to Alert</button>
+          </div>
+        </div>
+
+        <!-- TYPE 2: Blood Bank Inventory Request (No "Needed By") -->
+        <div class="facility-card">
+          <div class="facility-header">
+            <h3>Inventory Request: A-Positive Drive</h3>
+          </div>
+          <div class="facility-body">
+            <p class="facility-address">St. Jude Community Blood Center</p>
+            <p class="facility-hours"><strong>Eligible Donors:</strong> A-Positive & O-Positive</p>
+            <p class="facility-hours"><strong>Campaign Progress:</strong> 14 of 30 units collected this week</p>
+          </div>
+          <div class="facility-footer">
+            <button class="btn btn-book">Schedule Donation</button>
+          </div>
+        </div>
+        <div class="facility-card">
+          <div class="facility-header">
+            <h3>Urgent: B-Negative Needed</h3>
+          </div>
+          <div class="facility-body">
+            <p class="facility-address">Metro Health Regional Hospital – ICU Ward</p>
+            <p class="facility-hours"><strong>Needed By:</strong> Today, before 8:00 PM</p>
+            <p class="facility-hours"><strong>Progress:</strong> 0 of 2 units collected</p>
+          </div>
+          <div class="facility-footer">
+            <button class="btn btn-book">Respond to Alert</button>
+          </div>
+        </div>
+
+  
+        <div class="facility-card">
+          <div class="facility-header">
+            <h3>Inventory Restock: Universal Donors</h3>
+          </div>
+          <div class="facility-body">
+            <p class="facility-address">University Medical Center Donation Hub</p>
+            <p class="facility-hours"><strong>Eligible Donors:</strong> O-Negative (Universal)</p>
+            <p class="facility-hours"><strong>Campaign Progress:</strong> 8 of 20 units collected this week</p>
+          </div>
+          <div class="facility-footer">
+            <button class="btn btn-book">Schedule Donation</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+</body>
+</html>

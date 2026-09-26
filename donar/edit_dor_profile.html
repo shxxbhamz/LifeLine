@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeLine - Edit Profile</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body id="edit-profile-page">
+
+  <!-- Shared Header Section -->
+  <header class="main-header">
+    <div class="header-container">
+      <div class="logo">
+        <a href="index.html">
+          <img src="./image/logo.png" alt="LifeLine Logo" class="logo-img">
+        </a>
+      </div>
+
+      <!-- User Profile & Hamburger Menu Container -->
+      <div class="header-actions">
+        <span class="donor-name">Donor Name</span>
+
+        <div class="dropdown">
+          <button class="hamburger-btn" aria-label="Toggle Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <div class="dropdown-content">
+            <a href="index.html">Home</a>
+            <a href="edit_profile.html">Edit Profile</a>
+            <a href="#logout">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+
+  <!-- Main Content Area -->
+  <main class="content">
+
+    <section id="edit-profile-section" class="section">
+      <div class="section-header">
+        <h1>Edit Profile</h1>
+      </div>
+
+      <form class="profile-form">
+        <!-- Name Row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" name="firstName" placeholder="John">
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" name="lastName" placeholder="Doe">
+          </div>
+        </div>
+
+        <!-- Account Credentials Row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="username">Username (e.g. dusername)</label>
+            <input type="text" id="username" name="username" placeholder="do...">
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" placeholder="john.doe@example.com">
+          </div>
+        </div>
+
+        <!-- Phone & DOB Row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" placeholder="(555) 000-0000">
+          </div>
+          <div class="form-group">
+            <label for="dob">Date of Birth (DOB)</label>
+            <input type="date" id="dob" name="dob">
+          </div>
+        </div>
+
+        <!-- Full Address -->
+        <div class="form-group full-width">
+          <label for="address">Full Address</label>
+          <input type="text" id="address" name="address" placeholder="Street address, apartment, suite, etc.">
+        </div>
+
+        <!-- Location Info Row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="city">City</label>
+            <input type="text" id="city" name="city" placeholder="e.g. Regina">
+          </div>
+          <div class="form-group">
+            <label for="province">Province</label>
+            <input type="text" id="province" name="province" placeholder="e.g. SK">
+          </div>
+        </div>
+
+        <!-- Country & Postal Code Row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="country">Country</label>
+            <input type="text" id="country" name="country" placeholder="Canada">
+          </div>
+          <div class="form-group">
+            <label for="postalCode">Pincode / Postal Code</label>
+            <input type="text" id="postalCode" name="postalCode" placeholder="S4P 3Y2">
+          </div>
+        </div>
+
+        <!-- Blood Group & Password Row -->
+          <div class="form-group">
+            <label for="bloodGroup">Blood Group</label>
+            <select id="bloodGroup" name="bloodGroup">
+              <option value="">Select your blood type</option>
+              <option value="A+">A Positive (A+)</option>
+              <option value="A-">A Negative (A-)</option>
+              <option value="B+">B Positive (B+)</option>
+              <option value="B-">B Negative (B-)</option>
+              <option value="AB+">AB Positive (AB+)</option>
+              <option value="AB-">AB Negative (AB-)</option>
+              <option value="O+">O Positive (O+)</option>
+              <option value="O-">O Negative (O-)</option>
+            </select>
+          </div>
+
+        <!-- Submit Button -->
+        <div class="form-actions">
+          <button type="submit" class="btn btn-save">Save Changes</button>
+        </div>
+      </form>
+    </section>
+
+  </main>
+
+</body>
+</html>
