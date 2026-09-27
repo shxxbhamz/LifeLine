@@ -1,0 +1,13 @@
+# Node backend dependencies
+node_modules/
+
+# Environment variables (database passwords, API keys)
+.env
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / Code editor configurations
+.vscode/
