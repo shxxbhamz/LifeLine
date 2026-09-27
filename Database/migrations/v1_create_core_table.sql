@@ -1,14 +1,10 @@
--- =========================================================
+-- =====================================================
 -- LifeLine Database
--- Migration V1
--- Core user and facility tables
--- =========================================================
+-- V1 - Core Tables
+-- =====================================================
 
 
--- =========================
 -- USERS
--- =========================
-
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
 
@@ -20,19 +16,30 @@ CREATE TABLE users (
     last_name VARCHAR(60) NOT NULL,
 
     role VARCHAR(20) NOT NULL
-        CHECK (role IN ('DONOR', 'HOSPITAL_STAFF')),
+        CHECK (
+            role IN (
+                'DONOR',
+                'HOSPITAL_STAFF'
+            )
+        ),
 
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    account_status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE'
+        CHECK (
+            account_status IN (
+                'ACTIVE',
+                'PENDING',
+                'SUSPENDED'
+            )
+        ),
+
+    terms_accepted_at TIMESTAMP,
 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 
--- =========================
 -- FACILITIES
--- =========================
-
 CREATE TABLE facilities (
     id BIGSERIAL PRIMARY KEY,
 
@@ -46,28 +53,31 @@ CREATE TABLE facilities (
             )
         ),
 
-    address VARCHAR(255),
-    city VARCHAR(100),
-    province VARCHAR(50),
-    postal_code VARCHAR(10),
+    phone VARCHAR(20) NOT NULL,
+
+    country VARCHAR(80) NOT NULL,
+
+    street_address VARCHAR(255) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    province VARCHAR(50) NOT NULL,
+    postal_code VARCHAR(10) NOT NULL,
 
     latitude DECIMAL(9,6),
     longitude DECIMAL(9,6),
 
-    phone VARCHAR(20),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    UNIQUE (name, postal_code)
 );
 
 
--- =========================
 -- DONOR PROFILES
--- =========================
-
 CREATE TABLE donor_profiles (
-    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT PRIMARY KEY,
 
-    user_id BIGINT NOT NULL UNIQUE,
+    phone VARCHAR(20) NOT NULL,
+
+    date_of_birth DATE NOT NULL,
 
     blood_type VARCHAR(3) NOT NULL
         CHECK (
@@ -79,10 +89,11 @@ CREATE TABLE donor_profiles (
             )
         ),
 
-    phone VARCHAR(20),
+    street_address VARCHAR(255) NOT NULL,
 
-    city VARCHAR(100),
-    postal_code VARCHAR(10),
+    city VARCHAR(100) NOT NULL,
+    province VARCHAR(50) NOT NULL,
+    postal_code VARCHAR(10) NOT NULL,
 
     latitude DECIMAL(9,6),
     longitude DECIMAL(9,6),
@@ -98,17 +109,23 @@ CREATE TABLE donor_profiles (
 );
 
 
--- =========================
 -- STAFF PROFILES
--- =========================
-
 CREATE TABLE staff_profiles (
-    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT PRIMARY KEY,
 
-    user_id BIGINT NOT NULL UNIQUE,
     facility_id BIGINT NOT NULL,
 
-    position VARCHAR(100),
+    authorization_status VARCHAR(20)
+        NOT NULL DEFAULT 'PENDING'
+        CHECK (
+            authorization_status IN (
+                'PENDING',
+                'VERIFIED',
+                'REJECTED'
+            )
+        ),
+
+    authorization_declared_at TIMESTAMP,
 
     FOREIGN KEY (user_id)
         REFERENCES users(id)
