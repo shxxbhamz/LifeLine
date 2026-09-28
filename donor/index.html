@@ -28,7 +28,7 @@
             <span></span>
           </button>
           <div class="dropdown-content">
-            <a href="edit_dor_profile.html">Edit Profile</a>
+            <a href="edit_donor_profile.html">Edit Profile</a>
             <a href="../login.html">Logout</a>
           </div>
         </div>
@@ -39,12 +39,47 @@
   <!-- Navigation Bar -->
   <nav class="main-nav">
     <ul class="nav-links">
-      <li><a href="index.html" class="nav-item">Home</a></li>
+      <!-- Added 'active' class to Home -->
+      <li><a href="index.html" class="nav-item active">Home</a></li>
       <li><a href="active_requests.html" class="nav-item">Active Requests</a></li>
       <li><a href="book_an_appointment.html" class="nav-item">Book An Appointment</a></li>
       <li><a href="history.html" class="nav-item">History</a></li>
     </ul>
   </nav>
+
+  <!-- Added Main Content Area -->
+  <main class="content">
+    <section class="section">
+      <div class="section-header">
+        <h1>Welcome to your Donor Dashboard</h1>
+        <p class="section-subtitle">Thank you for being a lifesaver. Use the navigation above to book appointments, view your donation history, or respond to urgent requests.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Mobile Menu Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const hamburgerBtn = document.querySelector('.hamburger-btn');
+      const dropdownContent = document.querySelector('.dropdown-content');
+
+      if (hamburgerBtn && dropdownContent) {
+        hamburgerBtn.addEventListener('click', (event) => {
+          dropdownContent.classList.toggle('show');
+          event.stopPropagation();
+        });
+
+        document.addEventListener('click', (event) => {
+          if (!dropdownContent.contains(event.target)) {
+            dropdownContent.classList.remove('show');
+          }
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>
 
 
 </body>

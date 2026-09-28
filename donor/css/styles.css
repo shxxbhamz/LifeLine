@@ -425,3 +425,7 @@ main .section {
     width: 100%;
   }
 }
+
+.dropdown-content.show {
+  display: block;
+}
