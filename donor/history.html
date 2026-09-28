@@ -28,7 +28,7 @@
             <span></span>
           </button>
           <div class="dropdown-content">
-            <a href="#edit-profile">Edit Profile</a>
+            <a href="edit_donor_profile.html">Edit Profile</a>
             <a href="../login.html">Logout</a>
           </div>
         </div>
@@ -100,5 +100,27 @@
 
   </main>
 
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const hamburgerBtn = document.querySelector('.hamburger-btn');
+      const dropdownContent = document.querySelector('.dropdown-content');
+
+      if (hamburgerBtn && dropdownContent) {
+        // Toggle the menu when clicking the hamburger button
+        hamburgerBtn.addEventListener('click', (event) => {
+          dropdownContent.classList.toggle('show');
+          event.stopPropagation(); // Prevents the click from immediately closing the menu
+        });
+
+        // Close the menu if the user clicks anywhere else on the page
+        document.addEventListener('click', (event) => {
+          if (!dropdownContent.contains(event.target)) {
+            dropdownContent.classList.remove('show');
+          }
+        });
+      }
+    });
+  </script>
+  
 </body>
 </html>
