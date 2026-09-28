@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lifeline - Edit Organization Profile</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <header>
+        <a href="index.html" class="logo-link">
+            <img src="img/lifeline-logo.png" alt="LifeLine Logo" class="brand-logo">
+        </a>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="../login.html" class="btn-nav-auth">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main>
+        <div class="auth-container">
+            <h2>Edit Organization & Staff Profile</h2>
+            
+            <form action="index.html" method="POST" class="auth-form">
+                
+                <div class="form-grid">
+                    
+                    <!-- First Name -->
+                    <div class="form-group">
+                        <label for="firstName">First Name:</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                    </div>
+
+                    <!-- Last Name -->
+                    <div class="form-group">
+                        <label for="lastName">Last Name:</label>
+                        <input type="text" id="lastName" name="lastName"  required>
+                    </div>
+
+                    <!-- Employee ID (Read-only for security) -->
+                    <div class="form-group">
+                        <label for="username">Employee ID (Username):</label>
+                        <input type="text" id="username" name="username" readonly style="background-color: #f1f3f5;">
+                    </div>
+
+                    <!-- Work Email -->
+                    <div class="form-group">
+                        <label for="email">Work Email Address:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+
+                    <!-- Organization Name -->
+                    <div class="form-group">
+                        <label for="organization">Organization Name:</label>
+                        <input type="text" id="organization" name="organization" required>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="form-group">
+                        <label for="phone">Organization Phone Number:</label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+
+                    <!-- Facility Type -->
+                    <div class="form-group">
+                        <label for="facilityType">Facility Type:</label>
+                        <select id="facilityType" name="facilityType" required>
+                            <option value="Hospital" selected>Hospital</option>
+                            <option value="Blood Bank">Blood Bank</option>
+                        </select>
+                    </div>
+
+
+                    <!-- Full Address -->
+                    <div class="form-group full-width">
+                        <label for="fullAddress">Full Address:</label>
+                        <input type="text" id="fullAddress" name="fullAddress" required>
+                    </div>
+
+                    <!-- City & Province -->
+                    <div class="form-group">
+                        <label for="city">City:</label>
+                        <input type="text" id="city" name="city" required>
+                    </div>
+
+                     <div class="form-group">
+                        <label for="Province">Province:</label>
+                        <input type="text" id="Province" name="Province" required>
+                    </div>
+
+                     <!-- Country -->
+                    <div class="form-group">
+                        <label for="country">Country:</label>
+                        <input type="text" id="country" name="country"required>
+                    </div>
+
+
+                    <!-- Postal Code -->
+                    <div class="form-group">
+                        <label for="pincode">Pincode / Postal Code:</label>
+                        <input type="text" id="pincode" name="pincode"required>
+                    </div>
+
+                </div>
+
+                <!-- Submit / Save Changes Button -->
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn-submit">Save Changes</button>
+                </div>
+
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Lifeline Sync. Emergency Rapid-Response Blood Dispatch System. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
