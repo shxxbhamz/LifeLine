@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LifeLine - Donor Portal</title>
   <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="./css/home.css">
 </head>
 <body>
 
@@ -21,14 +22,14 @@
       <div class="header-actions">
         <span class="donor-name">Donor Name</span>
         
-        <div class="dropdown">
+        <div class="dropdown" tabindex="0">
           <button class="hamburger-btn" aria-label="Toggle Menu">
             <span></span>
             <span></span>
             <span></span>
           </button>
           <div class="dropdown-content">
-            <a href="edit_donor_profile.html">Edit Profile</a>
+            <a href="edit_dor_profile.html">Edit Profile</a>
             <a href="../login.html">Logout</a>
           </div>
         </div>
@@ -39,48 +40,128 @@
   <!-- Navigation Bar -->
   <nav class="main-nav">
     <ul class="nav-links">
-      <!-- Added 'active' class to Home -->
-      <li><a href="index.html" class="nav-item active">Home</a></li>
+      <li><a href="index.html" class="nav-item">Home</a></li>
       <li><a href="active_requests.html" class="nav-item">Active Requests</a></li>
       <li><a href="book_an_appointment.html" class="nav-item">Book An Appointment</a></li>
       <li><a href="history.html" class="nav-item">History</a></li>
     </ul>
   </nav>
 
-  <!-- Added Main Content Area -->
-  <main class="content">
-    <section class="section">
-      <div class="section-header">
-        <h1>Welcome to your Donor Dashboard</h1>
-        <p class="section-subtitle">Thank you for being a lifesaver. Use the navigation above to book appointments, view your donation history, or respond to urgent requests.</p>
+  <!-- Main Centralized Body Container -->
+  <main class="home-container">
+    
+    <!-- 1. Top Big Rectangle: Upcoming Appointment Banner -->
+    <section class="upcoming-appointment-card">
+      <div class="appointment-header">
+        <div class="header-left">
+          <h2>Upcoming Appointment</h2>
+        </div>
+        <span class="countdown-badge">In 3 Days</span>
+      </div>
+      <div class="appointment-details">
+        <div class="detail-item">
+          <span class="detail-label">Location</span>
+          <span class="detail-value">City General Hospital Blood Bank</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Date</span>
+          <span class="detail-value">October 01, 2026</span>
+        </div>
       </div>
     </section>
+
+    <!-- 2. Bottom Section: Re-structured Parallel Layout -->
+    <div class="home-grid">
+      
+      <!-- Left Card: Hero Impact Widget -->
+      <section class="home-card impact-card">
+        <div class="card-title-bar">
+          <h3>My Life-Saving Impact</h3>
+        </div>
+
+        <div class="impact-metrics-container">
+          <!-- Lives Saved Box -->
+          <div class="metric-box lives-saved">
+            <div class="metric-info">
+              <span class="metric-value">15</span>
+              <span class="metric-label">Lives Saved</span>
+            </div>
+          </div>
+
+          <!-- Total Donations Box -->
+          <div class="metric-box total-donations">
+            <div class="metric-info">
+              <span class="metric-value">25</span>
+              <span class="metric-label">Total Donations</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress to Next Tier -->
+        <div class="tier-progress-wrapper">
+          <div class="progress-labels">
+            <span>Progress to <strong>Life Saver Tier</strong></span>
+            <span>25 / 30</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-fill" style="width: 83.33%;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Card: Achievements Trophy Shelf -->
+      <section class="home-card achievements-card">
+        <div class="card-title-bar">
+          <h3>Achievements & Milestones</h3>
+        </div>
+
+        <div class="trophy-grid">
+          
+          <!-- Badge 1: Unlocked -->
+          <div class="trophy-card unlocked">
+            <img src="./image/welcomedonor.png" alt="badge" class="badge_achievement">
+            <div class="trophy-details">
+              <h4>Welcome Donor</h4>
+              <p>1st Donation Made</p>
+            </div>
+            <span class="status-pill unlocked-pill">Active</span>
+          </div>
+
+          <!-- Badge 2: Unlocked -->
+          <div class="trophy-card locked">
+            <img src="./image/30.png" alt="badge" class="badge_achievement">
+            <div class="trophy-details">
+              <h4>Dedicated Donor</h4>
+              <p>30 Donations Tier</p>
+            </div>
+            <span class="status-pill locked-pill">30 needed</span>
+          </div>
+
+          <!-- Badge 3: Locked -->
+          <div class="trophy-card locked">
+            <img src="./image/60.png" alt="badge" class="badge_achievement">
+            <div class="trophy-details">
+              <h4>Life Saver</h4>
+              <p>60 Donations Tier</p>
+            </div>
+            <span class="status-pill locked-pill">30 needed</span>
+          </div>
+
+          <!-- Badge 4: Locked -->
+          <div class="trophy-card locked">
+            <img src="./image/90+.png" alt="badge" class="badge_achievement">
+            <div class="trophy-details">
+              <h4>Hero Tier</h4>
+              <p>90+ Donations Tier</p>
+            </div>
+            <span class="status-pill locked-pill">Locked</span>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
   </main>
-
-  <!-- Mobile Menu Script -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const hamburgerBtn = document.querySelector('.hamburger-btn');
-      const dropdownContent = document.querySelector('.dropdown-content');
-
-      if (hamburgerBtn && dropdownContent) {
-        hamburgerBtn.addEventListener('click', (event) => {
-          dropdownContent.classList.toggle('show');
-          event.stopPropagation();
-        });
-
-        document.addEventListener('click', (event) => {
-          if (!dropdownContent.contains(event.target)) {
-            dropdownContent.classList.remove('show');
-          }
-        });
-      }
-    });
-  </script>
-
-</body>
-</html>
-
 
 </body>
 </html>
