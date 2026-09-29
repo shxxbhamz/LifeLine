@@ -62,6 +62,7 @@ class DonorProfiles(models.Model):
     city = models.CharField(max_length=100)
     province = models.CharField(max_length=50)
     postal_code = models.CharField(max_length=10)
+    country = models.CharField(max_length=80)
     latitude = models.DecimalField(
         max_digits=9,
         decimal_places=6,

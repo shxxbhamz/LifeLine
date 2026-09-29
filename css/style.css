@@ -588,3 +588,13 @@ footer {
 }
 
 /*Ending Hospital Sign Up Page CSS*/
+
+.form-error-banner {
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    border: 1px solid #c62828;
+    border-radius: 6px;
+    background-color: #fdecea;
+    color: #b71c1c;
+    font-weight: 600;
+}
