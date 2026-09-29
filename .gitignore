@@ -11,3 +11,8 @@ desktop.ini
 
 # IDE / Code editor configurations
 .vscode/
+
+# Python virtual environment
+.venv/
+__pycache__/
+*.pyc
