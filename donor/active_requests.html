@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LifeLine - Active Requests</title>
   <link rel="stylesheet" href="./css/styles.css">
 </head>
+
 <body id="active-requests-page">
 
   <!-- Shared Header Section -->
@@ -21,15 +23,16 @@
       <div class="header-actions">
         <span class="donor-name">Donor Name</span>
 
-        <div class="dropdown">
+        <!-- Added tabindex="0" here -->
+        <div class="dropdown" tabindex="0">
           <button class="hamburger-btn" aria-label="Toggle Menu">
             <span></span>
             <span></span>
             <span></span>
           </button>
           <div class="dropdown-content">
-              <a href="edit_donor_profile.html">Edit Profile</a>
-              <a href="../login.html">Logout</a>
+            <a href="edit_dor_profile.html">Edit Profile</a>
+            <a href="../login.html">Logout</a>
           </div>
         </div>
       </div>
@@ -39,10 +42,10 @@
   <!-- Navigation Bar -->
   <nav class="main-nav">
     <ul class="nav-links">
-        <li><a href="index.html" class="nav-item">Home</a></li>
-        <li><a href="active_requests.html" class="nav-item active">Active Requests</a></li>
-        <li><a href="book_an_appointment.html" class="nav-item">Book An Appointment</a></li>
-        <li><a href="history.html" class="nav-item">History</a></li>
+      <li><a href="index.html" class="nav-item">Home</a></li>
+      <li><a href="active_requests.html" class="nav-item active">Active Requests</a></li>
+      <li><a href="book_an_appointment.html" class="nav-item">Book An Appointment</a></li>
+      <li><a href="history.html" class="nav-item">History</a></li>
     </ul>
   </nav>
 
@@ -102,7 +105,7 @@
           </div>
         </div>
 
-  
+
         <div class="facility-card">
           <div class="facility-header">
             <h3>Inventory Restock: Universal Donors</h3>
@@ -122,26 +125,6 @@
 
   </main>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const hamburgerBtn = document.querySelector('.hamburger-btn');
-      const dropdownContent = document.querySelector('.dropdown-content');
-
-      if (hamburgerBtn && dropdownContent) {
-        // Toggle the menu when clicking the hamburger button
-        hamburgerBtn.addEventListener('click', (event) => {
-          dropdownContent.classList.toggle('show');
-          event.stopPropagation(); // Prevents the click from immediately closing the menu
-        });
-
-        // Close the menu if the user clicks anywhere else on the page
-        document.addEventListener('click', (event) => {
-          if (!dropdownContent.contains(event.target)) {
-            dropdownContent.classList.remove('show');
-          }
-        });
-      }
-    });
-  </script>
 </body>
+
 </html>
