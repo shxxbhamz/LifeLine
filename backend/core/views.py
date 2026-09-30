@@ -1,4 +1,4 @@
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import check_password, make_password
 from django.db import transaction
 from django.shortcuts import redirect, render
 from django.utils import timezone
@@ -7,8 +7,92 @@ from .models import DonorProfiles, Facilities, StaffProfiles, Users
 
 
 def login_view(request):
-    return render(request, "core/login.html")
+    # A GET request only displays the login page.
+    if request.method == "GET":
+        return render(request, "core/login.html")
 
+    username = request.POST.get("username", "").strip().lower()
+    password = request.POST.get("password", "")
+
+    # Preserve the username after a failed login attempt.
+    form_data = {
+        "username": username,
+    }
+
+    try:
+        user = Users.objects.get(username=username)
+    except Users.DoesNotExist:
+        return render(
+            request,
+            "core/login.html",
+            {
+                "error": "Invalid username or password.",
+                "form_data": form_data,
+            },
+        )
+
+    # Compare the submitted password with the securely stored password hash.
+    if not check_password(password, user.password_hash):
+        return render(
+            request,
+            "core/login.html",
+            {
+                "error": "Invalid username or password.",
+                "form_data": form_data,
+            },
+        )
+
+    # Prevent suspended accounts from signing in.
+    if user.account_status != "ACTIVE":
+        return render(
+            request,
+            "core/login.html",
+            {
+                "error": "This account is not currently active.",
+                "form_data": form_data,
+            },
+        )
+
+    # Store only the minimum information needed to identify the logged-in user.
+    request.session["user_id"] = user.id
+    request.session["role"] = user.role
+
+    # Send each account type to its own dashboard.
+    if user.role == "DONOR":
+        return redirect("donor_dashboard")
+
+    if user.role == "HOSPITAL_STAFF":
+        return redirect("staff_dashboard")
+
+    return render(
+        request,
+        "core/login.html",
+        {
+            "error": "This account has an unsupported role.",
+            "form_data": form_data,
+        },
+    )
+
+def donor_dashboard_view(request):
+    # Only logged-in donors should be able to access the donor dashboard.
+    if request.session.get("user_id") is None or request.session.get("role") != "DONOR":
+        return redirect("login")
+
+    return render(request, "core/donor_dashboard.html")
+
+
+def staff_dashboard_view(request):
+    # Only logged-in staff should be able to access the staff dashboard.
+    if request.session.get("user_id") is None or request.session.get("role") != "HOSPITAL_STAFF":
+        return redirect("login")
+
+    return render(request, "core/staff_dashboard.html")
+
+def logout_view(request):
+    # Remove all authentication data stored in the current session.
+    request.session.flush()
+
+    return redirect("login")
 
 def donor_signup_view(request):
     # A GET request only displays the registration page.

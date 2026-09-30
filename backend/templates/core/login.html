@@ -43,13 +43,19 @@
         <div class="auth-container login-card-container">
             <h2>Sign In to Lifeline</h2>
             
+            {% if error %}
+                <div class="form-error-banner" id="form-error">
+                    {{ error }}
+                </div>
+            {% endif %}
+
             <form action="{% url 'login' %}" method="POST" class="auth-form">
             {% csrf_token %}
                 
                 <!-- Smart Username / ID Input Field (Expects 'do...' or 'st...') -->
                 <div class="form-group">
                     <label for="username">Username or ID:</label>
-                    <input type="text" id="username" name="username" placeholder="e.g. dousername or stusername" required>
+                    <input type="text" id="username" name="username" placeholder="e.g. dousername or stusername" value="{{ form_data.username|default:'' }}" required>
                 </div>
 
                 <!-- Password Field -->
@@ -67,8 +73,8 @@
                 <div class="auth-footer login-footer-links">
                     <p>New to Lifeline?</p>
                     <div class="registration-links-group">
-                        <a href="donor_signup.html" class="sub-link-donor">Register as Donor</a> | 
-                        <a href="organization_signup.html" class="sub-link-staff">Register as Hospital Staff</a>
+                        <a href="{% url 'donor_signup' %}" class="sub-link-donor">Register as Donor</a>
+                        <a href="{% url 'organization_signup' %}" class="sub-link-staff">Register as Hospital Staff</a>
                     </div>
                 </div>
 
@@ -80,6 +86,14 @@
     <footer>
         <p>&copy; 2026 LifeLine. Emergency Rapid-Response Blood Dispatch System. All rights reserved.</p>
     </footer>
-
+    {% if error %}
+        <script>
+            // Bring the login error into view so the user does not miss it.
+            document.getElementById("form-error").scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+        </script>
+    {% endif %}
 </body>
 </html>
