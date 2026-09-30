@@ -324,6 +324,18 @@ main .section {
   text-align: center;
 }
 
+/* Edit Profile Validation Error */
+.profile-error {
+  background-color: #fdecea;
+  color: #b42318;
+  border: 1px solid #f5c2c0;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 600;
+}
+
 /* Form Container */
 .profile-form {
   display: flex;

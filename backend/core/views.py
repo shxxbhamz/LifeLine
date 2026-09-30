@@ -375,3 +375,106 @@ def organization_signup_view(request):
         )
 
     return redirect("login")
+
+def donor_edit_profile_view(request):
+    # Only logged-in donors can access this page.
+    if request.session.get("user_id") is None or request.session.get("role") != "DONOR":
+        return redirect("login")
+
+    user_id = request.session["user_id"]
+
+    try:
+        user = Users.objects.get(id=user_id)
+        donor_profile = DonorProfiles.objects.get(user_id=user_id)
+    except (Users.DoesNotExist, DonorProfiles.DoesNotExist):
+        request.session.flush()
+        return redirect("login")
+
+    if request.method == "POST":
+        first_name = request.POST.get("firstName", "").strip()
+        last_name = request.POST.get("lastName", "").strip()
+        username = request.POST.get("username", "").strip().lower()
+        email = request.POST.get("email", "").strip().lower()
+        phone = request.POST.get("phone", "").strip()
+        dob = request.POST.get("dob", "").strip()
+        address = request.POST.get("address", "").strip()
+        city = request.POST.get("city", "").strip()
+        province = request.POST.get("province", "").strip()
+        country = request.POST.get("country", "").strip()
+        postal_code = request.POST.get("postalCode", "").strip()
+        blood_type = request.POST.get("bloodGroup", "").strip()
+
+
+        # Donor usernames must continue to follow the 'do...' convention.
+        if not username.startswith("do"):
+            return render(
+                request,
+                "core/donor_edit_profile.html",
+                {
+                    "user": user,
+                    "donor_profile": donor_profile,
+                    "form_data": request.POST,
+                    "error": "Donor usernames must start with 'do'.",
+                },
+            )
+
+        # Allow the donor to keep their own username, but block one
+        # that already belongs to another account.
+        if Users.objects.exclude(id=user_id).filter(username=username).exists():
+            return render(
+                request,
+                "core/donor_edit_profile.html",
+                {
+                    "user": user,
+                    "donor_profile": donor_profile,
+                    "form_data": request.POST,
+                    "error": "That username is already in use.",
+                },
+            )
+
+        # The same rule applies to email addresses.
+        if Users.objects.exclude(id=user_id).filter(email=email).exists():
+            return render(
+                request,
+                "core/donor_edit_profile.html",
+                {
+                    "user": user,
+                    "donor_profile": donor_profile,
+                    "form_data": request.POST,
+                    "error": "That email address is already in use.",
+                },
+            )
+
+
+        # Update account information.
+        user.first_name = first_name
+        user.last_name = last_name
+        user.username = username
+        user.email = email
+        user.updated_at = timezone.now()
+
+        # Update donor-specific profile information.
+        donor_profile.phone = phone
+        donor_profile.date_of_birth = dob
+        donor_profile.street_address = address
+        donor_profile.city = city
+        donor_profile.province = province
+        donor_profile.country = country
+        donor_profile.postal_code = postal_code
+        donor_profile.blood_type = blood_type
+
+        # Save both records as one database transaction.
+        with transaction.atomic():
+            user.save()
+            donor_profile.save()
+
+        return redirect("donor_edit_profile")
+
+    return render(
+        request,
+        "core/donor_edit_profile.html",
+        {
+            "user": user,
+            "donor_profile": donor_profile,
+        },
+    )
