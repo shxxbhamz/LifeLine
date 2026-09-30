@@ -34,13 +34,13 @@
     <!-- Contains custom logo image and sign-in option -->
 
     <header>
-        <a href="index.html" class="logo-link">
+        <a href="{% url 'home' %}" class="logo-link">
             <img src="{% static 'img/lifeline-logo.png' %}" alt="LifeLine Logo" class="brand-logo">
         </a>
         <nav>
             <ul>
-                <li><a href="index.html#about">About Us</a></li>
-                <li><a href="login.html" class="btn-nav-auth">Sign In</a></li>
+                <li><a href="{% url 'home' %}#about">About Us</a></li>
+                <li><a href="{% url 'login' %}" class="btn-nav-auth">Sign In</a></li>
             </ul>
         </nav>
     </header>
@@ -177,7 +177,7 @@
 
                 <!-- Footer link for users who already have an account -->
                 <div class="auth-footer">
-                    Already registered? <a href="login.html">Sign In</a>
+                    Already registered? Already registered? <a href="{% url 'login' %}">Sign In</a>
                 </div>
 
             </form>

@@ -5,6 +5,8 @@ from django.utils import timezone
 
 from .models import DonorProfiles, Facilities, StaffProfiles, Users
 
+def home_view(request):
+    return render(request, "core/home.html")
 
 def login_view(request):
     # A GET request only displays the login page.
