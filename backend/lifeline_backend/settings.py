@@ -130,6 +130,10 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [
     ("css", BASE_DIR.parent / "css"),
     ("img", BASE_DIR.parent / "img"),
+    ("donor/css", BASE_DIR.parent / "donor" / "css"),
+    ("donor/image", BASE_DIR.parent / "donor" / "image"),
+    ("organization/css", BASE_DIR.parent / "organization" / "css"),
+    ("organization/img", BASE_DIR.parent / "organization" / "img"),
     BASE_DIR.parent / "static",
 ]
 
