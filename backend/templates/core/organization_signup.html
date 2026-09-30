@@ -50,6 +50,12 @@
         <div class="auth-container">
             <h2>Hospital / Staff Registration</h2>
             
+            {% if error %}
+                <div class="form-error-banner" id="form-error">
+                    {{ error }}
+                </div>
+            {% endif %}
+
             <form action="{% url 'organization_signup' %}" method="POST" class="auth-form">
             {% csrf_token %}
                 
@@ -62,78 +68,78 @@
                     <!-- First Name Field -->
                     <div class="form-group">
                         <label for="firstName">First Name:</label>
-                        <input type="text" id="firstName" name="firstName" required>
+                        <input type="text" id="firstName" name="firstName" value="{{ form_data.firstName|default:'' }}" required>
                     </div>
 
                     <!-- Last Name Field -->
                     <div class="form-group">
                         <label for="lastName">Last Name:</label>
-                        <input type="text" id="lastName" name="lastName" required>
+                        <input type="text" id="lastName" name="lastName" value="{{ form_data.lastName|default:'' }}" required>
                     </div>
 
                     <!-- Employee ID Field (Using ST prefix convention) -->
                     <div class="form-group">
                         <label for="username">Employee ID (e.g. stusername):</label>
-                        <input type="text" id="username" name="username" placeholder="st..." required>
+                        <input type="text" id="username" name="username" placeholder="st..." value="{{ form_data.username|default:'' }}" required>
                     </div>
 
                     <!-- Work Email Address Field -->
                     <div class="form-group">
                         <label for="email">Work Email Address:</label>
-                        <input type="email" id="email" name="email" required>
+                        <input type="email" id="email" name="email" value="{{ form_data.email|default:'' }}" required>
                     </div>
 
                     <!-- Organization Name Field -->
                     <div class="form-group">
                         <label for="organization">Organization Name:</label>
-                        <input type="text" id="organization" name="organization" placeholder="e.g. City General Hospital" required>
+                        <input type="text" id="organization" name="organization" placeholder="e.g. City General Hospital" value="{{ form_data.organization|default:'' }}" required>
                     </div>
 
                     <!-- Organization Phone Number Field -->
                     <div class="form-group">
                         <label for="phone">Organization Phone Number:</label>
-                        <input type="tel" id="phone" name="phone" required>
+                        <input type="tel" id="phone" name="phone" value="{{ form_data.phone|default:'' }}" required>
                     </div>
 
                     <!-- Facility Type Dropdown Selection -->
                     <div class="form-group">
                         <label for="facilityType">Facility Type:</label>
                         <select id="facilityType" name="facilityType" required>
-                            <option value="" disabled selected>Select facility type</option>
-                            <option value="Hospital">Hospital</option>
-                            <option value="Blood Bank">Blood Bank</option>
+                            <option value="" disabled {% if not form_data.facilityType %}selected{% endif %}>Select facility type</option>
+                            <option value="Hospital" {% if form_data.facilityType == "Hospital" %}selected{% endif %}>Hospital</option>
+                            <option value="Blood Bank" {% if form_data.facilityType == "Blood Bank" %}selected{% endif %}>Blood Bank</option>
                         </select>
                     </div>
 
                     <!-- Full Address Box (Spans both columns for width) -->
                     <div class="form-group full-width">
                         <label for="fullAddress">Full Address:</label>
-                        <input type="text" id="fullAddress" name="fullAddress" placeholder="Street address, building, suite, etc." required>
+                        <input type="text" id="fullAddress" name="fullAddress" placeholder="Street address, building, suite, etc." value="{{ form_data.fullAddress|default:'' }}" required>
                     </div>
 
                     <!-- Combined City & Province Field -->
                     <div class="form-group">
                         <label for="city">City:</label>
-                        <input type="text" id="city" name="city" placeholder="e.g.Regina" required>
+                        <input type="text" id="city" name="city" placeholder="e.g.Regina" value="{{ form_data.city|default:'' }}" required>
                     </div>
 
                     
                     <!-- Combined City & Province Field -->
                     <div class="form-group">
                         <label for="Province">Province:</label>
-                        <input type="text" id="Province" name="Province" placeholder="e.g.SK" required>
+                        <input type="text" id="Province" name="Province" placeholder="e.g.SK" value="{{ form_data.Province|default:'' }}" required>
                     </div>
 
                      <!-- Country Field -->
                     <div class="form-group">
                         <label for="country">Country:</label>
-                        <input type="text" id="country" name="country" required>
+                        <input type="text" id="country" name="country" value="{{ form_data.country|default:'' }}" required>
                     </div>
 
                     <!-- Pincode / Postal Code Field -->
                     <div class="form-group">
                         <label for="pincode">Pincode / Postal Code:</label>
-                        <input type="text" id="pincode" name="pincode" required>
+                        <input type="text" id="pincode" name="pincode" value="{{ form_data.pincode|default:'' }}" required>
                     </div>
 
                     <!-- Password Input Field -->
@@ -152,13 +158,13 @@
 
                 <!-- Staff Authorization Confirmation Checkbox -->
                 <div class="checkbox-group">
-                    <input type="checkbox" id="authorizedStaff" name="authorizedStaff" required>
+                    <input type="checkbox" id="authorizedStaff" name="authorizedStaff" {% if form_data.authorizedStaff %}checked{% endif %} required>
                     <label for="authorizedStaff">I confirm that I am an authorized staff member of this organization</label>
                 </div>
 
                 <!-- Terms & Conditions Agreement Checkbox -->
                 <div class="checkbox-group">
-                    <input type="checkbox" id="terms" name="terms" required>
+                    <input type="checkbox" id="terms" name="terms" {% if form_data.terms %}checked{% endif %} required>
                     <label for="terms">I agree to the terms and privacy policy</label>
                 </div>
 
@@ -180,6 +186,14 @@
     <footer>
         <p>&copy; 2026 LifeLine. Emergency Rapid-Response Blood Dispatch System. All rights reserved.</p>
     </footer>
-
+    {% if error %}
+        <script>
+            // Bring the validation error into view so the user does not miss it.
+            document.getElementById("form-error").scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+        </script>
+    {% endif %}
 </body>
 </html>
