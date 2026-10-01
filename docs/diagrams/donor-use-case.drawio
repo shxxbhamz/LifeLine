@@ -1,0 +1,95 @@
+<mxfile host="app.diagrams.net" agent="ChatGPT">
+  <diagram id="lifeline-donor-use-case" name="Donor Use Case Diagram">
+    <mxGraphModel dx="1134" dy="782" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="boundary" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=center;fontStyle=1;fontSize=16;strokeWidth=2;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="660" width="760" x="300" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="donor" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fontSize=14;" value="Donor" vertex="1">
+          <mxGeometry height="120" width="80" x="95" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="register" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" value="Register as Donor" vertex="1">
+          <mxGeometry height="65" width="210" x="460" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="signin" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" value="Sign In" vertex="1">
+          <mxGeometry height="65" width="210" x="460" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="requests" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" value="View Active Requests" vertex="1">
+          <mxGeometry height="65" width="210" x="460" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="book" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" value="Book Appointment" vertex="1">
+          <mxGeometry height="65" width="210" x="460" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="history" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" value="View Donation History" vertex="1">
+          <mxGeometry height="65" width="210" x="460" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="edit" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" value="Edit Profile" vertex="1">
+          <mxGeometry height="65" width="210" x="460" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="logout" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" value="Logout" vertex="1">
+          <mxGeometry height="65" width="210" x="460" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="respond" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" value="Respond to Emergency Alert" vertex="1">
+          <mxGeometry height="65" width="240" x="790" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="schedule" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" value="Schedule Donation for Request" vertex="1">
+          <mxGeometry height="65" width="240" x="790" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="register">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="180" y="390" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="signin">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="180" y="390" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="requests">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="180" y="390" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="book">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="180" y="390" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="history">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="180" y="390" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="edit">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="180" y="390" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="logout">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="180" y="390" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ex1" edge="1" parent="1" source="respond" style="dashed=1;endArrow=open;endFill=0;html=1;fontSize=12;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="requests" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ex2" edge="1" parent="1" source="schedule" style="dashed=1;endArrow=open;endFill=0;html=1;fontSize=12;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="requests" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" x="-0.0047" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="nKmsmw6Yzfw3wZ4OZdql-1" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="dashboard" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="180" y="390" as="sourcePoint" />
+            <mxPoint x="769" y="470" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="dashboard" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=13;" value="View Donor Dashboard" vertex="1">
+          <mxGeometry height="65" width="210" x="460" y="210" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
