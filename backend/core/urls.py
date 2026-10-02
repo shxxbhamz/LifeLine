@@ -11,5 +11,6 @@ urlpatterns = [
     path("donor/dashboard/", views.donor_dashboard_view, name="donor_dashboard"),
     path("donor/profile/edit/", views.donor_edit_profile_view, name="donor_edit_profile"),
     path("staff/dashboard/", views.staff_dashboard_view, name="staff_dashboard"),
+    path("staff/profile/edit/", views.staff_edit_profile_view, name="staff_edit_profile"),
     path("logout/", views.logout_view, name="logout"),
 ]

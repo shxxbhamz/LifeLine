@@ -478,3 +478,125 @@ def donor_edit_profile_view(request):
             "donor_profile": donor_profile,
         },
     )
+
+def staff_edit_profile_view(request):
+    # Only logged-in staff can access this page.
+    if request.session.get("user_id") is None or request.session.get("role") != "HOSPITAL_STAFF":
+        return redirect("login")
+
+    user_id = request.session["user_id"]
+
+    # Load the staff account, staff profile and associated facility.
+    try:
+        user = Users.objects.get(id=user_id)
+        staff_profile = StaffProfiles.objects.get(user_id=user_id)
+        facility = staff_profile.facility
+    except (Users.DoesNotExist, StaffProfiles.DoesNotExist):
+        request.session.flush()
+        return redirect("login")
+
+    if request.method == "POST":
+        # Read the editable values submitted by the form.
+        first_name = request.POST.get("firstName", "").strip()
+        last_name = request.POST.get("lastName", "").strip()
+        email = request.POST.get("email", "").strip().lower()
+
+        organization = request.POST.get("organization", "").strip()
+        phone = request.POST.get("phone", "").strip()
+        facility_type = request.POST.get("facilityType", "")
+
+        street_address = request.POST.get("fullAddress", "").strip()
+        city = request.POST.get("city", "").strip()
+        province = request.POST.get("Province", "").strip()
+        country = request.POST.get("country", "").strip()
+        postal_code = request.POST.get("pincode", "").strip()
+
+        # Allow the staff member to keep their current email, but prevent
+        # an email address that already belongs to another account.
+        if Users.objects.exclude(id=user_id).filter(email=email).exists():
+            return render(
+                request,
+                "core/staff_edit_profile.html",
+                {
+                    "user": user,
+                    "staff_profile": staff_profile,
+                    "facility": facility,
+                    "form_data": request.POST,
+                    "error": "That email address is already in use.",
+                },
+            )
+
+        # Convert the wording used by the frontend dropdown into the
+        # values stored in PostgreSQL.
+        facility_type_mapping = {
+            "Hospital": "HOSPITAL",
+            "Blood Bank": "BLOOD_BANK",
+        }
+
+        database_facility_type = facility_type_mapping.get(facility_type)
+
+        if database_facility_type is None:
+            return render(
+                request,
+                "core/staff_edit_profile.html",
+                {
+                    "user": user,
+                    "staff_profile": staff_profile,
+                    "facility": facility,
+                    "form_data": request.POST,
+                    "error": "Please select a valid facility type.",
+                },
+            )
+
+        # A facility is uniquely identified by its name and postal code.
+        # Prevent this facility from being changed into a duplicate of
+        # another facility that already exists.
+        if Facilities.objects.exclude(id=facility.id).filter(
+            name=organization,
+            postal_code=postal_code,
+        ).exists():
+            return render(
+                request,
+                "core/staff_edit_profile.html",
+                {
+                    "user": user,
+                    "staff_profile": staff_profile,
+                    "facility": facility,
+                    "form_data": request.POST,
+                    "error": "A facility with that name and postal code already exists.",
+                },
+            )
+
+        # Update account information.
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.updated_at = timezone.now()
+
+        # Update the associated facility information.
+        facility.name = organization
+        facility.phone = phone
+        facility.facility_type = database_facility_type
+        facility.street_address = street_address
+        facility.city = city
+        facility.province = province
+        facility.country = country
+        facility.postal_code = postal_code
+
+        # Save the account and facility changes as one database transaction.
+        with transaction.atomic():
+            user.save()
+            facility.save()
+
+        return redirect("staff_edit_profile")
+
+    # A GET request displays the staff member's existing information.
+    return render(
+        request,
+        "core/staff_edit_profile.html",
+        {
+            "user": user,
+            "staff_profile": staff_profile,
+            "facility": facility,
+        },
+    )
