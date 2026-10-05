@@ -758,3 +758,194 @@ main .section {
   object-fit: contain; 
   border-radius: 6px; 
 }
+
+/* ==========================================================================
+   Schedule Donation Modal Styles (Active Requests Page)
+   ========================================================================== */
+
+/* Centered Dialog Window */
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0; 
+  border: none;
+  border-radius: 8px;
+  padding: 0;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  background-color: var(--white, #ffffff);
+}
+
+/* Modal Content Inner Wrapper */
+.modal-content {
+  padding: 25px 30px;
+}
+
+.modal-header {
+  margin-bottom: 20px;
+}
+
+.modal-header h2 {
+  color: var(--red, #D9534F);
+  font-size: 22px;
+  margin-bottom: 5px;
+}
+
+/* Form Layout & Fields */
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--red,#ff0000);
+  font-size: 14px;
+}
+
+/* Radio Option Selection Alignment */
+.radio-group {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 6px;
+}
+
+.radio-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px; 
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--teal-dark, #2B7A78);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.radio-label input[type="radio"] {
+  margin: 0;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--teal, #3AAFA9);
+}
+
+/* Dropdown & Input Controls */
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color, #CCCCCC);
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--text-color, #333333);
+  outline: none;
+  background-color: var(--white, #ffffff);
+}
+
+.form-input:focus {
+  border-color: var(--teal, #3AAFA9);
+}
+
+/* Action Buttons (Cancel / Submit) */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 1px solid #F0F0F0;
+}
+
+.btn-secondary {
+  background-color: #E0E0E0;
+  color: #333333;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: #D0D0D0;
+}
+
+.btn-primary {
+  background-color: var(--red, #D9534F);
+  color: var(--white, #ffffff);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #C9302C;
+}
+
+/* Header User Profile Wrapper */
+.profile-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Circular Avatar Image Styling */
+.donor-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--white, #ffffff);
+}
+
+/* Centered Profile Picture Upload Area */
+.profile-upload-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 25px 0 10px;
+  width: 100%;
+}
+
+.avatar-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.current-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--teal, #3AAFA9);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.avatar-label:hover .current-avatar {
+  transform: scale(1.05);
+  border-color: var(--teal-dark, #2B7A78);
+}
+
+.change-photo-link {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--teal, #3AAFA9);
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.avatar-label:hover .change-photo-link {
+  color: var(--teal-dark, #2B7A78);
+}

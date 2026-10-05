@@ -23,7 +23,6 @@
       <div class="header-actions">
         <a href="index.html" class="white-link-bold">Home</a>
 
-        <!-- Added tabindex="0" here -->
         <div class="dropdown" tabindex="0">
           <button class="hamburger-btn" aria-label="Toggle Menu">
             <span></span>
@@ -37,8 +36,6 @@
       </div>
     </div>
   </header>
-
-
 
   <!-- Main Content Area -->
   <main class="content">
@@ -115,7 +112,7 @@
           </div>
         </div>
 
-        <!-- Blood Group & Password Row -->
+        <!-- Blood Group -->
         <div class="form-group">
           <label for="bloodGroup">Blood Group</label>
           <select id="bloodGroup" name="bloodGroup">
@@ -129,6 +126,16 @@
             <option value="O+">O Positive (O+)</option>
             <option value="O-">O Negative (O-)</option>
           </select>
+        </div>
+
+        <!-- Existing Profile Preview & Change Link -->
+        <div class="profile-upload-container">
+          <label for="profilePicture" class="avatar-label">
+            <img src="./image/default-avatar.png" alt="Current Profile" class="current-avatar">
+            <span class="change-photo-link">Change Profile Picture</span>
+          </label>
+          <!-- Hidden file input linked directly to label -->
+          <input type="file" id="profilePicture" name="profilePicture" accept="image/*" hidden>
         </div>
 
         <!-- Submit Button -->

@@ -25,11 +25,7 @@
 
         <!-- Added tabindex="0" here -->
         <div class="dropdown" tabindex="0">
-          <button class="hamburger-btn" aria-label="Toggle Menu">
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
+          <img src="./image/default-avatar.png" alt="Donor Profile" class="donor-avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;">
           <div class="dropdown-content">
             <a href="edit_dor_profile.html">Edit Profile</a>
             <a href="../login.html">Logout</a>
@@ -131,11 +127,97 @@
           </div>
         </div>
 
+
       </div>
     </section>
 
   </main>
+  <dialog id="schedule-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Confirm Appointment</h2>
+      </div>
 
+      <form id="schedule-form" class="modal-form">
+        <!-- 1. Component Type Selection (Mandatory) -->
+        <div class="form-group">
+          <label class="form-label">Select Component Type (Choose Exactly One):</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="componentType" value="Blood" required> Blood
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="componentType" value="Plasma" required> Plasma
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="componentType" value="Platelets" required> Platelets
+            </label>
+          </div>
+        </div>
+
+        <!-- 2. Blood Group Dropdown (Mandatory) -->
+        <div class="form-group">
+          <label for="bloodGroup" class="form-label">Blood Group:</label>
+          <select id="bloodGroup" name="bloodGroup" class="form-input" required>
+            <option value="" disabled selected>Select blood group</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+          </select>
+        </div>
+
+        <!-- 3. Preferred Timing Field (Mandatory) -->
+        <div class="form-group">
+          <label for="preferredTiming" class="form-label">Preferred Timing to Visit:</label>
+          <input type="text" id="preferredTiming" name="preferredTiming" class="form-input"
+            placeholder="e.g., Tomorrow between 10:00 AM - 12:00 PM" required>
+        </div>
+
+        <!-- Actions -->
+        <div class="modal-actions">
+          <button type="button" id="btn-cancel" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Interactive JavaScript Logic -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const modal = document.getElementById('schedule-modal');
+      const scheduleForm = document.getElementById('schedule-form');
+      const cancelBtn = document.getElementById('btn-cancel');
+      const scheduleBtns = document.querySelectorAll('.btn-book');
+
+      // Open modal when any "Schedule Donation" button is clicked
+      scheduleBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          scheduleForm.reset();
+          modal.showModal();
+        });
+      });
+
+      // Close modal on Cancel click
+      cancelBtn.addEventListener('click', () => {
+        modal.close();
+      });
+
+      // Submit form validation
+      scheduleForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (scheduleForm.checkValidity()) {
+          alert('Donation appointment details submitted successfully!');
+          modal.close();
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>
