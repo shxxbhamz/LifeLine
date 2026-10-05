@@ -18,7 +18,7 @@
     
         <div class="nav-right">
             <!-- Emergency Create Action Button -->
-            <button class="btn-emergency-create" onclick="openEmergencyModal()">+ Emergency Create</button>
+            <button class="btn-emergency-create" onclick="openEmergencyModal()">Create Emergency</button>
             
             <!-- Three-Dash Hamburger Dropdown Menu -->
             <div class="dropdown">
@@ -141,6 +141,11 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Centered Restock Request Action Container -->
+                <div class="inventory-card-footer-center">
+                    <button class="btn-restock-request" onclick="openFulfillmentModal()">Request Restock</button>
+                </div>
             </section>
 
         </div>
@@ -192,6 +197,51 @@
                 <button type="button" class="btn-secondary modal-cancel-btn" onclick="closeEditModal()">Cancel</button>
                 <button type="button" class="btn-primary modal-save-btn" onclick="saveStockChanges()">Save Changes</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Request Restock / Fulfillment Modal Component -->
+    <div id="fulfillmentModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Request for Restock</h3>
+              
+            <form id="fulfillmentForm" onsubmit="submitFulfillmentRequest(event)">
+                
+                <div class="modal-section">
+                    <label class="modal-label" for="targetBloodGroup">Blood Group</label>
+                    <select id="targetBloodGroup" class="modal-select" style="width: 100%;" required>
+                        <option value="" disabled selected>Select blood type</option>
+                        <option value="A-Positive (A+)">A-Positive (A+)</option>
+                        <option value="A-Negative (A-)">A-Negative (A-)</option>
+                        <option value="B-Positive (B+)">B-Positive (B+)</option>
+                        <option value="B-Negative (B-)">B-Negative (B-)</option>
+                        <option value="O-Positive (O+)">O-Positive (O+)</option>
+                        <option value="O-Negative (O-)">O-Negative (O-)</option>
+                        <option value="AB-Positive (AB+)">AB-Positive (AB+)</option>
+                        <option value="AB-Negative (AB-)">AB-Negative (AB-)</option>
+                    </select>
+                </div>
+
+                <div class="modal-section">
+                    <label class="modal-label" for="targetComponent">Component Type</label>
+                    <select id="targetComponent" class="modal-select" style="width: 100%;" required>
+                        <option value="Whole Blood">Whole Blood</option>
+                        <option value="Platelets">Platelets</option>
+                        <option value="Plasma">Plasma</option>
+                    </select>
+                </div>
+
+                <div class="modal-section">
+                    <label class="modal-label" for="requestedUnits">Required Units</label>
+                    <input type="number" id="requestedUnits" value="5" min="1" class="modal-input" style="width: 100%;" required>
+                </div>
+
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary modal-cancel-btn" onclick="closeFulfillmentModal()">Cancel</button>
+                    <button type="submit" class="btn-primary modal-save-btn" style="background-color: red;">Submit Request</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -249,6 +299,7 @@
     </footer>
 
     <!-- JavaScript for Actions, Dropdown & Modal -->
+    <!-- JavaScript for Actions, Dropdown & Modal -->
     <script>
         let currentSelectedBloodType = "";
 
@@ -267,10 +318,20 @@
                 }
             }
 
-            // Close modal when clicking outside the modal content window
-            const modal = document.getElementById("globalEmergencyModal");
-            if (event.target === modal) {
+            // Close modals when clicking outside the modal window
+            const emergencyModal = document.getElementById("globalEmergencyModal");
+            if (event.target === emergencyModal) {
                 closeEmergencyModal();
+            }
+
+            const editModal = document.getElementById("editStockModal");
+            if (event.target === editModal) {
+                closeEditModal();
+            }
+
+            const fulfillmentModal = document.getElementById("fulfillmentModal");
+            if (event.target === fulfillmentModal) {
+                closeFulfillmentModal();
             }
         }
 
@@ -335,6 +396,28 @@
                   "- Plasma: " + plasmaAction + " " + plasmaUnits + " units\n\n(Backend database sync ready)");
             
             closeEditModal();
+        }
+
+        // --- Restock / Fulfillment Modal Functions ---
+        function openFulfillmentModal() {
+            document.getElementById("fulfillmentModal").style.display = "flex";
+        }
+
+        function closeFulfillmentModal() {
+            document.getElementById("fulfillmentModal").style.display = "none";
+            document.getElementById("fulfillmentForm").reset();
+        }
+
+        function submitFulfillmentRequest(event) {
+            event.preventDefault();
+            const bloodGroup = document.getElementById("targetBloodGroup").value;
+            const component = document.getElementById("targetComponent").value;
+            const units = document.getElementById("requestedUnits").value;
+
+            console.log("Restock Fulfillment Request Sent:", { bloodGroup, component, units });
+
+            alert(`Successfully submitted restock request for ${units} unit(s) of ${component} (${bloodGroup})!`);
+            closeFulfillmentModal();
         }
 
         function openAddStockModal() {
