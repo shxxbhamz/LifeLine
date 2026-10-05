@@ -12,8 +12,8 @@
      and a username following the 'DO' prefix convention (e.g., doharshpatel).
   4. Formatted address sections including a full-width address box, combined 
      city/province input, and a dedicated postal code/pincode field.
-  5. Digital terms and privacy policy agreement checkbox before final registration.
-
+  5. A centered professional profile photo upload card at the bottom of the form.
+  6. Digital terms and privacy policy agreement checkbox before final registration.=
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -28,10 +28,7 @@
 </head>
 <body>
 
-
-    <!-- NAVIGATION BAR-->
-    <!-- Contains custom logo image and sign-in option -->
-
+    <!-- NAVIGATION BAR                             -->
     <header>
         <a href="index.html" class="logo-link">
             <img src="img/lifeline-logo.png" alt="LifeLine Logo" class="brand-logo">
@@ -44,14 +41,13 @@
         </nav>
     </header>
 
-
     <!-- MAIN CONTENT AREA: DONOR REGISTRATION FORM -->
 
     <main>
         <div class="auth-container">
             <h2>Donor Registration</h2>
             
-            <form action="login.html" method="POST" class="auth-form">
+            <form action="login.html" method="POST" enctype="multipart/form-data" class="auth-form">
                 
                 <!-- Hidden Role Field: Quietly flags this user profile as a 'donor' in the database -->
                 <input type="hidden" name="role" value="donor">
@@ -71,9 +67,9 @@
                         <input type="text" id="lastName" name="lastName" required>
                     </div>
 
-                    <!-- Username Field (Using 'DO' prefix convention) -->
+                    <!-- Username Field -->
                     <div class="form-group">
-                        <label for="username">Username (e.g. dousername):</label>
+                        <label for="username">Username (e.g. doharshpatel):</label>
                         <input type="text" id="username" name="username" placeholder="do..." required>
                     </div>
 
@@ -95,7 +91,7 @@
                         <input type="date" id="dob" name="dob" required>
                     </div>
 
-                    <!-- Full Address Box (Spans both columns for width) -->
+                    <!-- Full Address Box -->
                     <div class="form-group full-width">
                         <label for="fullAddress">Full Address:</label>
                         <input type="text" id="fullAddress" name="fullAddress" placeholder="Street address, apartment, suite, etc." required>
@@ -103,21 +99,8 @@
 
                     <!-- Combined City & Province Field -->
                     <div class="form-group">
-                        <label for="city">City:</label>
-                        <input type="text" id="city" name="city" placeholder="e.g. Regina" required>
-                    </div>
-
-                    
-                    <!-- Combined City & Province Field -->
-                    <div class="form-group">
-                        <label for="Province">Province:</label>
-                        <input type="text" id="Province" name="Province" placeholder="e.g.SK" required>
-                    </div>
-
-                     <!-- Country Field -->
-                    <div class="form-group">
-                        <label for="country">Country:</label>
-                        <input type="text" id="country" name="country" required>
+                        <label for="cityProvince">City & Province:</label>
+                        <input type="text" id="cityProvince" name="cityProvince" placeholder="e.g. Regina, SK" required>
                     </div>
 
                     <!-- Pincode / Postal Code Field -->
@@ -156,6 +139,20 @@
 
                 </div>
 
+                <!--Profile Image Upload Card -->
+                <div class="profile-upload-section">
+                    <div class="profile-upload-card">
+                        <div class="profile-avatar-preview">
+                            <img id="avatarPreview" src="img/default-avatar.png" alt="Avatar Preview">
+                        </div>
+                        <div class="profile-upload-controls">
+                            <label for="profileImage" class="btn-change-photo">Change Photo</label>
+                            <input type="file" id="profileImage" name="profileImage" accept="image/*" style="display: none;">
+                            <button type="button" id="removePhoto" class="btn-delete-photo">Delete Photo</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Terms & Conditions Agreement Checkbox -->
                 <div class="checkbox-group">
                     <input type="checkbox" id="terms" name="terms" required>
@@ -176,8 +173,7 @@
         </div>
     </main>
 
-
-    <!-- FOOTER SECTION-->
+    <!-- FOOTER SECTION -->
     <footer>
         <p>&copy; 2026 LifeLine. Emergency Rapid-Response Blood Dispatch System. All rights reserved.</p>
     </footer>
