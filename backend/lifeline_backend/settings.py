@@ -31,6 +31,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['lifeline-85fz.onrender.com', '.onrender.com', '127.0.0.1', 'localhost']
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://lifeline-85fz.onrender.com",
+]
 
 # Application definition
 
