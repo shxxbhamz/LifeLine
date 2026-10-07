@@ -15,7 +15,7 @@ def run_sql_migrations():
         return
 
     # Find all .sql files and sort them alphabetically (V1, V2, V3...)
-    sql_files = sorted([f for f in os.listdir(migrations_folder) if f.endswith(".sql")])
+    sql_files = sorted([f for f in os.listdir(migrations_folder) if f.endswith(".sql")], key=str.lower)
     
     if not sql_files:
         print("No .sql migration files found.")
