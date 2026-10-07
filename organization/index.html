@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,19 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lifeline- Organization Staff Dashboard</title>
     <!-- Linking the centralized stylesheet -->
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="{% static 'organization/css/style.css' %}">
 </head>
 <body data-facility-type="hospital"> <!-- Dynamic switcher: change to 'blood_bank' if needed -->
 
     <!-- Top Navigation Bar -->
     <header>
         <a href="index.html" class="logo-link">
-            <img src="img/lifeline-logo.png" alt="LifeLine Logo" class="brand-logo">
+            <img src="{% static 'organization/img/lifeline-logo.png' %}" alt="LifeLine Logo" class="brand-logo">
         </a>
     
         <div class="nav-right">
             <!-- Emergency Create Action Button -->
-            <button class="btn-emergency-create" onclick="openEmergencyModal()">Create Emergency</button>
+            <button class="btn-emergency-create" onclick="openEmergencyModal()">+ Emergency Create</button>
             
             <!-- Three-Dash Hamburger Dropdown Menu -->
             <div class="dropdown">
@@ -25,10 +26,10 @@
                     &#9776;
                 </button>
                 <div class="dropdown-content" id="navDropdown">
-                    <a href="edit_org_profile.html">Edit Profile</a>
+                    <a href="{% url 'staff_edit_profile' %}">Edit Profile</a>
                     <a href="appointment.html">Notifications <span class="badge-count">3</span></a>
                     <div class="dropdown-divider"></div>
-                    <a href="../login.html" class="logout-link">Logout</a>
+                    <a href="{% url 'logout' %}" class="logout-link">Logout</a>
                 </div>
             </div>
         </div>

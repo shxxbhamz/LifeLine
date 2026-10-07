@@ -61,7 +61,7 @@ ROOT_URLCONF = "lifeline_backend.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
+        "DIRS": [BASE_DIR.parent],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
