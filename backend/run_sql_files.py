@@ -14,8 +14,8 @@ def run_sql_migrations():
         print(f"Error: Directory not found -> {migrations_folder}")
         return
 
-    # Find all .sql files and sort them alphabetically (V1, V2, V3...)
-    sql_files = sorted([f for f in os.listdir(migrations_folder) if f.endswith(".sql")])
+    # Find all .sql files and sort them case-insensitively (V1, v2, v3...)
+    sql_files = sorted([f for f in os.listdir(migrations_folder) if f.endswith(".sql")], key=str.lower)
     
     if not sql_files:
         print("No .sql migration files found.")
