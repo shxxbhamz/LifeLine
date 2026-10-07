@@ -12,9 +12,10 @@
      and a username following the 'DO' prefix convention (e.g., doharshpatel).
   4. Formatted address sections including a full-width address box, combined 
      city/province input, and a dedicated postal code/pincode field.
-  5. A centered professional profile photo upload card at the bottom of the form.
-  6. Digital terms and privacy policy agreement checkbox before final registration.=
+  5. Digital terms and privacy policy agreement checkbox before final registration.
+
 -->
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,30 +25,41 @@
     <title>Lifeline - Donor Sign Up</title>
     
     <!-- Linking the centralized global stylesheet -->
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
 
-    <!-- NAVIGATION BAR                             -->
+
+    <!-- NAVIGATION BAR-->
+    <!-- Contains custom logo image and sign-in option -->
+
     <header>
-        <a href="index.html" class="logo-link">
-            <img src="img/lifeline-logo.png" alt="LifeLine Logo" class="brand-logo">
+        <a href="{% url 'home' %}" class="logo-link">
+            <img src="{% static 'img/lifeline-logo.png' %}" alt="LifeLine Logo" class="brand-logo">
         </a>
         <nav>
             <ul>
-                <li><a href="index.html#about">About Us</a></li>
-                <li><a href="login.html" class="btn-nav-auth">Sign In</a></li>
+                <li><a href="{% url 'home' %}#about">About Us</a></li>
+                <li><a href="{% url 'login' %}" class="btn-nav-auth">Sign In</a></li>
             </ul>
         </nav>
     </header>
+
 
     <!-- MAIN CONTENT AREA: DONOR REGISTRATION FORM -->
 
     <main>
         <div class="auth-container">
             <h2>Donor Registration</h2>
+
+            {% if error %}
+                <div class="form-error-banner" id="form-error">
+                    {{ error }}
+                </div>
+            {% endif %}
             
-            <form action="login.html" method="POST" enctype="multipart/form-data" class="auth-form">
+            <form action="{% url 'donor_signup' %}" method="POST" class="auth-form">
+            {% csrf_token %}
                 
                 <!-- Hidden Role Field: Quietly flags this user profile as a 'donor' in the database -->
                 <input type="hidden" name="role" value="donor">
@@ -58,70 +70,83 @@
                     <!-- First Name Field -->
                     <div class="form-group">
                         <label for="firstName">First Name:</label>
-                        <input type="text" id="firstName" name="firstName" required>
+                        <input type="text" id="firstName" name="firstName" value="{{ form_data.firstName|default:'' }}" required>
                     </div>
 
                     <!-- Last Name Field -->
                     <div class="form-group">
                         <label for="lastName">Last Name:</label>
-                        <input type="text" id="lastName" name="lastName" required>
+                        <input type="text" id="lastName" name="lastName" value="{{ form_data.lastName|default:'' }}" required>
                     </div>
 
-                    <!-- Username Field -->
+                    <!-- Username Field (Using 'DO' prefix convention) -->
                     <div class="form-group">
-                        <label for="username">Username (e.g. doharshpatel):</label>
-                        <input type="text" id="username" name="username" placeholder="do..." required>
+                        <label for="username">Username (e.g. dousername):</label>
+                        <input type="text" id="username" name="username" placeholder="do..." value="{{ form_data.username|default:'' }}" required>
                     </div>
 
                     <!-- Email Address Field -->
                     <div class="form-group">
                         <label for="email">Email Address:</label>
-                        <input type="email" id="email" name="email" required>
+                        <input type="email" id="email" name="email" value="{{ form_data.email|default:'' }}" required>
                     </div>
 
                     <!-- Phone Number Field -->
                     <div class="form-group">
                         <label for="phone">Phone Number:</label>
-                        <input type="tel" id="phone" name="phone" required>
+                        <input type="tel" id="phone" name="phone" value="{{ form_data.phone|default:'' }}" required>
                     </div>
 
                     <!-- Date of Birth Field -->
                     <div class="form-group">
                         <label for="dob">Date of Birth (DOB):</label>
-                        <input type="date" id="dob" name="dob" required>
+                        <input type="date" id="dob" name="dob" value="{{ form_data.dob|default:'' }}" required>
                     </div>
 
-                    <!-- Full Address Box -->
+                    <!-- Full Address Box (Spans both columns for width) -->
                     <div class="form-group full-width">
                         <label for="fullAddress">Full Address:</label>
-                        <input type="text" id="fullAddress" name="fullAddress" placeholder="Street address, apartment, suite, etc." required>
+                        <input type="text" id="fullAddress" name="fullAddress" placeholder="Street address, apartment, suite, etc." value="{{ form_data.fullAddress|default:'' }}" required>
                     </div>
 
                     <!-- Combined City & Province Field -->
                     <div class="form-group">
-                        <label for="cityProvince">City & Province:</label>
-                        <input type="text" id="cityProvince" name="cityProvince" placeholder="e.g. Regina, SK" required>
+                        <label for="city">City:</label>
+                        <input type="text" id="city" name="city" placeholder="e.g. Regina" value="{{ form_data.city|default:'' }}" required>
+                    </div>
+
+                    
+                    <!-- Combined City & Province Field -->
+                    <div class="form-group">
+                        <label for="Province">Province:</label>
+                        <input type="text" id="Province" name="Province" placeholder="e.g.SK" value="{{ form_data.Province|default:'' }}" required>
+                    </div>
+
+                     <!-- Country Field -->
+                    <div class="form-group">
+                        <label for="country">Country:</label>
+                        <input type="text" id="country" name="country" value="{{ form_data.country|default:'' }}" required>
                     </div>
 
                     <!-- Pincode / Postal Code Field -->
                     <div class="form-group">
                         <label for="pincode">Pincode / Postal Code:</label>
-                        <input type="text" id="pincode" name="pincode" required>
+                        <input type="text" id="pincode" name="pincode" value="{{ form_data.pincode|default:'' }}" required>
                     </div>
 
                     <!-- Blood Group Selection Dropdown -->
                     <div class="form-group">
                         <label for="bloodGroup">Blood Group:</label>
                         <select id="bloodGroup" name="bloodGroup" required>
-                            <option value="" disabled selected>Select your blood type</option>
-                            <option value="A+">A+</option>
-                            <option value="A-">A-</option>
-                            <option value="B+">B+</option>
-                            <option value="B-">B-</option>
-                            <option value="AB+">AB+</option>
-                            <option value="AB-">AB-</option>
-                            <option value="O+">O+</option>
-                            <option value="O-">O-</option>
+                            <option value="" disabled {% if not form_data.bloodGroup %}selected{% endif %}>Select your blood type</option>
+                            <option value="A+" {% if form_data.bloodGroup == "A+" %}selected{% endif %}>A+</option>
+                            <option value="A-" {% if form_data.bloodGroup == "A-" %}selected{% endif %}>A-</option>
+                            <option value="B+" {% if form_data.bloodGroup == "B+" %}selected{% endif %}>B+</option>
+                            <option value="B-" {% if form_data.bloodGroup == "B-" %}selected{% endif %}>B-</option>
+                            <option value="AB+" {% if form_data.bloodGroup == "AB+" %}selected{% endif %}>AB+</option>
+                            <option value="AB-" {% if form_data.bloodGroup == "AB-" %}selected{% endif %}>AB-</option>
+                            <option value="O+" {% if form_data.bloodGroup == "O+" %}selected{% endif %}>O+</option>
+                            <option value="O-" {% if form_data.bloodGroup == "O-" %}selected{% endif %}>O-</option>
                         </select>
                     </div>
 
@@ -139,23 +164,9 @@
 
                 </div>
 
-                <!--Profile Image Upload Card -->
-                <div class="profile-upload-section">
-                    <div class="profile-upload-card">
-                        <div class="profile-avatar-preview">
-                            <img id="avatarPreview" src="img/default-avatar.png" alt="Avatar Preview">
-                        </div>
-                        <div class="profile-upload-controls">
-                            <label for="profileImage" class="btn-change-photo">Change Photo</label>
-                            <input type="file" id="profileImage" name="profileImage" accept="image/*" style="display: none;">
-                            <button type="button" id="removePhoto" class="btn-delete-photo">Delete Photo</button>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Terms & Conditions Agreement Checkbox -->
                 <div class="checkbox-group">
-                    <input type="checkbox" id="terms" name="terms" required>
+                    <input type="checkbox" id="terms" name="terms" {% if form_data.terms %}checked{% endif %} required>
                     <label for="terms">I agree to the terms and privacy policy</label>
                 </div>
 
@@ -166,17 +177,26 @@
 
                 <!-- Footer link for users who already have an account -->
                 <div class="auth-footer">
-                    Already registered? <a href="login.html">Sign In</a>
+                    Already registered? Already registered? <a href="{% url 'login' %}">Sign In</a>
                 </div>
 
             </form>
         </div>
     </main>
 
-    <!-- FOOTER SECTION -->
+
+    <!-- FOOTER SECTION-->
     <footer>
         <p>&copy; 2026 LifeLine. Emergency Rapid-Response Blood Dispatch System. All rights reserved.</p>
     </footer>
-
+{% if error %}
+    <script>
+        // Bring the validation error into view so the user does not miss it.
+        document.getElementById("form-error").scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+    </script>
+{% endif %}
 </body>
 </html>

@@ -1,11 +1,12 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LifeLine - Donor Portal</title>
-  <link rel="stylesheet" href="./css/styles.css">
-  <link rel="stylesheet" href="./css/home.css">
+  <link rel="stylesheet" href="{% static 'donor/css/styles.css' %}">
+  <link rel="stylesheet" href="{% static 'donor/css/home.css' %}">
 </head>
 <body>
 
@@ -14,7 +15,7 @@
     <div class="header-container">
       <div class="logo">
         <a href="index.html">
-            <img src="./image/logo.png" alt="LifeLine Logo" class="logo-img">
+            <img src="{% static 'donor/image/logo.png' %}" alt="LifeLine Logo" class="logo-img">
         </a>
       </div>
 
@@ -23,11 +24,14 @@
         <span class="donor-name">Donor Name</span>
         
         <div class="dropdown" tabindex="0">
-          <img src="./image/default-avatar.png" alt="Donor Profile" class="donor-avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;">
-          
+          <button class="hamburger-btn" aria-label="Toggle Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
           <div class="dropdown-content">
-            <a href="edit_dor_profile.html">Edit Profile</a>
-            <a href="../login.html">Logout</a>
+            <a href="{% url 'donor_edit_profile' %}">Edit Profile</a>
+            <a href="{% url 'logout' %}">Logout</a>
           </div>
         </div>
       </div>
@@ -116,7 +120,7 @@
           
           <!-- Badge 1: Unlocked -->
           <div class="trophy-card unlocked">
-            <img src="./image/welcomedonor.png" alt="badge" class="badge_achievement">
+            <img src="{% static 'donor/image/welcomedonor.png' %}" alt="badge" class="badge_achievement">
             <div class="trophy-details">
               <h4>Welcome Donor</h4>
               <p>1st Donation Made</p>
@@ -126,7 +130,7 @@
 
           <!-- Badge 2: Unlocked -->
           <div class="trophy-card locked">
-            <img src="./image/30.png" alt="badge" class="badge_achievement">
+            <img src="{% static 'donor/image/30.png' %}" alt="badge" class="badge_achievement">
             <div class="trophy-details">
               <h4>Dedicated Donor</h4>
               <p>30 Donations Tier</p>
@@ -136,7 +140,7 @@
 
           <!-- Badge 3: Locked -->
           <div class="trophy-card locked">
-            <img src="./image/60.png" alt="badge" class="badge_achievement">
+            <img src="{% static 'donor/image/60.png' %}" alt="badge" class="badge_achievement">
             <div class="trophy-details">
               <h4>Life Saver</h4>
               <p>60 Donations Tier</p>
@@ -146,7 +150,7 @@
 
           <!-- Badge 4: Locked -->
           <div class="trophy-card locked">
-            <img src="./image/90+.png" alt="badge" class="badge_achievement">
+            <img src="{% static 'donor/image/90+.png' %}" alt="badge" class="badge_achievement">
             <div class="trophy-details">
               <h4>Hero Tier</h4>
               <p>90+ Donations Tier</p>

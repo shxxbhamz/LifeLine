@@ -1,41 +1,52 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LifeLine - Edit Profile</title>
-  <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="{% static 'donor/css/styles.css' %}">
 </head>
-
 <body id="edit-profile-page">
 
   <!-- Shared Header Section -->
   <header class="main-header">
     <div class="header-container">
       <div class="logo">
-        <a href="index.html">
-          <img src="./image/logo.png" alt="LifeLine Logo" class="logo-img">
+        <a href="{% url 'donor_dashboard' %}">
+          <img src="{% static 'donor/image/logo.png' %}" alt="LifeLine Logo" class="logo-img">
         </a>
       </div>
 
       <!-- User Profile & Hamburger Menu Container -->
       <div class="header-actions">
-        <a href="index.html" class="white-link-bold">Home</a>
+        <span class="donor-name">Donor Name</span>
 
-        <div class="dropdown" tabindex="0">
+        <div class="dropdown">
           <button class="hamburger-btn" aria-label="Toggle Menu">
             <span></span>
             <span></span>
             <span></span>
           </button>
           <div class="dropdown-content">
-            <a href="../login.html">Logout</a>
+            <a href="{% url 'donor_dashboard' %}">Home</a>
+            <a href="{% url 'logout' %}">Logout</a>
           </div>
         </div>
       </div>
     </div>
   </header>
+
+  <!-- Navigation Bar -->
+  <nav class="main-nav"> 
+    <ul class="nav-links">
+      <li><a href="{% url 'donor_dashboard' %}" class="nav-item">Home</a></li>
+      <li><a href="active_requests.html" class="nav-item">Active Requests</a></li>
+      <li><a href="book_an_appointment.html" class="nav-item">Book An Appointment</a></li>
+      <li><a href="history.html" class="nav-item">History</a></li>
+    </ul>
+  </nav>
+
 
   <!-- Main Content Area -->
   <main class="content">
@@ -45,16 +56,23 @@
         <h1>Edit Profile</h1>
       </div>
 
-      <form class="profile-form">
+      {% if error %}
+        <div class="profile-error" id="profile-error">
+            {{ error }}
+        </div>
+      {% endif %}
+
+      <form method="POST" class="profile-form">
+        {% csrf_token %}
         <!-- Name Row -->
         <div class="form-row">
           <div class="form-group">
             <label for="firstName">First Name</label>
-            <input type="text" id="firstName" name="firstName" placeholder="John">
+            <input type="text" id="firstName" name="firstName" value="{{ form_data.firstName|default:user.first_name }}" required>
           </div>
           <div class="form-group">
             <label for="lastName">Last Name</label>
-            <input type="text" id="lastName" name="lastName" placeholder="Doe">
+            <input type="text" id="lastName" name="lastName" value="{{ form_data.lastName|default:user.last_name }}" required>
           </div>
         </div>
 
@@ -62,11 +80,11 @@
         <div class="form-row">
           <div class="form-group">
             <label for="username">Username (e.g. dusername)</label>
-            <input type="text" id="username" name="username" placeholder="do...">
+            <input type="text" id="username" name="username" value="{{ form_data.username|default:user.username }}" required>
           </div>
           <div class="form-group">
             <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" placeholder="john.doe@example.com">
+            <input type="email" id="email" name="email" value="{{ form_data.email|default:user.email }}" required>
           </div>
         </div>
 
@@ -74,29 +92,29 @@
         <div class="form-row">
           <div class="form-group">
             <label for="phone">Phone Number</label>
-            <input type="tel" id="phone" name="phone" placeholder="(555) 000-0000">
+            <input type="tel" id="phone" name="phone" value="{{ form_data.phone|default:donor_profile.phone }}" required>
           </div>
           <div class="form-group">
             <label for="dob">Date of Birth (DOB)</label>
-            <input type="date" id="dob" name="dob">
+            <input type="date" id="dob" name="dob" value="{% if form_data %}{{ form_data.dob }}{% else %}{{ donor_profile.date_of_birth|date:'Y-m-d' }}{% endif %}" required>
           </div>
         </div>
 
         <!-- Full Address -->
         <div class="form-group full-width">
           <label for="address">Full Address</label>
-          <input type="text" id="address" name="address" placeholder="Street address, apartment, suite, etc.">
+          <input type="text" id="address" name="address" value="{{ form_data.address|default:donor_profile.street_address }}" required>
         </div>
 
         <!-- Location Info Row -->
         <div class="form-row">
           <div class="form-group">
             <label for="city">City</label>
-            <input type="text" id="city" name="city" placeholder="e.g. Regina">
+            <input type="text" id="city" name="city" value="{{ form_data.city|default:donor_profile.city }}" required>
           </div>
           <div class="form-group">
             <label for="province">Province</label>
-            <input type="text" id="province" name="province" placeholder="e.g. SK">
+            <input type="text" id="province" name="province" value="{{ form_data.province|default:donor_profile.province }}" required>
           </div>
         </div>
 
@@ -104,39 +122,29 @@
         <div class="form-row">
           <div class="form-group">
             <label for="country">Country</label>
-            <input type="text" id="country" name="country" placeholder="Canada">
+            <input type="text" id="country" name="country" value="{{ form_data.country|default:donor_profile.country }}" required>
           </div>
           <div class="form-group">
             <label for="postalCode">Pincode / Postal Code</label>
-            <input type="text" id="postalCode" name="postalCode" placeholder="S4P 3Y2">
+            <input type="text" id="postalCode" name="postalCode" value="{{ form_data.postalCode|default:donor_profile.postal_code }}" required>
           </div>
         </div>
 
-        <!-- Blood Group -->
-        <div class="form-group">
-          <label for="bloodGroup">Blood Group</label>
-          <select id="bloodGroup" name="bloodGroup">
-            <option value="">Select your blood type</option>
-            <option value="A+">A Positive (A+)</option>
-            <option value="A-">A Negative (A-)</option>
-            <option value="B+">B Positive (B+)</option>
-            <option value="B-">B Negative (B-)</option>
-            <option value="AB+">AB Positive (AB+)</option>
-            <option value="AB-">AB Negative (AB-)</option>
-            <option value="O+">O Positive (O+)</option>
-            <option value="O-">O Negative (O-)</option>
-          </select>
-        </div>
-
-        <!-- Existing Profile Preview & Change Link -->
-        <div class="profile-upload-container">
-          <label for="profilePicture" class="avatar-label">
-            <img src="./image/default-avatar.png" alt="Current Profile" class="current-avatar">
-            <span class="change-photo-link">Change Profile Picture</span>
-          </label>
-          <!-- Hidden file input linked directly to label -->
-          <input type="file" id="profilePicture" name="profilePicture" accept="image/*" hidden>
-        </div>
+        <!-- Blood Group & Password Row -->
+          <div class="form-group">
+            <label for="bloodGroup">Blood Group</label>
+            <select id="bloodGroup" name="bloodGroup" required>
+              <option value="">Select your blood type</option>
+              <option value="A+" {% if form_data and form_data.bloodGroup == "A+" or not form_data and donor_profile.blood_type == "A+" %}selected{% endif %}>A Positive (A+)</option>
+              <option value="A-" {% if form_data and form_data.bloodGroup == "A-" or not form_data and donor_profile.blood_type == "A-" %}selected{% endif %}>A Negative (A-)</option>
+              <option value="B+" {% if form_data and form_data.bloodGroup == "B+" or not form_data and donor_profile.blood_type == "B+" %}selected{% endif %}>B Positive (B+)</option>
+              <option value="B-" {% if form_data and form_data.bloodGroup == "B-" or not form_data and donor_profile.blood_type == "B-" %}selected{% endif %}>B Negative (B-)</option>
+              <option value="AB+" {% if form_data and form_data.bloodGroup == "AB+" or not form_data and donor_profile.blood_type == "AB+" %}selected{% endif %}>AB Positive (AB+)</option>
+              <option value="AB-" {% if form_data and form_data.bloodGroup == "AB-" or not form_data and donor_profile.blood_type == "AB-" %}selected{% endif %}>AB Negative (AB-)</option>
+              <option value="O+" {% if form_data and form_data.bloodGroup == "O+" or not form_data and donor_profile.blood_type == "O+" %}selected{% endif %}>O Positive (O+)</option>
+              <option value="O-" {% if form_data and form_data.bloodGroup == "O-" or not form_data and donor_profile.blood_type == "O-" %}selected{% endif %}>O Negative (O-)</option>
+            </select>
+          </div>
 
         <!-- Submit Button -->
         <div class="form-actions">
@@ -147,6 +155,26 @@
 
   </main>
 
-</body>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const hamburgerBtn = document.querySelector('.hamburger-btn');
+      const dropdownContent = document.querySelector('.dropdown-content');
 
+      if (hamburgerBtn && dropdownContent) {
+        // Toggle the menu when clicking the hamburger button
+        hamburgerBtn.addEventListener('click', (event) => {
+          dropdownContent.classList.toggle('show');
+          event.stopPropagation(); // Prevents the click from immediately closing the menu
+        });
+
+        // Close the menu if the user clicks anywhere else on the page
+        document.addEventListener('click', (event) => {
+          if (!dropdownContent.contains(event.target)) {
+            dropdownContent.classList.remove('show');
+          }
+        });
+      }
+    });
+  </script>
+</body>
 </html>

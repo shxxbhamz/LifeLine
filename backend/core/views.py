@@ -6,12 +6,12 @@ from django.utils import timezone
 from .models import DonorProfiles, Facilities, StaffProfiles, Users
 
 def home_view(request):
-    return render(request, "core/home.html")
+    return render(request, "index.html")
 
 def login_view(request):
     # A GET request only displays the login page.
     if request.method == "GET":
-        return render(request, "core/login.html")
+        return render(request, "login.html")
 
     username = request.POST.get("username", "").strip().lower()
     password = request.POST.get("password", "")
@@ -26,7 +26,7 @@ def login_view(request):
     except Users.DoesNotExist:
         return render(
             request,
-            "core/login.html",
+            "login.html",
             {
                 "error": "Invalid username or password.",
                 "form_data": form_data,
@@ -37,7 +37,7 @@ def login_view(request):
     if not check_password(password, user.password_hash):
         return render(
             request,
-            "core/login.html",
+            "login.html",
             {
                 "error": "Invalid username or password.",
                 "form_data": form_data,
@@ -48,7 +48,7 @@ def login_view(request):
     if user.account_status != "ACTIVE":
         return render(
             request,
-            "core/login.html",
+            "login.html",
             {
                 "error": "This account is not currently active.",
                 "form_data": form_data,
@@ -68,7 +68,7 @@ def login_view(request):
 
     return render(
         request,
-        "core/login.html",
+        "login.html",
         {
             "error": "This account has an unsupported role.",
             "form_data": form_data,
@@ -80,7 +80,7 @@ def donor_dashboard_view(request):
     if request.session.get("user_id") is None or request.session.get("role") != "DONOR":
         return redirect("login")
 
-    return render(request, "core/donor_dashboard.html")
+    return render(request, "donor/index.html")
 
 
 def staff_dashboard_view(request):
@@ -88,7 +88,7 @@ def staff_dashboard_view(request):
     if request.session.get("user_id") is None or request.session.get("role") != "HOSPITAL_STAFF":
         return redirect("login")
 
-    return render(request, "core/staff_dashboard.html")
+    return render(request, "organization/index.html")
 
 def logout_view(request):
     # Remove all authentication data stored in the current session.
@@ -99,7 +99,7 @@ def logout_view(request):
 def donor_signup_view(request):
     # A GET request only displays the registration page.
     if request.method == "GET":
-        return render(request, "core/donor_signup.html")
+        return render(request, "donor_signup.html")
 
     # Read the values submitted by the donor registration form.
     first_name = request.POST.get("firstName", "").strip()
@@ -140,35 +140,35 @@ def donor_signup_view(request):
     if not username.startswith("do"):
         return render(
             request,
-            "core/donor_signup.html",
+            "donor_signup.html",
             {"error": "Donor usernames must begin with 'do'.", "form_data": form_data},
         )
 
     if password != confirm_password:
         return render(
             request,
-            "core/donor_signup.html",
+            "donor_signup.html",
             {"error": "Passwords do not match.", "form_data": form_data},
         )
 
     if Users.objects.filter(username=username).exists():
         return render(
             request,
-            "core/donor_signup.html",
+            "donor_signup.html",
             {"error": "That username is already in use.", "form_data": form_data},
         )
 
     if Users.objects.filter(email=email).exists():
         return render(
             request,
-            "core/donor_signup.html",
+            "donor_signup.html",
             {"error": "An account with that email already exists.", "form_data": form_data},
         )
 
     if not terms_accepted:
         return render(
             request,
-            "core/donor_signup.html",
+            "donor_signup.html",
             {"error": "You must accept the terms and privacy policy.", "form_data": form_data},
         )
 
@@ -210,7 +210,7 @@ def donor_signup_view(request):
 def organization_signup_view(request):
     # A GET request only displays the staff registration page.
     if request.method == "GET":
-        return render(request, "core/organization_signup.html")
+        return render(request, "organization_signup.html")
 
     # Read values submitted by the staff registration form.
     first_name = request.POST.get("firstName", "").strip()
@@ -257,7 +257,7 @@ def organization_signup_view(request):
     if not username.startswith("st"):
         return render(
             request,
-            "core/organization_signup.html",
+            "organization_signup.html",
             {
                 "error": "Staff usernames must begin with 'st'.",
                 "form_data": form_data,
@@ -267,7 +267,7 @@ def organization_signup_view(request):
     if password != confirm_password:
         return render(
             request,
-            "core/organization_signup.html",
+            "organization_signup.html",
             {
                 "error": "Passwords do not match.",
                 "form_data": form_data,
@@ -277,7 +277,7 @@ def organization_signup_view(request):
     if Users.objects.filter(username=username).exists():
         return render(
             request,
-            "core/organization_signup.html",
+            "organization_signup.html",
             {
                 "error": "That username is already in use.",
                 "form_data": form_data,
@@ -287,7 +287,7 @@ def organization_signup_view(request):
     if Users.objects.filter(email=email).exists():
         return render(
             request,
-            "core/organization_signup.html",
+            "organization_signup.html",
             {
                 "error": "An account with that email already exists.",
                 "form_data": form_data,
@@ -297,7 +297,7 @@ def organization_signup_view(request):
     if not authorized_staff:
         return render(
             request,
-            "core/organization_signup.html",
+            "organization_signup.html",
             {
                 "error": "You must confirm that you are an authorized staff member.",
                 "form_data": form_data,
@@ -307,7 +307,7 @@ def organization_signup_view(request):
     if not terms_accepted:
         return render(
             request,
-            "core/organization_signup.html",
+            "organization_signup.html",
             {
                 "error": "You must accept the terms and privacy policy.",
                 "form_data": form_data,
@@ -326,7 +326,7 @@ def organization_signup_view(request):
     if database_facility_type is None:
         return render(
             request,
-            "core/organization_signup.html",
+            "organization_signup.html",
             {
                 "error": "Please select a valid facility type.",
                 "form_data": form_data,
@@ -409,7 +409,7 @@ def donor_edit_profile_view(request):
         if not username.startswith("do"):
             return render(
                 request,
-                "core/donor_edit_profile.html",
+                "donor/edit_dor_profile.html",
                 {
                     "user": user,
                     "donor_profile": donor_profile,
@@ -423,7 +423,7 @@ def donor_edit_profile_view(request):
         if Users.objects.exclude(id=user_id).filter(username=username).exists():
             return render(
                 request,
-                "core/donor_edit_profile.html",
+                "donor/edit_dor_profile.html",
                 {
                     "user": user,
                     "donor_profile": donor_profile,
@@ -436,7 +436,7 @@ def donor_edit_profile_view(request):
         if Users.objects.exclude(id=user_id).filter(email=email).exists():
             return render(
                 request,
-                "core/donor_edit_profile.html",
+                "donor/edit_dor_profile.html",
                 {
                     "user": user,
                     "donor_profile": donor_profile,
@@ -472,7 +472,7 @@ def donor_edit_profile_view(request):
 
     return render(
         request,
-        "core/donor_edit_profile.html",
+        "donor/edit_dor_profile.html",
         {
             "user": user,
             "donor_profile": donor_profile,
@@ -516,7 +516,7 @@ def staff_edit_profile_view(request):
         if Users.objects.exclude(id=user_id).filter(email=email).exists():
             return render(
                 request,
-                "core/staff_edit_profile.html",
+                "organization/edit_org_profile.html",
                 {
                     "user": user,
                     "staff_profile": staff_profile,
@@ -538,7 +538,7 @@ def staff_edit_profile_view(request):
         if database_facility_type is None:
             return render(
                 request,
-                "core/staff_edit_profile.html",
+                "organization/edit_org_profile.html",
                 {
                     "user": user,
                     "staff_profile": staff_profile,
@@ -557,7 +557,7 @@ def staff_edit_profile_view(request):
         ).exists():
             return render(
                 request,
-                "core/staff_edit_profile.html",
+                "organization/edit_org_profile.html",
                 {
                     "user": user,
                     "staff_profile": staff_profile,
@@ -593,7 +593,7 @@ def staff_edit_profile_view(request):
     # A GET request displays the staff member's existing information.
     return render(
         request,
-        "core/staff_edit_profile.html",
+        "organization/edit_org_profile.html",
         {
             "user": user,
             "staff_profile": staff_profile,
