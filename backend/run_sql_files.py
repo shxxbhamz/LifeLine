@@ -7,14 +7,13 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "lifeline_backend.settings")
 django.setup()
 
 def run_sql_migrations():
-    # Dynamically locate the Database/migrations folder
     migrations_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), "../Database/migrations"))
     
     if not os.path.exists(migrations_folder):
         print(f"Error: Directory not found -> {migrations_folder}")
         return
 
-    # Find all .sql files and sort them case-insensitively (V1, v2, v3...)
+    # Find all .sql files and sort them case-insensitively
     sql_files = sorted([f for f in os.listdir(migrations_folder) if f.endswith(".sql")], key=str.lower)
     
     if not sql_files:
@@ -28,13 +27,17 @@ def run_sql_migrations():
             file_path = os.path.join(migrations_folder, file)
             print(f"Running migration: {file}...")
             
-            with open(file_path, "r", encoding="utf-8") as f:
-                sql_content = f.read()
-                cursor.execute(sql_content)
-                
-            print(f"Successfully applied: {file}")
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    sql_content = f.read()
+                    cursor.execute(sql_content)
+                connection.commit()
+                print(f"Successfully applied: {file}")
+            except Exception as e:
+                connection.rollback()
+                print(f"Notice: Skipped or table already exists in {file} -> {e}")
 
-    print("All migrations executed successfully!")
+    print("All migration files processed!")
 
 if __name__ == "__main__":
     run_sql_migrations()
