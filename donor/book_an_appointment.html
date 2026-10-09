@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LifeLine - Donor Portal</title>
-  <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="{% static 'donor/css/styles.css' %}">
 </head>
 
 <body id="book-appointment-page">
@@ -14,8 +15,8 @@
   <header class="main-header">
     <div class="header-container">
       <div class="logo">
-        <a href="index.html">
-          <img src="./image/logo.png" alt="LifeLine Logo" class="logo-img">
+        <a href="{% url 'donor_dashboard' %}">
+          <img src="{% static 'donor/image/logo.png' %}" alt="LifeLine Logo" class="logo-img">
         </a>
       </div>
 
@@ -25,10 +26,10 @@
 
         <!-- Added tabindex="0" here -->
         <div class="dropdown" tabindex="0">
-          <img src="./image/default-avatar.png" alt="Donor Profile" class="donor-avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;">
+          <img src="{% static 'donor/image/default-avatar.png' %}" alt="Donor Profile" class="donor-avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;">
           <div class="dropdown-content">
-            <a href="edit_dor_profile.html">Edit Profile</a>
-            <a href="../login.html">Logout</a>
+            <a href="{% url 'donor_edit_profile' %}">Edit Profile</a>
+            <a href="{% url 'logout' %}">Logout</a>
           </div>
         </div>
       </div>
@@ -38,10 +39,10 @@
   <!-- Navigation Bar -->
   <nav class="main-nav">
     <ul class="nav-links">
-      <li><a href="index.html" class="nav-item">Home</a></li>
-      <li><a href="active_requests.html" class="nav-item">Active Requests</a></li>
-      <li><a href="book_an_appointment.html" class="nav-item active">Book An Appointment</a></li>
-      <li><a href="history.html" class="nav-item">History</a></li>
+      <li><a href="{% url 'donor_dashboard' %}" class="nav-item">Home</a></li>
+      <li><a href="{% url 'donor_active_requests' %}" class="nav-item">Active Requests</a></li>
+      <li><a href="{% url 'donor_book_appointment' %}" class="nav-item active">Book An Appointment</a></li>
+      <li><a href="{% url 'donor_history' %}" class="nav-item">History</a></li>
     </ul>
   </nav>
 

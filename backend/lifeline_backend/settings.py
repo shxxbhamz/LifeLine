@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "emergencies",
     "appointments",
     "screening",
+    "inventory",
 ]
 
 MIDDLEWARE = [

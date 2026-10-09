@@ -1,19 +1,26 @@
+
 from django.db import models
 
-from appointments.models import Appointments
 from core.models import DonorProfiles
 
 
 class EligibilityScreenings(models.Model):
     id = models.BigAutoField(primary_key=True)
-    donor = models.ForeignKey(DonorProfiles, models.DB_CASCADE)
+
+    donor = models.ForeignKey(
+        DonorProfiles,
+        models.DB_CASCADE,
+    )
+
     screening_type = models.CharField(max_length=30)
+
     appointment = models.ForeignKey(
-        Appointments,
+        "appointments.Appointments",
         models.DB_SET_NULL,
         blank=True,
         null=True,
     )
+
     status = models.CharField(max_length=20)
     preliminary_result = models.CharField(max_length=30)
     rules_version = models.CharField(max_length=30)
@@ -28,7 +35,12 @@ class EligibilityScreenings(models.Model):
 
 class ScreeningQuestions(models.Model):
     id = models.BigAutoField(primary_key=True)
-    question_code = models.CharField(unique=True, max_length=50)
+
+    question_code = models.CharField(
+        unique=True,
+        max_length=50,
+    )
+
     question_text = models.TextField()
     answer_type = models.CharField(max_length=20)
     is_required = models.BooleanField()
@@ -44,14 +56,17 @@ class ScreeningQuestions(models.Model):
 
 class ScreeningAnswers(models.Model):
     id = models.BigAutoField(primary_key=True)
+
     screening = models.ForeignKey(
         EligibilityScreenings,
         models.DB_CASCADE,
     )
+
     question = models.ForeignKey(
         ScreeningQuestions,
         models.DO_NOTHING,
     )
+
     answer_value = models.CharField(max_length=255)
     is_flagged = models.BooleanField()
     flag_reason = models.CharField(

@@ -1,3 +1,4 @@
+
 from django.db import models
 
 
@@ -62,7 +63,6 @@ class DonorProfiles(models.Model):
     city = models.CharField(max_length=100)
     province = models.CharField(max_length=50)
     postal_code = models.CharField(max_length=10)
-    country = models.CharField(max_length=80)
     latitude = models.DecimalField(
         max_digits=9,
         decimal_places=6,
@@ -78,6 +78,7 @@ class DonorProfiles(models.Model):
     last_donation_date = models.DateField(blank=True, null=True)
     next_eligible_date = models.DateField(blank=True, null=True)
     emergency_available = models.BooleanField()
+    country = models.CharField(max_length=80)
 
     class Meta:
         managed = False
@@ -94,7 +95,6 @@ class StaffProfiles(models.Model):
         Facilities,
         models.DO_NOTHING,
     )
-    authorization_status = models.CharField(max_length=20)
     authorization_declared_at = models.DateTimeField(
         blank=True,
         null=True,
