@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,16 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lifeline - Broadcast & Emergency Audit Log</title>
     <!-- Linking centralized and page-specific stylesheets -->
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/inventory.css">
-    <link rel="stylesheet" href="css/broadcast-audit.css">
+    <link rel="stylesheet" href="{% static 'organization/css/style.css' %}">
 </head>
 <body data-facility-type="hospital">
 
     <!-- Top Navigation Bar -->
     <header>
-        <a href="index.html" class="logo-link">
-            <img src="img/lifeline-logo.png" alt="LifeLine Logo" class="brand-logo">
+        <a href="{% url 'staff_dashboard' %}" class="logo-link">
+            <img src="{% static 'organization/img/lifeline-logo.png' %}" alt="LifeLine Logo" class="brand-logo">
         </a>
     
         <div class="nav-right">
@@ -27,10 +26,10 @@
                     &#9776;
                 </button>
                 <div class="dropdown-content" id="navDropdown">
-                    <a href="edit_org_profile.html">Edit Profile</a>
-                    <a href="appointment.html">Notifications <span class="badge-count">3</span></a>
+                    <a href="{% url 'staff_edit_profile' %}">Edit Profile</a>
+                    <a href="{% url 'staff_appointments' %}">Notifications <span class="badge-count">3</span></a>
                     <div class="dropdown-divider"></div>
-                    <a href="../login.html" class="logout-link">Logout</a>
+                    <a href="{% url 'logout' %}" class="logout-link">Logout</a>
                 </div>
             </div>
         </div>
@@ -39,11 +38,11 @@
     <!-- Sub Navigation Bar / Quick Links -->
     <nav class="sub-nav">
         <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="appointment.html">Appointments</a></li>
-            <li><a href="emergency.html">Active Emergency Dispatches</a></li>
-            <li><a href="inventory.html">Blood & Plasma Inventory</a></li>
-            <li><a href="broadcast-audit.html" class="active">Broadcast Audit Log</a></li>
+            <li><a href="{% url 'staff_dashboard' %}">Home</a></li>
+            <li><a href="{% url 'staff_appointments' %}">Appointments</a></li>
+            <li><a href="{% url 'staff_emergencies' %}">Active Emergency Dispatches</a></li>
+            <li><a href="{% url 'staff_inventory' %}">Blood & Plasma Inventory</a></li>
+            <li><a href="{% url 'staff_audit_log' %}" class="active">Broadcast Audit Log</a></li>
         </ul>
     </nav>
 
@@ -79,7 +78,7 @@
                                 <td>Oct 24, 2026 - 14:32</td>
                                 <td>
                                     <div class="donor-profile-cell">
-                                        <img src="img/donor-placeholder-1.png" alt="Donor Avatar" class="donor-avatar">
+                                        <img src="{% static 'organization/img/donor-placeholder-1.png' %}" alt="Donor Avatar" class="donor-avatar">
                                         <div>
                                             <strong>Sarah Jenkins</strong><br>
                                             <small class="text-muted">Blood Type: O-</small>
@@ -99,7 +98,7 @@
                                 <td>Oct 22, 2026 - 09:15</td>
                                 <td>
                                     <div class="donor-profile-cell">
-                                        <img src="img/donor-placeholder-2.png" alt="Donor Avatar" class="donor-avatar">
+                                        <img src="{% static 'organization/img/donor-placeholder-2.png' %}" alt="Donor Avatar" class="donor-avatar">
                                         <div>
                                             <strong>Michael Chang</strong><br>
                                             <small class="text-muted">Blood Type: A+</small>

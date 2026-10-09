@@ -1,16 +1,23 @@
+
 from django.db import models
 
-from core.models import DonorProfiles, StaffProfiles, Facilities, Users
+from core.models import DonorProfiles, Facilities, StaffProfiles, Users
 
 
 class EmergencyRequests(models.Model):
     id = models.BigAutoField(primary_key=True)
-    facility = models.ForeignKey(Facilities, models.DO_NOTHING)
+
+    facility = models.ForeignKey(
+        Facilities,
+        models.DO_NOTHING,
+    )
+
     created_by = models.ForeignKey(
         StaffProfiles,
         models.DO_NOTHING,
         db_column="created_by",
     )
+
     required_blood_type = models.CharField(max_length=3)
     component_type = models.CharField(max_length=30)
     units_required = models.IntegerField()
@@ -23,6 +30,13 @@ class EmergencyRequests(models.Model):
     updated_at = models.DateTimeField()
     fulfilled_at = models.DateTimeField(blank=True, null=True)
 
+    idempotency_key = models.CharField(
+        unique=True,
+        max_length=64,
+        blank=True,
+        null=True,
+    )
+
     class Meta:
         managed = False
         db_table = "emergency_requests"
@@ -30,20 +44,31 @@ class EmergencyRequests(models.Model):
 
 class RequestMatches(models.Model):
     id = models.BigAutoField(primary_key=True)
-    request = models.ForeignKey(EmergencyRequests, models.DB_CASCADE)
-    donor = models.ForeignKey(DonorProfiles, models.DB_CASCADE)
+
+    request = models.ForeignKey(
+        EmergencyRequests,
+        models.DB_CASCADE,
+    )
+
+    donor = models.ForeignKey(
+        DonorProfiles,
+        models.DB_CASCADE,
+    )
+
     distance_km = models.DecimalField(
         max_digits=7,
         decimal_places=2,
         blank=True,
         null=True,
     )
+
     match_score = models.DecimalField(
         max_digits=7,
         decimal_places=2,
         blank=True,
         null=True,
     )
+
     notification_status = models.CharField(max_length=20)
     response_status = models.CharField(max_length=20)
     matched_at = models.DateTimeField()
@@ -59,19 +84,26 @@ class RequestMatches(models.Model):
 
 class Notifications(models.Model):
     id = models.BigAutoField(primary_key=True)
-    user = models.ForeignKey(Users, models.DB_CASCADE)
+
+    user = models.ForeignKey(
+        Users,
+        models.DB_CASCADE,
+    )
+
     emergency_request = models.ForeignKey(
         EmergencyRequests,
         models.DB_CASCADE,
         blank=True,
         null=True,
     )
+
     request_match = models.ForeignKey(
         RequestMatches,
         models.DB_CASCADE,
         blank=True,
         null=True,
     )
+
     notification_type = models.CharField(max_length=30)
     title = models.CharField(max_length=150)
     message = models.TextField()

@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LifeLine - Active Requests</title>
-  <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="{% static 'donor/css/styles.css' %}">
 </head>
 
 <body id="active-requests-page">
@@ -14,8 +15,8 @@
   <header class="main-header">
     <div class="header-container">
       <div class="logo">
-        <a href="index.html">
-          <img src="./image/logo.png" alt="LifeLine Logo" class="logo-img">
+        <a href="{% url 'donor_dashboard' %}">
+          <img src="{% static 'donor/image/logo.png' %}" alt="LifeLine Logo" class="logo-img">
         </a>
       </div>
 
@@ -24,10 +25,10 @@
         <span class="donor-name">Donor Name</span>
 
         <div class="dropdown" tabindex="0">
-          <img src="./image/default-avatar.png" alt="Donor Profile" class="donor-avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;">
+          <img src="{% static 'donor/image/default-avatar.png' %}" alt="Donor Profile" class="donor-avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;">
           <div class="dropdown-content">
-            <a href="edit_dor_profile.html">Edit Profile</a>
-            <a href="../login.html">Logout</a>
+            <a href="{% url 'donor_edit_profile' %}">Edit Profile</a>
+            <a href="{% url 'logout' %}">Logout</a>
           </div>
         </div>
       </div>
@@ -37,10 +38,10 @@
   <!-- Navigation Bar -->
   <nav class="main-nav">
     <ul class="nav-links">
-      <li><a href="index.html" class="nav-item">Home</a></li>
-      <li><a href="active_requests.html" class="nav-item active">Active Requests</a></li>
-      <li><a href="book_an_appointment.html" class="nav-item">Book An Appointment</a></li>
-      <li><a href="history.html" class="nav-item">History</a></li>
+      <li><a href="{% url 'donor_dashboard' %}" class="nav-item">Home</a></li>
+      <li><a href="{% url 'donor_active_requests' %}" class="nav-item active">Active Requests</a></li>
+      <li><a href="{% url 'donor_book_appointment' %}" class="nav-item">Book An Appointment</a></li>
+      <li><a href="{% url 'donor_history' %}" class="nav-item">History</a></li>
     </ul>
   </nav>
 
@@ -51,7 +52,7 @@
     <section id="active-requests" class="section">
       <div class="section-header">
         <h1>Active Blood Requests</h1>
-        <p class="section-subtitle">Urgent hospital emergency alerts and ongoing blood bank drive requests.</p>
+        <p class="section-subtitle">View ongoing donation requests from hospitals and blood banks, and schedule an appointment.</p>
       </div>
 
       <!-- Request Cards Container -->
@@ -64,7 +65,7 @@
           </div>
           <div class="facility-body">
             <p class="facility-address">122 Victoria Ave, Regina, Sk</p>
-            <p class="facility-hours"><strong>Resquested for:</strong> A+ Blood Donors</p>
+            <p class="facility-hours"><strong>Requested for:</strong> A+ Blood Donors</p>
           </div>
           <div class="facility-footer">
             <button class="btn btn-book">Schedule Donation</button>
@@ -77,7 +78,7 @@
           </div>
           <div class="facility-body">
             <p class="facility-address">231 Clg Ave, Regina, Sk</p>
-            <p class="facility-hours"><strong>Resquested for:</strong> A+ Plasma Donors</p>
+            <p class="facility-hours"><strong>Requested for:</strong> A+ Plasma Donors</p>
           </div>
           <div class="facility-footer">
             <button class="btn btn-book">Schedule Donation</button>
@@ -90,7 +91,7 @@
           </div>
           <div class="facility-body">
             <p class="facility-address">3542 Harbour Landing Dr, Regina, Sk</p>
-            <p class="facility-hours"><strong>Resquested for:</strong> A+ platelets Donors</p>
+            <p class="facility-hours"><strong>Requested for:</strong> A+ platelets Donors</p>
           </div>
           <div class="facility-footer">
             <button class="btn btn-book">Schedule Donation</button>

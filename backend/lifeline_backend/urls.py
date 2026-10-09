@@ -20,7 +20,8 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-
-    # Send authentication-related URLs to the core app.
     path("", include("core.urls")),
+    path("", include("appointments.urls")),
+    path("", include("emergencies.urls")),
+    path("", include("inventory.urls")),
 ]

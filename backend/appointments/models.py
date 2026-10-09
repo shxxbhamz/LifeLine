@@ -1,12 +1,17 @@
+
 from django.db import models
 
 from core.models import DonorProfiles, Facilities, StaffProfiles
-from emergencies.models import RequestMatches
 
 
 class FacilityHours(models.Model):
     id = models.BigAutoField(primary_key=True)
-    facility = models.ForeignKey(Facilities, models.DB_CASCADE)
+
+    facility = models.ForeignKey(
+        Facilities,
+        models.DB_CASCADE,
+    )
+
     day_of_week = models.SmallIntegerField()
     open_time = models.TimeField(blank=True, null=True)
     close_time = models.TimeField(blank=True, null=True)
@@ -20,18 +25,29 @@ class FacilityHours(models.Model):
 
 class Appointments(models.Model):
     id = models.BigAutoField(primary_key=True)
-    donor = models.ForeignKey(DonorProfiles, models.DB_CASCADE)
-    facility = models.ForeignKey(Facilities, models.DO_NOTHING)
+
+    donor = models.ForeignKey(
+        DonorProfiles,
+        models.DB_CASCADE,
+    )
+
+    facility = models.ForeignKey(
+        Facilities,
+        models.DO_NOTHING,
+    )
+
     request_match = models.OneToOneField(
-        RequestMatches,
+        "emergencies.RequestMatches",
         models.DB_SET_NULL,
         blank=True,
         null=True,
     )
+
     donation_type = models.CharField(max_length=30)
     appointment_source = models.CharField(max_length=20)
     scheduled_at = models.DateTimeField()
     status = models.CharField(max_length=20)
+
     confirmed_by = models.ForeignKey(
         StaffProfiles,
         models.DO_NOTHING,
@@ -39,6 +55,7 @@ class Appointments(models.Model):
         blank=True,
         null=True,
     )
+
     notes = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
@@ -52,11 +69,14 @@ class Appointments(models.Model):
 
 class Donations(models.Model):
     id = models.BigAutoField(primary_key=True)
+
     appointment = models.OneToOneField(
         Appointments,
         models.DO_NOTHING,
     )
+
     actual_component_type = models.CharField(max_length=30)
+
     recorded_by = models.ForeignKey(
         StaffProfiles,
         models.DO_NOTHING,
@@ -64,8 +84,10 @@ class Donations(models.Model):
         blank=True,
         null=True,
     )
+
     completed_at = models.DateTimeField()
     notes = models.TextField(blank=True, null=True)
+    quantity_units = models.IntegerField()
 
     class Meta:
         managed = False

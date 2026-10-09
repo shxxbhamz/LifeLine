@@ -14,7 +14,7 @@
   <header class="main-header">
     <div class="header-container">
       <div class="logo">
-        <a href="index.html">
+        <a href="{% url 'donor_dashboard' %}">
             <img src="{% static 'donor/image/logo.png' %}" alt="LifeLine Logo" class="logo-img">
         </a>
       </div>
@@ -41,10 +41,10 @@
   <!-- Navigation Bar -->
   <nav class="main-nav">
     <ul class="nav-links">
-      <li><a href="index.html" class="nav-item">Home</a></li>
-      <li><a href="active_requests.html" class="nav-item">Active Requests</a></li>
-      <li><a href="book_an_appointment.html" class="nav-item">Book An Appointment</a></li>
-      <li><a href="history.html" class="nav-item">History</a></li>
+      <li><a href="{% url 'donor_dashboard' %}" class="nav-item active">Home</a></li>
+      <li><a href="{% url 'donor_active_requests' %}" class="nav-item">Active Requests</a></li>
+      <li><a href="{% url 'donor_book_appointment' %}" class="nav-item">Book An Appointment</a></li>
+      <li><a href="{% url 'donor_history' %}" class="nav-item">History</a></li>
     </ul>
   </nav>
 

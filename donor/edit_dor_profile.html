@@ -38,12 +38,12 @@
   </header>
 
   <!-- Navigation Bar -->
-  <nav class="main-nav"> 
+  <nav class="main-nav">
     <ul class="nav-links">
       <li><a href="{% url 'donor_dashboard' %}" class="nav-item">Home</a></li>
-      <li><a href="active_requests.html" class="nav-item">Active Requests</a></li>
-      <li><a href="book_an_appointment.html" class="nav-item">Book An Appointment</a></li>
-      <li><a href="history.html" class="nav-item">History</a></li>
+      <li><a href="{% url 'donor_active_requests' %}" class="nav-item">Active Requests</a></li>
+      <li><a href="{% url 'donor_book_appointment' %}" class="nav-item">Book An Appointment</a></li>
+      <li><a href="{% url 'donor_history' %}" class="nav-item">History</a></li>
     </ul>
   </nav>
 
