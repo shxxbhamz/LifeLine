@@ -17,11 +17,21 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    
+    # Core application routes (handles login, signup, dashboards)
     path("", include("core.urls")),
+    
+    # Additional project app routers
     path("", include("appointments.urls")),
     path("", include("emergencies.urls")),
     path("", include("inventory.urls")),
 ]
+
+# Serve media files (like profile pictures) during development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
