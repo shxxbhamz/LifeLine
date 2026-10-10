@@ -136,12 +136,29 @@ def donor_signup_view(request):
         "terms": bool(terms_accepted),
     }
 
-    # Basic validation before anything is written to the database.
-    if not username.startswith("do"):
+   # 1. Get whatever username the user typed
+    username = request.POST.get("username", "").strip().lower()
+
+    # 2. Automatically prepend "do" if they didn't write it, 
+    # but strip it first if they somehow typed it twice.
+    if username.startswith("do"):
+        username = username[2:]
+    
+    username = f"do{username}"  # Results in 'dopheerpatel' automatically
+
+    form_data = {
+        "firstName": first_name,
+        "lastName": last_name,
+        "username": request.POST.get("username", "").strip().lower(), # Keep what they typed in box
+        # ... rest of your fields ...
+    }
+
+    # 3. Check for duplicates using the final generated username
+    if Users.objects.filter(username=username).exists():
         return render(
             request,
             "donor_signup.html",
-            {"error": "Donor usernames must begin with 'do'.", "form_data": form_data},
+            {"error": f"The username '{username}' is already in use.", "form_data": form_data},
         )
 
     if password != confirm_password:
@@ -254,14 +271,29 @@ def organization_signup_view(request):
     }
 
     # Staff usernames must follow the ST prefix convention used by the frontend.
-    if not username.startswith("st"):
+    # 1. Get whatever username the user typed
+    username = request.POST.get("username", "").strip().lower()
+
+    # 2. Automatically prepend "do" if they didn't write it, 
+    # but strip it first if they somehow typed it twice.
+    if username.startswith("st"):
+        username = username[2:]
+    
+    username = f"do{username}"  # Results in 'dopheerpatel' automatically
+
+    form_data = {
+        "firstName": first_name,
+        "lastName": last_name,
+        "username": request.POST.get("username", "").strip().lower(), # Keep what they typed in box
+        # ... rest of your fields ...
+    }
+
+    # 3. Check for duplicates using the final generated username
+    if Users.objects.filter(username=username).exists():
         return render(
             request,
-            "organization_signup.html",
-            {
-                "error": "Staff usernames must begin with 'st'.",
-                "form_data": form_data,
-            },
+            "donor_signup.html",
+            {"error": f"The username '{username}' is already in use.", "form_data": form_data},
         )
 
     if password != confirm_password:
