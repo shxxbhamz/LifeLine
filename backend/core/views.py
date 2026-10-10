@@ -144,7 +144,7 @@ def donor_signup_view(request):
     if username.startswith("do"):
         username = username[2:]
     
-    username = f"do{username}"  # Results in 'dopheerpatel' automatically
+    username = f"do{username}"  # Results in 'dousername' automatically
 
     form_data = {
         "firstName": first_name,
@@ -279,7 +279,7 @@ def organization_signup_view(request):
     if username.startswith("st"):
         username = username[2:]
     
-    username = f"do{username}"  # Results in 'dopheerpatel' automatically
+    username = f"st{username}"  # Results in 'stusername' automatically
 
     form_data = {
         "firstName": first_name,
@@ -292,7 +292,7 @@ def organization_signup_view(request):
     if Users.objects.filter(username=username).exists():
         return render(
             request,
-            "donor_signup.html",
+            "organization_signup.html",
             {"error": f"The username '{username}' is already in use.", "form_data": form_data},
         )
 
