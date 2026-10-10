@@ -292,7 +292,7 @@ def organization_signup_view(request):
     if Users.objects.filter(username=username).exists():
         return render(
             request,
-            "organization_signup.html",
+            "donor_signup.html",
             {"error": f"The username '{username}' is already in use.", "form_data": form_data},
         )
 
