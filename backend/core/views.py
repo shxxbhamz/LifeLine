@@ -168,13 +168,6 @@ def donor_signup_view(request):
             {"error": "Passwords do not match.", "form_data": form_data},
         )
 
-    if Users.objects.filter(username=username).exists():
-        return render(
-            request,
-            "donor_signup.html",
-            {"error": "That username is already in use.", "form_data": form_data},
-        )
-
     if Users.objects.filter(email=email).exists():
         return render(
             request,
@@ -402,7 +395,6 @@ def organization_signup_view(request):
         StaffProfiles.objects.create(
             user=user,
             facility=facility,
-            authorization_status="PENDING",
             authorization_declared_at=now,
         )
 
