@@ -141,10 +141,11 @@ STATICFILES_DIRS = [
 
 
 # Email
-# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
-
-MAILERS = {
-    "default": {
-        "BACKEND": "django.core.mail.backends.console.EmailBackend",
-    },
-}
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'emergency.lifelineservices999@gmail.com'
+EMAIL_HOST_PASSWORD = 'your-16-character-gmail-app-password'  # Keep this secret or use os.getenv()
+DEFAULT_FROM_EMAIL = 'LifeLine Emergency Team <emergency.lifelineservices999@gmail.com>'
