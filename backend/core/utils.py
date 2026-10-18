@@ -5,13 +5,13 @@ from django.conf import settings
 def _send_email_async(subject, message, recipient_list):
     """Helper function to execute email transmission in a background thread."""
     try:
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=recipient_list,
-            fail_silently=False,
-        )
+        params = {
+            "from": "LifeLine Emergency Team <onboarding@resend.dev>",
+            "to": [recipient_email],
+            "subject": subject,
+            "text": message,
+        }
+        resend.Emails.send(params) 
     except Exception as e:
         print(f"Background email dispatch error: {e}")
 
