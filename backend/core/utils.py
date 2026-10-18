@@ -22,7 +22,6 @@ def send_welcome_email(user_email, username, role):
     """
     subject = f"Welcome to LifeLine, {username}!"
     
-    # Custom message body depending on user role
     role_lower = role.lower() if role else 'donor'
     if 'donor' in role_lower:
         role_message = "Thank you for registering as a Blood Donor! Your contributions can save lives."
@@ -33,8 +32,7 @@ def send_welcome_email(user_email, username, role):
     else:
         role_message = "Thank you for joining our healthcare platform!"
 
-    message = f"""
-Hello {username},
+    message = f"""Hello {username},
 
 {role_message}
 
