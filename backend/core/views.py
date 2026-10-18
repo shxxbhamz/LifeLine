@@ -141,7 +141,7 @@ def donor_signup_view(request):
     if username.startswith("do"):
         username = username[2:]
     
-    username = f"do{username}"  # Results in 'dopheerpatel' automatically
+    username = f"do{username}"  # Results in 'dousername' automatically
 
     # Check for duplicates using the final generated username
     if Users.objects.filter(username=username).exists():
@@ -262,7 +262,7 @@ def organization_signup_view(request):
     if username.startswith("st"):
         username = username[2:]
     
-    username = f"st{username}"  # Results in 'st...' automatically
+    username = f"st{username}"  # Results in 'stusername' automatically
 
     # Check for duplicates using the final generated username
     if Users.objects.filter(username=username).exists():
@@ -368,7 +368,6 @@ def organization_signup_view(request):
         StaffProfiles.objects.create(
             user=user,
             facility=facility,
-            authorization_status="PENDING",
             authorization_declared_at=now,
         )
 
