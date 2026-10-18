@@ -4,6 +4,7 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 
 from .models import DonorProfiles, Facilities, StaffProfiles, Users
+from .utils import send_welcome_email
 
 def home_view(request):
     return render(request, "index.html")
@@ -123,7 +124,7 @@ def donor_signup_view(request):
     form_data = {
         "firstName": first_name,
         "lastName": last_name,
-        "username": username,
+        "username": request.POST.get("username", "").strip().lower(),
         "email": email,
         "phone": phone,
         "dob": date_of_birth,
@@ -136,24 +137,13 @@ def donor_signup_view(request):
         "terms": bool(terms_accepted),
     }
 
-   # 1. Get whatever username the user typed
-    username = request.POST.get("username", "").strip().lower()
-
-    # 2. Automatically prepend "do" if they didn't write it, 
-    # but strip it first if they somehow typed it twice.
+    # Donor usernames must follow the 'do' prefix convention used by the frontend.
     if username.startswith("do"):
         username = username[2:]
     
     username = f"do{username}"  # Results in 'dopheerpatel' automatically
 
-    form_data = {
-        "firstName": first_name,
-        "lastName": last_name,
-        "username": request.POST.get("username", "").strip().lower(), # Keep what they typed in box
-        # ... rest of your fields ...
-    }
-
-    # 3. Check for duplicates using the final generated username
+    # Check for duplicates using the final generated username
     if Users.objects.filter(username=username).exists():
         return render(
             request,
@@ -166,13 +156,6 @@ def donor_signup_view(request):
             request,
             "donor_signup.html",
             {"error": "Passwords do not match.", "form_data": form_data},
-        )
-
-    if Users.objects.filter(username=username).exists():
-        return render(
-            request,
-            "donor_signup.html",
-            {"error": "That username is already in use.", "form_data": form_data},
         )
 
     if Users.objects.filter(email=email).exists():
@@ -220,6 +203,12 @@ def donor_signup_view(request):
             emergency_available=True,
         )
 
+    # Automatically send the welcome email immediately after successful registration
+    try:
+        send_welcome_email(user_email=email, username=first_name, role="Donor")
+    except Exception as e:
+        print(f"Failed to send welcome email to donor: {e}")
+
     # Registration succeeded, so send the donor to the login page.
     return redirect("login")
 
@@ -252,11 +241,10 @@ def organization_signup_view(request):
     terms_accepted = request.POST.get("terms")
 
     # Preserve non-sensitive information if validation fails.
-    # Passwords are deliberately excluded.
     form_data = {
         "firstName": first_name,
         "lastName": last_name,
-        "username": username,
+        "username": request.POST.get("username", "").strip().lower(),
         "email": email,
         "organization": organization,
         "phone": phone,
@@ -271,24 +259,12 @@ def organization_signup_view(request):
     }
 
     # Staff usernames must follow the ST prefix convention used by the frontend.
-    # 1. Get whatever username the user typed
-    username = request.POST.get("username", "").strip().lower()
-
-    # 2. Automatically prepend "do" if they didn't write it, 
-    # but strip it first if they somehow typed it twice.
     if username.startswith("st"):
         username = username[2:]
     
-    username = f"st{username}"  # Results in 'st username' automatically
+    username = f"st{username}"  # Results in 'st...' automatically
 
-    form_data = {
-        "firstName": first_name,
-        "lastName": last_name,
-        "username": request.POST.get("username", "").strip().lower(), # Keep what they typed in box
-        # ... rest of your fields ...
-    }
-
-    # 3. Check for duplicates using the final generated username
+    # Check for duplicates using the final generated username
     if Users.objects.filter(username=username).exists():
         return render(
             request,
@@ -302,16 +278,6 @@ def organization_signup_view(request):
             "organization_signup.html",
             {
                 "error": "Passwords do not match.",
-                "form_data": form_data,
-            },
-        )
-
-    if Users.objects.filter(username=username).exists():
-        return render(
-            request,
-            "organization_signup.html",
-            {
-                "error": "That username is already in use.",
                 "form_data": form_data,
             },
         )
@@ -406,6 +372,12 @@ def organization_signup_view(request):
             authorization_declared_at=now,
         )
 
+    # Automatically send the welcome email based on facility type (Hospital vs Blood Bank)
+    try:
+        send_welcome_email(user_email=email, username=first_name, role=facility_type)
+    except Exception as e:
+        print(f"Failed to send welcome email to staff: {e}")
+
     return redirect("login")
 
 def donor_edit_profile_view(request):
@@ -435,7 +407,6 @@ def donor_edit_profile_view(request):
         country = request.POST.get("country", "").strip()
         postal_code = request.POST.get("postalCode", "").strip()
         blood_type = request.POST.get("bloodGroup", "").strip()
-
 
         # Donor usernames must continue to follow the 'do...' convention.
         if not username.startswith("do"):
@@ -476,7 +447,6 @@ def donor_edit_profile_view(request):
                     "error": "That email address is already in use.",
                 },
             )
-
 
         # Update account information.
         user.first_name = first_name
