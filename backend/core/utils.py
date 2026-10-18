@@ -1,28 +1,29 @@
 import threading
-from django.core.mail import send_mail
+import resend
 from django.conf import settings
 
-def _send_email_async(subject, message, recipient_list):
-    """Helper function to execute email transmission in a background thread."""
+# Initialize Resend with your API key from environment variables
+resend.api_key = getattr(settings, 'RESEND_API_KEY', None)
+
+def _send_email_async(subject, message, recipient_email):
+    """Sends email via Resend's HTTPS API in a background thread."""
     try:
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=recipient_list,
-            fail_silently=False,
-        )
+        params = {
+            "from": "LifeLine Emergency Team <onboarding@resend.dev>",
+            "to": [recipient_email],
+            "subject": subject,
+            "text": message,
+        }
+        resend.emails.send(params)
     except Exception as e:
-        print(f"Background email dispatch error: {e}")
+        print(f"Resend email dispatch error: {e}")
 
 def send_welcome_email(user_email, username, role):
     """
-    Sends an automated welcome email from emergency.lifelineservices999@gmail.com 
-    customized by user role, dispatched asynchronously via a background thread.
+    Sends an automated welcome email via Resend asynchronously.
     """
     subject = f"Welcome to LifeLine, {username}!"
     
-    # Custom message body depending on user role
     role_lower = role.lower() if role else 'donor'
     if 'donor' in role_lower:
         role_message = "Thank you for registering as a Blood Donor! Your contributions can save lives."
@@ -33,20 +34,18 @@ def send_welcome_email(user_email, username, role):
     else:
         role_message = "Thank you for joining our healthcare platform!"
 
-    message = f"""
-Hello {username},
+    message = f"""Hello {username},
 
 {role_message}
 
 We are excited to have you on board with LifeLine. 
 
 Best regards,
-The LifeLine Team
-"""
+The LifeLine Team"""
 
-    
+    # Dispatch via background thread so registration remains instant
     email_thread = threading.Thread(
         target=_send_email_async,
-        args=(subject, message, [user_email])
+        args=(subject, message, user_email)
     )
     email_thread.start()
