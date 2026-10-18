@@ -1,8 +1,11 @@
 import threading
-from django.core.mail import send_mail
+import resend
 from django.conf import settings
 
-def _send_email_async(subject, message, recipient_list):
+# Initialize Resend with your API key from environment variables
+resend.api_key = getattr(settings, 'RESEND_API_KEY', None)
+
+def _send_email_async(subject, message, recipient_email):
     """Helper function to execute email transmission in a background thread."""
     try:
         params = {
@@ -17,8 +20,7 @@ def _send_email_async(subject, message, recipient_list):
 
 def send_welcome_email(user_email, username, role):
     """
-    Sends an automated welcome email from emergency.lifelineservices999@gmail.com 
-    customized by user role, dispatched asynchronously via a background thread.
+    Sends an automated welcome email, dispatched asynchronously via a background thread.
     """
     subject = f"Welcome to LifeLine, {username}!"
     
@@ -39,12 +41,11 @@ def send_welcome_email(user_email, username, role):
 We are excited to have you on board with LifeLine. 
 
 Best regards,
-The LifeLine Team
-"""
+The LifeLine Team"""
 
-    
+    # Dispatch via background thread so registration remains instant
     email_thread = threading.Thread(
         target=_send_email_async,
-        args=(subject, message, [user_email])
+        args=(subject, message, user_email)
     )
     email_thread.start()
