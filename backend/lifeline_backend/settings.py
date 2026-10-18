@@ -147,5 +147,5 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'emergency.lifelineservices999@gmail.com'
-EMAIL_HOST_PASSWORD = 'your-16-character-gmail-app-password'  # Keep this secret or use os.getenv()
+EMAIL_HOST_PASSWORD = 'iwfsdstpueegnmni'  
 DEFAULT_FROM_EMAIL = 'LifeLine Emergency Team <emergency.lifelineservices999@gmail.com>'
