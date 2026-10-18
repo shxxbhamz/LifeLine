@@ -14,7 +14,7 @@ def _send_email_async(subject, message, recipient_email):
             "subject": subject,
             "text": message,
         }
-        resend.Emails.send(params)
+        resend.Emails.send(params) 
     except Exception as e:
         print(f"Background email dispatch error: {e}")
 
