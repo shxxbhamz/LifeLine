@@ -368,7 +368,6 @@ def organization_signup_view(request):
         StaffProfiles.objects.create(
             user=user,
             facility=facility,
-            authorization_status="PENDING",
             authorization_declared_at=now,
         )
 
