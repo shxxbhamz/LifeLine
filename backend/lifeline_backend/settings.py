@@ -140,12 +140,9 @@ STATICFILES_DIRS = [
   *([BASE_DIR.parent / "static"] if (BASE_DIR.parent / "static").is_dir() else []),
 ]
 
-
-# Email
-EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
-
-ANYMAIL = {
-    "RESEND_API_KEY": os.getenv("RESEND_API_KEY"),
-}
-
-DEFAULT_FROM_EMAIL = "onboarding@resend.dev"
+BREVO_API_KEY = os.getenv("BREVO_API_KEY")
+BREVO_SENDER_EMAIL = os.getenv("BREVO_SENDER_EMAIL")
+BREVO_SENDER_NAME = os.getenv(
+    "BREVO_SENDER_NAME",
+    "LifeLine Emergency Team",
+)
