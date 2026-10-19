@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "appointments",
     "screening",
     "inventory",
+    'anymail',
 ]
 
 MIDDLEWARE = [
@@ -141,12 +142,10 @@ STATICFILES_DIRS = [
 
 
 # Email
-# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'emergency.lifelineservices999@gmail.com')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'vcsslwngsipxkwav')
-DEFAULT_FROM_EMAIL = f'LifeLine <{EMAIL_HOST_USER}>'
+EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+
+ANYMAIL = {
+    "RESEND_API_KEY": os.getenv("RESEND_API_KEY"),
+}
+
+DEFAULT_FROM_EMAIL = "onboarding@resend.dev"
