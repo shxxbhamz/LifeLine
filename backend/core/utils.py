@@ -1,4 +1,4 @@
-
+import threading
 import logging
 import requests
 from django.conf import settings
@@ -8,8 +8,27 @@ logger = logging.getLogger(__name__)
 BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
 
 
+def _send_email_async(payload, api_key):
+    """Helper function to send the email via Brevo HTTPS API in a background thread."""
+    try:
+        response = requests.post(
+            BREVO_API_URL,
+            headers={
+                "accept": "application/json",
+                "api-key": api_key,
+                "content-type": "application/json",
+            },
+            json=payload,
+            timeout=20,
+        )
+        response.raise_for_status()
+        logger.info("Brevo successfully accepted the welcome email request.")
+    except requests.RequestException as e:
+        logger.exception("Brevo failed to send the welcome email in background thread: %s", e)
+
+
 def send_welcome_email(user_email, username, role):
-    """Send a LifeLine welcome email using the Brevo HTTPS API."""
+    """Send a LifeLine welcome email asynchronously using the Brevo HTTPS API."""
 
     if not user_email:
         logger.error("Welcome email skipped: recipient email is empty.")
@@ -22,7 +41,7 @@ def send_welcome_email(user_email, username, role):
     )
 
     if not api_key or not sender_email:
-        logger.error("Brevo email configuration is missing.")
+        logger.error("Brevo email configuration is missing or invalid.")
         return False
 
     subject = f"Welcome to LifeLine, {username}!"
@@ -74,28 +93,10 @@ LifeLine Emergency Team
         "textContent": message,
     }
 
-    try:
-        response = requests.post(
-            BREVO_API_URL,
-            headers={
-                "accept": "application/json",
-                "api-key": api_key,
-                "content-type": "application/json",
-            },
-            json=payload,
-            timeout=20,
-        )
-        response.raise_for_status()
-
-        logger.info(
-            "Brevo accepted the welcome email request for %s.",
-            user_email,
-        )
-        return True
-
-    except requests.RequestException:
-        logger.exception(
-            "Brevo failed to send the welcome email to %s.",
-            user_email,
-        )
-        return False
+    # Dispatch via background thread so user registration isn't laggy
+    email_thread = threading.Thread(
+        target=_send_email_async,
+        args=(payload, api_key),
+    )
+    email_thread.start()
+    return True
