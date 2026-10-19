@@ -1,51 +1,99 @@
-import threading
-import resend
+
+import logging
+
 from django.conf import settings
+from django.core.mail import send_mail
 
-# Initialize Resend with your API key from environment variables
-resend.api_key = getattr(settings, 'RESEND_API_KEY', None)
 
-def _send_email_async(subject, message, recipient_email):
-    """Helper function to execute email transmission in a background thread."""
-    try:
-        params = {
-            "from": "LifeLine Emergency Team <onboarding@resend.dev>",
-            "to": [recipient_email],
-            "subject": subject,
-            "text": message,
-        }
-        resend.Emails.send(params) 
-    except Exception as e:
-        print(f"Background email dispatch error: {e}")
+logger = logging.getLogger(__name__)
+
 
 def send_welcome_email(user_email, username, role):
     """
-    Sends an automated welcome email, dispatched asynchronously via a background thread.
+    Send a welcome email to a newly registered LifeLine user
+    using the Gmail SMTP configuration in settings.py.
     """
-    subject = f"Welcome to LifeLine, {username}!"
-    
-    role_lower = role.lower() if role else 'donor'
-    if 'donor' in role_lower:
-        role_message = "Thank you for registering as a Blood Donor! Your contributions can save lives."
-    elif 'hospital' in role_lower:
-        role_message = "Welcome! As Hospital Staff, you can now request blood units and manage urgent patient needs."
-    elif 'blood_bank' in role_lower or 'blood bank' in role_lower:
-        role_message = "Welcome! As Blood Bank Staff, you can now manage blood inventory and coordinate requests."
-    else:
-        role_message = "Thank you for joining our healthcare platform!"
 
+    # Check that a recipient email address exists.
+    if not user_email:
+        logger.error(
+            "Welcome email skipped because the recipient email is empty."
+        )
+        return False
+
+    # Prepare the email subject.
+    subject = f"Welcome to LifeLine, {username}!"
+
+    # Normalize the user's role.
+    role_lower = (role or "donor").lower().replace("_", " ").strip()
+
+    # Customize the message according to the user's role.
+    if "donor" in role_lower:
+        role_message = (
+            "Thank you for registering as a Blood Donor! "
+            "Your contributions can save lives."
+        )
+
+    elif "hospital" in role_lower:
+        role_message = (
+            "Welcome to LifeLine! You can now request blood units "
+            "and manage urgent patient needs."
+        )
+
+    elif "blood bank" in role_lower:
+        role_message = (
+            "Welcome to LifeLine! You can now manage blood inventory "
+            "and coordinate blood requests."
+        )
+
+    else:
+        role_message = (
+            "Thank you for joining our healthcare platform. "
+            "We are happy to have you as part of LifeLine."
+        )
+
+    # Construct the plain-text email.
     message = f"""Hello {username},
+
+Your LifeLine account has been created successfully!
 
 {role_message}
 
-We are excited to have you on board with LifeLine. 
+We are excited to have you on board with LifeLine.
+
+If you need assistance, please contact our team.
 
 Best regards,
-The LifeLine Team"""
+LifeLine Emergency Team
+"""
 
-    # Dispatch via background thread so registration remains instant
-    email_thread = threading.Thread(
-        target=_send_email_async,
-        args=(subject, message, user_email)
-    )
-    email_thread.start()
+    try:
+        # Send the email using Django's configured email backend.
+        sent_count = send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user_email],
+            fail_silently=False,
+        )
+
+        if sent_count == 1:
+            logger.info(
+                "LifeLine welcome email successfully submitted to %s",
+                user_email,
+            )
+            return True
+
+        logger.error(
+            "LifeLine welcome email was not sent to %s",
+            user_email,
+        )
+        return False
+
+    except Exception:
+        # Record the full exception in the server logs.
+        logger.exception(
+            "Error sending LifeLine welcome email to %s",
+            user_email,
+        )
+        return False
