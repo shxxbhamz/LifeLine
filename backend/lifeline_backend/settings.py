@@ -146,3 +146,4 @@ BREVO_SENDER_NAME = os.getenv(
     "BREVO_SENDER_NAME",
     "LifeLine Emergency Team",
 )
+DEFAULT_FROM_EMAIL = BREVO_SENDER_EMAIL
