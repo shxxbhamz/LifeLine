@@ -112,7 +112,13 @@
                                         <td class="text-right">
                                             <button
                                                 class="btn-secondary btn-sm"
-                                                onclick="openEditModal('{{ row.blood_type }}')"
+                                                onclick="openEditModal(
+                                                '{{ row.blood_type }}',
+                                                '{{ row.whole_blood }}',
+                                                '{{ row.red_blood_cells }}',
+                                                '{{ row.platelets }}',
+                                                '{{ row.plasma }}'
+                                            )"
                                             >
                                                 Edit
                                             </button>
@@ -149,7 +155,24 @@
                 for each blood component.
             </p>
 
-            <form method="POST" action="{% url 'staff_inventory' %}">
+            <div
+                id="inventoryError"
+                style="
+                    display: none;
+                    margin-bottom: 15px;
+                    padding: 10px;
+                    background: #ffe5e5;
+                    color: #b00020;
+                    border-radius: 6px;
+                    font-weight: 600;
+                "
+            ></div>
+
+            <form
+                method="POST"
+                action="{% url 'staff_inventory' %}"
+                onsubmit="return validateInventoryUpdate()"
+            >
                 {% csrf_token %}
 
                 <!-- The selected blood type is filled by JavaScript -->
@@ -451,8 +474,28 @@
             closeEmergencyModal();
         }
 
-        function openEditModal(bloodType) {
+        let currentInventory = {
+            wholeBlood: 0,
+            redBloodCells: 0,
+            platelets: 0,
+            plasma: 0
+        };
+
+        function openEditModal(
+            bloodType,
+            wholeBlood,
+            redBloodCells,
+            platelets,
+            plasma
+        ) {
             currentSelectedBloodType = bloodType;
+
+            currentInventory = {
+                wholeBlood: wholeBlood,
+                redBloodCells: redBloodCells,
+                platelets: platelets,
+                plasma: plasma
+            };
 
             document.getElementById("selectedBloodType").value = bloodType;
 
@@ -464,7 +507,88 @@
             document.getElementById("unitsPlatelets").value = 0;
             document.getElementById("unitsPlasma").value = 0;
 
+            document.getElementById("inventoryError").style.display = "none";
+            document.getElementById("inventoryError").innerText = "";
+
             document.getElementById("editStockModal").style.display = "flex";
+        }
+
+        function validateInventoryUpdate() {
+            const errorBox = document.getElementById("inventoryError");
+
+            errorBox.style.display = "none";
+            errorBox.innerText = "";
+
+            const changes = [
+                {
+                    name: "Whole Blood",
+                    action: document.getElementById("actionBlood").value,
+                    units: Number(document.getElementById("unitsBlood").value),
+                    available: currentInventory.wholeBlood
+                },
+                {
+                    name: "Red Blood Cells",
+                    action: document.getElementById("actionRedBloodCells").value,
+                    units: Number(document.getElementById("unitsRedBloodCells").value),
+                    available: currentInventory.redBloodCells
+                },
+                {
+                    name: "Platelets",
+                    action: document.getElementById("actionPlatelets").value,
+                    units: Number(document.getElementById("unitsPlatelets").value),
+                    available: currentInventory.platelets
+                },
+                {
+                    name: "Plasma",
+                    action: document.getElementById("actionPlasma").value,
+                    units: Number(document.getElementById("unitsPlasma").value),
+                    available: currentInventory.plasma
+                }
+            ];
+
+            let hasChange = false;
+
+            for (const change of changes) {
+
+                if (!Number.isInteger(change.units) || change.units < 0) {
+                    errorBox.innerText =
+                        change.name + " must contain a valid whole number.";
+
+                    errorBox.style.display = "block";
+                    return false;
+                }
+
+                if (change.units > 0) {
+                    hasChange = true;
+                }
+
+                if (
+                    change.action === "delete" &&
+                    change.units > change.available
+                ) {
+                    errorBox.innerText =
+                        "Cannot remove " +
+                        change.units +
+                        " units of " +
+                        change.name +
+                        ". Only " +
+                        change.available +
+                        " unit(s) are currently available.";
+
+                    errorBox.style.display = "block";
+                    return false;
+                }
+            }
+
+            if (!hasChange) {
+                errorBox.innerText =
+                    "Enter at least one inventory amount greater than 0.";
+
+                errorBox.style.display = "block";
+                return false;
+            }
+
+            return true;
         }
 
         function closeEditModal() {
