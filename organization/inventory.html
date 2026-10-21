@@ -52,6 +52,13 @@
         <section class="hero-section">
             <h1>Blood, Platelet & Plasma Inventory Management</h1>
         </section>
+            {% if messages %}
+                <div class="inventory-messages">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
         <!-- Dashboard Grid Layout -->
         <div class="dashboard-grid inventory-dashboard-grid">
@@ -67,77 +74,57 @@
                             <tr>
                                 <th style=" border-top-left-radius: 7px; border-bottom-left-radius: 7px ;">Blood Type</th>
                                 <th>Whole Blood (Units)</th>
+                                <th>Red Blood Cells (Units)</th>
                                 <th>Platelets (Units)</th>
                                 <th>Plasma (Units)</th>
                                 <th>Status</th>
                                 <th class="text-right" style=" border-top-right-radius: 7px; border-bottom-right-radius: 7px ;">Action</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>A-Positive (A+)</strong></td>
-                                <td>18</td>
-                                <td>8</td>
-                                <td>12</td>
-                                <td><span class="badge green">Normal</span></td>
-                                <td class="text-right"><button class="btn-secondary btn-sm" onclick="openEditModal('A-Positive (A+)')">Edit</button></td>
-                            </tr>
-                            <tr>
-                                <td><strong>A-Negative (A-)</strong></td>
-                                <td>4</td>
-                                <td>2</td>
-                                <td>2</td>
-                                <td><span class="badge yellow">Low</span></td>
-                                <td class="text-right"><button class="btn-secondary btn-sm" onclick="openEditModal('A-Negative (A-)')">Edit</button></td>
-                            </tr>
-                            <tr>
-                                <td><strong>B-Positive (B+)</strong></td>
-                                <td>14</td>
-                                <td>6</td>
-                                <td>9</td>
-                                <td><span class="badge green">Normal</span></td>
-                                <td class="text-right"><button class="btn-secondary btn-sm" onclick="openEditModal('B-Positive (B+)')">Edit</button></td>
-                            </tr>
-                            <tr>
-                                <td><strong>B-Negative (B-)</strong></td>
-                                <td>3</td>
-                                <td>1</td>
-                                <td>1</td>
-                                <td><span class="badge red">Critical</span></td>
-                                <td class="text-right"><button class="btn-secondary btn-sm" onclick="openEditModal('B-Negative (B-)')">Edit</button></td>
-                            </tr>
-                            <tr>
-                                <td><strong>O-Positive (O+)</strong></td>
-                                <td>22</td>
-                                <td>10</td>
-                                <td>15</td>
-                                <td><span class="badge green">Normal</span></td>
-                                <td class="text-right"><button class="btn-secondary btn-sm" onclick="openEditModal('O-Positive (O+)')">Edit</button></td>
-                            </tr>
-                            <tr>
-                                <td><strong>O-Negative (O-)</strong></td>
-                                <td>2</td>
-                                <td>1</td>
-                                <td>1</td>
-                                <td><span class="badge red">Critical</span></td>
-                                <td class="text-right"><button class="btn-secondary btn-sm" onclick="openEditModal('O-Negative (O-)')">Edit</button></td>
-                            </tr>
-                            <tr>
-                                <td><strong>AB-Positive (AB+)</strong></td>
-                                <td>9</td>
-                                <td>4</td>
-                                <td>6</td>
-                                <td><span class="badge green">Normal</span></td>
-                                <td class="text-right"><button class="btn-secondary btn-sm" onclick="openEditModal('AB-Positive (AB+)')">Edit</button></td>
-                            </tr>
-                            <tr>
-                                <td><strong>AB-Negative (AB-)</strong></td>
-                                <td>5</td>
-                                <td>2</td>
-                                <td>3</td>
-                                <td><span class="badge yellow">Low</span></td>
-                                <td class="text-right"><button class="btn-secondary btn-sm" onclick="openEditModal('AB-Negative (AB-)')">Edit</button></td>
-                            </tr>
+                        
+                            <tbody>
+                                {% for row in inventory_rows %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ row.blood_type }}</strong>
+                                        </td>
+
+                                        <td>{{ row.whole_blood }}</td>
+
+                                        <td>{{ row.red_blood_cells }}</td>
+
+                                        <td>{{ row.platelets }}</td>
+
+                                        <td>{{ row.plasma }}</td>
+
+                                        <td>
+                                            {% if row.status == "CRITICAL" %}
+                                                <span class="badge red">Critical</span>
+
+                                            {% elif row.status == "LOW" %}
+                                                <span class="badge yellow">Low</span>
+
+                                            {% else %}
+                                                <span class="badge green">Normal</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td class="text-right">
+                                            <button
+                                                class="btn-secondary btn-sm"
+                                                onclick="openEditModal('{{ row.blood_type }}')"
+                                            >
+                                                Edit
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="7">
+                                            No inventory records are available for this facility.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -154,49 +141,146 @@
     <!-- Edit Stock Modal Component -->
     <div id="editStockModal" class="modal-overlay">
         <div class="modal-content">
-            <h3 id="modalTitle">Manage Stock: A-Positive</h3>
-            <p class="modal-desc">Choose to add incoming units or delete/discard units for each blood component.</p>
-            
-            <!-- Whole Blood Section -->
-            <div class="modal-section">
-                <label class="modal-label">Whole Blood</label>
-                <div class="modal-row">
-                    <select id="actionBlood" class="modal-select">
-                        <option value="add">Add Units (+)</option>
-                        <option value="delete">Delete Units (-)</option>
-                    </select>
-                    <input type="number" id="unitsBlood" value="0" min="0" class="modal-input" placeholder="Units">
-                </div>
-            </div>
 
-            <!-- Platelets Section -->
-            <div class="modal-section">
-                <label class="modal-label">Platelets</label>
-                <div class="modal-row">
-                    <select id="actionPlatelets" class="modal-select">
-                        <option value="add">Add Units (+)</option>
-                        <option value="delete">Delete Units (-)</option>
-                    </select>
-                    <input type="number" id="unitsPlatelets" value="0" min="0" class="modal-input" placeholder="Units">
-                </div>
-            </div>
+            <h3 id="modalTitle">Manage Stock</h3>
 
-            <!-- Plasma Section -->
-            <div class="modal-section modal-section-last">
-                <label class="modal-label">Plasma</label>
-                <div class="modal-row">
-                    <select id="actionPlasma" class="modal-select">
-                        <option value="add">Add Units (+)</option>
-                        <option value="delete">Delete Units (-)</option>
-                    </select>
-                    <input type="number" id="unitsPlasma" value="0" min="0" class="modal-input" placeholder="Units">
-                </div>
-            </div>
+            <p class="modal-desc">
+                Choose to add incoming units or remove/discard units
+                for each blood component.
+            </p>
 
-            <div class="modal-footer">
-                <button type="button" class="btn-secondary modal-cancel-btn" onclick="closeEditModal()">Cancel</button>
-                <button type="button" class="btn-primary modal-save-btn" onclick="saveStockChanges()">Save Changes</button>
-            </div>
+            <form method="POST" action="{% url 'staff_inventory' %}">
+                {% csrf_token %}
+
+                <!-- The selected blood type is filled by JavaScript -->
+                <input
+                    type="hidden"
+                    name="blood_type"
+                    id="selectedBloodType"
+                >
+
+                <!-- Whole Blood -->
+                <div class="modal-section">
+                    <label class="modal-label">Whole Blood</label>
+
+                    <div class="modal-row">
+                        <select
+                            name="action_whole_blood"
+                            id="actionBlood"
+                            class="modal-select"
+                        >
+                            <option value="add">Add Units (+)</option>
+                            <option value="delete">Delete Units (-)</option>
+                        </select>
+
+                        <input
+                            type="number"
+                            name="units_whole_blood"
+                            id="unitsBlood"
+                            value="0"
+                            min="0"
+                            class="modal-input"
+                        >
+                    </div>
+                </div>
+
+
+                <!-- Red Blood Cells -->
+                <div class="modal-section">
+                    <label class="modal-label">Red Blood Cells</label>
+
+                    <div class="modal-row">
+                        <select
+                            name="action_red_blood_cells"
+                            id="actionRedBloodCells"
+                            class="modal-select"
+                        >
+                            <option value="add">Add Units (+)</option>
+                            <option value="delete">Delete Units (-)</option>
+                        </select>
+
+                        <input
+                            type="number"
+                            name="units_red_blood_cells"
+                            id="unitsRedBloodCells"
+                            value="0"
+                            min="0"
+                            class="modal-input"
+                        >
+                    </div>
+                </div>
+
+
+                <!-- Platelets -->
+                <div class="modal-section">
+                    <label class="modal-label">Platelets</label>
+
+                    <div class="modal-row">
+                        <select
+                            name="action_platelets"
+                            id="actionPlatelets"
+                            class="modal-select"
+                        >
+                            <option value="add">Add Units (+)</option>
+                            <option value="delete">Delete Units (-)</option>
+                        </select>
+
+                        <input
+                            type="number"
+                            name="units_platelets"
+                            id="unitsPlatelets"
+                            value="0"
+                            min="0"
+                            class="modal-input"
+                        >
+                    </div>
+                </div>
+
+
+                <!-- Plasma -->
+                <div class="modal-section modal-section-last">
+                    <label class="modal-label">Plasma</label>
+
+                    <div class="modal-row">
+                        <select
+                            name="action_plasma"
+                            id="actionPlasma"
+                            class="modal-select"
+                        >
+                            <option value="add">Add Units (+)</option>
+                            <option value="delete">Delete Units (-)</option>
+                        </select>
+
+                        <input
+                            type="number"
+                            name="units_plasma"
+                            id="unitsPlasma"
+                            value="0"
+                            min="0"
+                            class="modal-input"
+                        >
+                    </div>
+                </div>
+
+
+                <div class="modal-footer">
+                    <button
+                        type="button"
+                        class="btn-secondary modal-cancel-btn"
+                        onclick="closeEditModal()"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn-primary modal-save-btn"
+                    >
+                        Save Changes
+                    </button>
+                </div>
+
+            </form>
         </div>
     </div>
 
@@ -369,33 +453,22 @@
 
         function openEditModal(bloodType) {
             currentSelectedBloodType = bloodType;
-            document.getElementById("modalTitle").innerText = "Manage Stock: " + bloodType;
+
+            document.getElementById("selectedBloodType").value = bloodType;
+
+            document.getElementById("modalTitle").innerText =
+                "Manage Stock: " + bloodType;
+
             document.getElementById("unitsBlood").value = 0;
+            document.getElementById("unitsRedBloodCells").value = 0;
             document.getElementById("unitsPlatelets").value = 0;
             document.getElementById("unitsPlasma").value = 0;
+
             document.getElementById("editStockModal").style.display = "flex";
         }
 
         function closeEditModal() {
             document.getElementById("editStockModal").style.display = "none";
-        }
-
-        function saveStockChanges() {
-            const bloodAction = document.getElementById("actionBlood").value;
-            const bloodUnits = document.getElementById("unitsBlood").value;
-            
-            const platAction = document.getElementById("actionPlatelets").value;
-            const platUnits = document.getElementById("unitsPlatelets").value;
-
-            const plasmaAction = document.getElementById("actionPlasma").value;
-            const plasmaUnits = document.getElementById("unitsPlasma").value;
-
-            alert("Successfully queued updates for " + currentSelectedBloodType + ":\n" +
-                  "- Whole Blood: " + bloodAction + " " + bloodUnits + " units\n" +
-                  "- Platelets: " + platAction + " " + platUnits + " units\n" +
-                  "- Plasma: " + plasmaAction + " " + plasmaUnits + " units\n\n(Backend database sync ready)");
-            
-            closeEditModal();
         }
 
         // --- Restock / Fulfillment Modal Functions ---
