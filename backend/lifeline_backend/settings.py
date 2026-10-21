@@ -24,7 +24,7 @@ load_dotenv(BASE_DIR.parent / ".env")
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-(uwaij&00(l@=c0zgt(ue&0=pqt5+mdu30ao&s00fel=w(ed70"
+SECRET_KEY = "django-insecure-(cdZYTaGQOhbKfyqiTv-L_u7djbrjsOSgZGshaVLkqNlr3pyHpLQB_3YReV6xplarcwA"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "appointments",
     "screening",
     "inventory",
+    'anymail',
 ]
 
 MIDDLEWARE = [
@@ -136,16 +137,14 @@ STATICFILES_DIRS = [
     ("donor/image", BASE_DIR.parent / "donor" / "image"),
     ("organization/css", BASE_DIR.parent / "organization" / "css"),
     ("organization/img", BASE_DIR.parent / "organization" / "img"),
-    BASE_DIR.parent / "static",
+  *([BASE_DIR.parent / "static"] if (BASE_DIR.parent / "static").is_dir() else []),
 ]
 
 
-# Email
-# Email Configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'emergency.lifelineservices999@gmail.com'
-EMAIL_HOST_PASSWORD = 'your-16-character-gmail-app-password'  # Keep this secret or use os.getenv()
-DEFAULT_FROM_EMAIL = 'LifeLine Emergency Team <emergency.lifelineservices999@gmail.com>'
+BREVO_API_KEY = os.getenv("BREVO_API_KEY")
+BREVO_SENDER_EMAIL = os.getenv("BREVO_SENDER_EMAIL")
+BREVO_SENDER_NAME = os.getenv(
+    "BREVO_SENDER_NAME",
+    "LifeLine Emergency Team",
+)
+DEFAULT_FROM_EMAIL = BREVO_SENDER_EMAIL
