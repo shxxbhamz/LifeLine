@@ -3,7 +3,10 @@ from django.db import transaction
 from django.shortcuts import redirect, render
 from django.utils import timezone
 
-from .models import DonorProfiles, Facilities, StaffProfiles, Users, Appointments
+
+from .models import DonorProfiles, Facilities, StaffProfiles, Users
+from appointments.models import Appointments
+
 from .utils import send_welcome_email
 
 def home_view(request):
