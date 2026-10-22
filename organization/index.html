@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <!-- Linking the centralized stylesheet -->
     <link rel="stylesheet" href="{% static 'organization/css/style.css' %}">
 </head>
+
 <body data-facility-type="hospital"> <!-- Dynamic switcher: change to 'blood_bank' if needed -->
 
     <!-- Top Navigation Bar -->
@@ -15,11 +17,11 @@
         <a href="{% url 'staff_dashboard' %}" class="logo-link">
             <img src="{% static 'organization/img/lifeline-logo.png' %}" alt="LifeLine Logo" class="brand-logo">
         </a>
-    
+
         <div class="nav-right">
             <!-- Emergency Create Action Button -->
             <button class="btn-emergency-create" onclick="openEmergencyModal()">+ Emergency Create</button>
-            
+
             <!-- Three-Dash Hamburger Dropdown Menu -->
             <div class="dropdown">
                 <button class="hamburger-btn" onclick="toggleDropdown()" aria-label="Menu">
@@ -50,27 +52,23 @@
     <main>
         <!-- Welcome Banner -->
         <section class="hero-section">
-            <h1 id="welcomeTitle">Government of Saskatchewan</h1>
-        </section>
-        
-        <section class="hero-section">
             <h1 id="welcomeTitle">{{ facility_name }}</h1>
-            <p>Welcome back, {{ request.user.username }}. Manage your real-time inventory and emergency dispatches below.</p>
-        </section>>
-
+            <p>Welcome back, {{ logged_in_user.username }}. Manage your real-time inventory and emergency dispatches
+                below.</p>
+        </section>
         <!-- Dashboard Grid Layout -->
         <div class="dashboard-grid">
-            
+
             <!-- Left Column: Inventory & Appointments -->
             <div class="dash-column">
-                
+
                 <!-- Blood & Plasma Inventory Module -->
                 <section class="dash-card" id="inventory">
                     <div class="card-header">
                         <h3>Inventory Management</h3>
                         <span class="status-indicator optimal">Stock Stable</span>
                     </div>
-                    
+
                     <div class="inventory-table-container">
                         <table class="inventory-table">
                             <thead>
@@ -82,14 +80,54 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr><td><strong>A+</strong></td><td>18</td><td>12</td><td><span class="badge green">Normal</span></td></tr>
-                                <tr><td><strong>A-</strong></td><td>4</td><td>2</td><td><span class="badge yellow">Low</span></td></tr>
-                                <tr><td><strong>B+</strong></td><td>14</td><td>9</td><td><span class="badge green">Normal</span></td></tr>
-                                <tr><td><strong>B-</strong></td><td>3</td><td>1</td><td><span class="badge red">Critical</span></td></tr>
-                                <tr><td><strong>O+</strong></td><td>22</td><td>15</td><td><span class="badge green">Normal</span></td></tr>
-                                <tr><td><strong>O-</strong></td><td>2</td><td>1</td><td><span class="badge red">Critical</span></td></tr>
-                                <tr><td><strong>AB+</strong></td><td>9</td><td>6</td><td><span class="badge green">Normal</span></td></tr>
-                                <tr><td><strong>AB-</strong></td><td>5</td><td>3</td><td><span class="badge yellow">Low</span></td></tr>
+                                <tr>
+                                    <td><strong>A+</strong></td>
+                                    <td>18</td>
+                                    <td>12</td>
+                                    <td><span class="badge green">Normal</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>A-</strong></td>
+                                    <td>4</td>
+                                    <td>2</td>
+                                    <td><span class="badge yellow">Low</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>B+</strong></td>
+                                    <td>14</td>
+                                    <td>9</td>
+                                    <td><span class="badge green">Normal</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>B-</strong></td>
+                                    <td>3</td>
+                                    <td>1</td>
+                                    <td><span class="badge red">Critical</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>O+</strong></td>
+                                    <td>22</td>
+                                    <td>15</td>
+                                    <td><span class="badge green">Normal</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>O-</strong></td>
+                                    <td>2</td>
+                                    <td>1</td>
+                                    <td><span class="badge red">Critical</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>AB+</strong></td>
+                                    <td>9</td>
+                                    <td>6</td>
+                                    <td><span class="badge green">Normal</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>AB-</strong></td>
+                                    <td>5</td>
+                                    <td>3</td>
+                                    <td><span class="badge yellow">Low</span></td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -101,7 +139,7 @@
                         <h3>Scheduled Donor Appointments</h3>
                         <span class="badge-count">4 Incoming Today</span>
                     </div>
-                    
+
                     <div class="appointment-list">
                         <div class="appointment-item">
                             <div class="appt-info">
@@ -128,17 +166,17 @@
 
             <!-- Right Column: Emergency Dispatches & Proximity Map -->
             <div class="dash-column">
-                
+
                 <!-- Active Emergency Requests & Live Proximity Map Module -->
                 <section class="dash-card map-card" id="dispatches">
                     <div class="card-header">
                         <h3>Active Emergency Dispatches & Proximity Map</h3>
                         <span class="badge red-pulse">Live Broadcast Active</span>
                     </div>
-                    
+
                     <!-- Simulated Interactive Map Container -->
                     <div class="map-container">
-                        
+
                     </div>
 
                 </section>
@@ -187,16 +225,19 @@
     <div id="globalEmergencyModal" class="emergency-modal-overlay">
         <div class="emergency-modal-content">
             <h3>Create Emergency Donation Request</h3>
-            
+
             <form id="emergencyRequestForm" onsubmit="submitEmergencyRequest(event)">
-                
+
                 <!-- Component Type Selection (Mutually Exclusive Radio Buttons) -->
                 <div class="em-form-group">
                     <label>Select Component Type (Choose Exactly One):</label>
                     <div class="component-options">
-                        <label><input type="radio" name="componentType" value="Blood" onclick="updateBloodGroupOptions('Blood')" checked> Blood</label>
-                        <label><input type="radio" name="componentType" value="Plasma" onclick="updateBloodGroupOptions('Plasma')"> Plasma</label>
-                        <label><input type="radio" name="componentType" value="Platelets" onclick="updateBloodGroupOptions('Platelets')"> Platelets</label>
+                        <label><input type="radio" name="componentType" value="Blood"
+                                onclick="updateBloodGroupOptions('Blood')" checked> Blood</label>
+                        <label><input type="radio" name="componentType" value="Plasma"
+                                onclick="updateBloodGroupOptions('Plasma')"> Plasma</label>
+                        <label><input type="radio" name="componentType" value="Platelets"
+                                onclick="updateBloodGroupOptions('Platelets')"> Platelets</label>
                     </div>
                 </div>
 
@@ -219,7 +260,8 @@
                 <!-- Description Box -->
                 <div class="em-form-group">
                     <label for="emDescription">Emergency Description / Case Details:</label>
-                    <textarea id="emDescription" placeholder="e.g., Critical trauma surgery requiring immediate units..." required></textarea>
+                    <textarea id="emDescription"
+                        placeholder="e.g., Critical trauma surgery requiring immediate units..." required></textarea>
                 </div>
 
                 <!-- Centered Submit Button & Cancel Action -->
@@ -230,7 +272,7 @@
             </form>
         </div>
     </div>
-    
+
     <!-- JavaScript for Dropdown, Modal, and Actions -->
     <script>
         function toggleDropdown() {
@@ -238,7 +280,7 @@
         }
 
         // Close dropdown when clicking outside
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             if (!event.target.matches('.hamburger-btn')) {
                 var dropdowns = document.getElementsByClassName("dropdown-content");
                 for (var i = 0; i < dropdowns.length; i++) {
@@ -273,7 +315,7 @@
 
         function submitEmergencyRequest(event) {
             event.preventDefault();
-            
+
             const description = document.getElementById("emDescription").value;
             const selectedComponent = document.querySelector('input[name="componentType"]:checked').value;
             const bloodGroup = document.getElementById("emBloodGroup").value;
@@ -289,4 +331,5 @@
         }
     </script>
 </body>
+
 </html>
