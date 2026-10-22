@@ -3,7 +3,7 @@ from django.db import transaction
 from django.shortcuts import redirect, render
 from django.utils import timezone
 
-from .models import DonorProfiles, Facilities, StaffProfiles, Users
+from .models import DonorProfiles, Facilities, StaffProfiles, Users, appointments
 from .utils import send_welcome_email
 
 def home_view(request):
@@ -602,8 +602,7 @@ def staff_edit_profile_view(request):
         },
     )
 
-from django.shortcuts import render, redirect
-from .models import StaffProfiles, Facilities, Users
+
 
 def staff_dashboard_view(request):
     # Only logged-in staff should be able to access the staff dashboard.
@@ -615,6 +614,7 @@ def staff_dashboard_view(request):
     facility_name = "Organization Staff Console"
     facility_type = "hospital"  # Default fallback
     current_user = None
+    scheduled_appointments = []
 
     try:
         # Fetch the custom user record and staff profile
@@ -623,12 +623,19 @@ def staff_dashboard_view(request):
         if staff_profile.facility:
             facility_name = staff_profile.facility.name
             facility_type = staff_profile.facility.facility_type.lower()
+            
+            # Fetch scheduled appointments linked specifically to this facility
+            scheduled_appointments = appointments.objects.filter(
+                facility=staff_profile.facility
+            ).select_related('donor__user')
+            
     except (Users.DoesNotExist, StaffProfiles.DoesNotExist, Facilities.DoesNotExist):
         pass
 
     context = {
         'facility_name': facility_name,
         'facility_type': facility_type,
-        'logged_in_user': current_user,  # Pass custom user object to template
+        'logged_in_user': current_user,  # Custom user object for first/last name display
+        'scheduled_appointments': scheduled_appointments,  # Dynamic appointments for this facility
     }
     return render(request, "organization/index.html", context)

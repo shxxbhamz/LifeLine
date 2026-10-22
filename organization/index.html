@@ -53,8 +53,8 @@
         <!-- Welcome Banner -->
         <section class="hero-section">
             <h1 id="welcomeTitle">{{ facility_name }}</h1>
-            <p>Welcome back, {{ logged_in_user.username }}. Manage your real-time inventory and emergency dispatches
-                below.</p>
+            <p>Welcome back, {{ logged_in_user.first_name }} {{ logged_in_user.last_name }}. Manage your real-time
+                inventory and emergency dispatches below.</p>
         </section>
         <!-- Dashboard Grid Layout -->
         <div class="dashboard-grid">
@@ -137,31 +137,31 @@
                 <section class="dash-card" id="appointments">
                     <div class="card-header">
                         <h3>Scheduled Donor Appointments</h3>
-                        <span class="badge-count">4 Incoming Today</span>
+                        <span class="badge-count">{{ scheduled_appointments|length }} Incoming Today</span>
                     </div>
 
                     <div class="appointment-list">
+                        {% if scheduled_appointments %}
+                        {% for appt in scheduled_appointments %}
                         <div class="appointment-item">
                             <div class="appt-info">
-                                <strong>Marcus Vance</strong> (O-Positive)
-                                <small>Verified Pre-Screening • Slot: 10:30 AM</small>
+                                <strong>{{ appt.donor.user.first_name }} {{ appt.donor.user.last_name }}</strong>
+                                <span class="badge yellow">{{ appt.donor.blood_type }}</span>
+                                <small>Type: {{ appt.donation_type|default:"Blood Donation" }} • Slot: {{
+                                    appt.appointment_time|default:"Scheduled Slot" }}</small>
                             </div>
                         </div>
+                        {% endfor %}
+                        {% else %}
                         <div class="appointment-item">
                             <div class="appt-info">
-                                <strong>Sarah Jenkins</strong> (A-Negative)
-                                <small>Emergency Response Slot • Slot: 11:15 AM</small>
+                                <strong>No Appointments</strong>
+                                <small>No scheduled appointments found for this facility.</small>
                             </div>
                         </div>
-                        <div class="appointment-item">
-                            <div class="appt-info">
-                                <strong>David Ross</strong> (O-Negative)
-                                <small>Walk-in Match • Slot: 01:00 PM</small>
-                            </div>
-                        </div>
+                        {% endif %}
                     </div>
                 </section>
-
             </div>
 
             <!-- Right Column: Emergency Dispatches & Proximity Map -->
