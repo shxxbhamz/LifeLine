@@ -52,6 +52,11 @@
         <section class="hero-section">
             <h1 id="welcomeTitle">Government of Saskatchewan</h1>
         </section>
+        
+        <section class="hero-section">
+            <h1 id="welcomeTitle">{{ facility_name }}</h1>
+            <p>Welcome back, {{ request.user.username }}. Manage your real-time inventory and emergency dispatches below.</p>
+        </section>>
 
         <!-- Dashboard Grid Layout -->
         <div class="dashboard-grid">
