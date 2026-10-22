@@ -601,3 +601,28 @@ def staff_edit_profile_view(request):
             "facility": facility,
         },
     )
+
+def staff_dashboard_view(request):
+    # Only logged-in staff should be able to access the staff dashboard.
+    if request.session.get("user_id") is None or request.session.get("role") != "HOSPITAL_STAFF":
+        return redirect("login")
+
+    user_id = request.session.get("user_id")
+    
+    facility_name = "Organization Staff Console"
+    facility_type = "hospital"  # Default fallback
+
+    try:
+        # Fetch the staff profile linked to this user and its associated facility
+        staff_profile = StaffProfiles.objects.get(user_id=user_id)
+        if staff_profile.facility:
+            facility_name = staff_profile.facility.name  # Pulls from the 'name' column in your 'facilities' table
+            facility_type = staff_profile.facility.facility_type.lower()  # Converts 'HOSPITAL' / 'BLOOD_BANK' for CSS
+    except (StaffProfiles.DoesNotExist, Facilities.DoesNotExist):
+        pass
+
+    context = {
+        'facility_name': facility_name,
+        'facility_type': facility_type,
+    }
+    return render(request, "organization/index.html", context)
