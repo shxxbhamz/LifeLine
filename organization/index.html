@@ -147,8 +147,8 @@
                             <div class="appt-info">
                                 <strong>{{ appt.donor.user.first_name }} {{ appt.donor.user.last_name }}</strong>
                                 <span class="badge yellow">{{ appt.donor.blood_type }}</span>
-                                <small>Type: {{ appt.donation_type|default:"Blood Donation" }} • Slot: {{
-                                    appt.appointment_time|default:"Scheduled Slot" }}</small>
+                                <small>Type: {{ appt.donation_type }} • Slot: {{ appt.scheduled_at|time:"g:i
+                                    A"|default:"Scheduled Slot" }}</small>
                             </div>
                         </div>
                         {% endfor %}
