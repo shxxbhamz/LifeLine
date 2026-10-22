@@ -3,7 +3,7 @@ from django.db import transaction
 from django.shortcuts import redirect, render
 from django.utils import timezone
 
-from .models import DonorProfiles, Facilities, StaffProfiles, Users, appointments
+from .models import DonorProfiles, Facilities, StaffProfiles, Users, Appointments
 from .utils import send_welcome_email
 
 def home_view(request):
@@ -625,7 +625,7 @@ def staff_dashboard_view(request):
             facility_type = staff_profile.facility.facility_type.lower()
             
             # Fetch scheduled appointments linked specifically to this facility
-            scheduled_appointments = appointments.objects.filter(
+            scheduled_appointments = Appointments.objects.filter(
                 facility=staff_profile.facility
             ).select_related('donor__user')
             
