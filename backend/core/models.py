@@ -122,7 +122,7 @@ class BloodInventory(models.Model):
     class Meta:
         managed = False
         db_table = "blood_inventory"
-
+        
 class EmergencyRequests(models.Model):
     id = models.BigAutoField(primary_key=True)
     facility = models.ForeignKey(
@@ -131,14 +131,13 @@ class EmergencyRequests(models.Model):
         db_column='facility_id',
         related_name='facility_emergency_requests',
     )
-    blood_type_needed = models.CharField(max_length=5)
-    component_type = models.CharField(max_length=30)
-    units_required = models.IntegerField(default=1)
-    urgency_level = models.CharField(max_length=20, default='Critical')
+    blood_type_needed = models.CharField(max_length=5, db_column='required_blood_type') # or check exact column name
+    component_type = models.CharField(max_length=30, db_column='component_type')
+    units_required = models.IntegerField(default=1, db_column='units_required')
+    urgency_level = models.CharField(max_length=20, default='Critical', db_column='urgency_level')
     status = models.CharField(max_length=20, default='active')
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_column='created_at')
 
     class Meta:
         managed = False
         db_table = "emergency_requests"
-        
