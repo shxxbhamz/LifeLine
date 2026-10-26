@@ -122,3 +122,23 @@ class BloodInventory(models.Model):
     class Meta:
         managed = False
         db_table = "blood_inventory"
+
+class EmergencyRequests(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    facility = models.ForeignKey(
+        Facilities,
+        models.DO_NOTHING,
+        db_column='facility_id',
+        related_name='facility_emergency_requests',
+    )
+    blood_type_needed = models.CharField(max_length=5)
+    component_type = models.CharField(max_length=30)
+    units_required = models.IntegerField(default=1)
+    urgency_level = models.CharField(max_length=20, default='Critical')
+    status = models.CharField(max_length=20, default='active')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = False
+        db_table = "emergency_requests"
+        

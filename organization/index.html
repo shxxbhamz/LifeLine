@@ -140,8 +140,7 @@
                         <div class="appt-info">
                             <strong>{{ appt.donor.user.first_name }} {{ appt.donor.user.last_name }}</strong>
                             <span class="badge yellow">{{ appt.donor.blood_type }}</span>
-                            <small>Type: {{ appt.donation_type }} • Slot: {{ appt.scheduled_at|time:"g:i
-                                A"|default:"Scheduled Slot" }}</small>
+                            <small>Type: {{ appt.donation_type }} • Slot: {{ appt.scheduled_at|time:"g:iA"|default:"Scheduled Slot" }}</small>
                         </div>
                     </div>
                     {% endfor %}
@@ -157,36 +156,57 @@
             </section>
         </div>
 
+        <div style="margin-bottom: 2rem;"></div>
+
         <!-- Right Column: Emergency Dispatches & Proximity Map -->
         <div class="dash-column">
             <!-- Broadcast Audit & History Log -->
+            <!-- Recent Emergency History Module -->
             <section class="dash-card" id="audit-log">
                 <div class="card-header">
                     <h3>Recent Emergency History</h3>
+                    <span class="badge red-pulse">Live Dispatches</span>
                 </div>
-                <ul class="history-list">
-                    <li class="history-item">
-                        <strong>Marcus Vance</strong>
-                        <div class="history-details">
-                            <span>1850 Lorne St, Regina, SK</span>
-                            <span>Blood (Group: O-Positive)</span>
+        
+                <div class="appointment-list">
+                    {% if emergency_history %}
+                    {% for em in emergency_history %}
+                    <div class="appointment-item" style="border-left: 4px solid var(--primary-red);">
+                        <div class="donor-profile-group">
+                            <!-- Donor Avatar / Fallback Initials -->
+                            <div class="donor-avatar"
+                                style="display: flex; align-items: center; justify-content: center; background: #fee2e2; color: #dc2626; font-weight: bold; border-radius: 50%; width: 40px; height: 40px;">
+                                {{ em.donor.user.first_name|slice:":1" }}{{ em.donor.user.last_name|slice:":1" }}
+                            </div>
+                            <div class="appt-info">
+                                <strong>{{ em.donor.user.first_name }} {{ em.donor.user.last_name }} <span
+                                        class="badge blood-badge">{{ em.donor.blood_type }}</span></strong>
+                                <div>
+                                    <span class="donor-contact">{{ em.donor.phone|default:"Contact on file" }}</span> •
+                                    <span class="donation-type-tag">Emergency {{ em.component_type|title|default:"Blood"
+                                        }}</span>
+                                </div>
+                                <small style="color: var(--text-muted); display: block; margin-top: 2px;">
+                                    📍 {{ em.donor.street_address }}, {{ em.donor.city }} (Requested: {{ em.created_at|date:"M
+                                    j, g:i A" }})
+                                </small>
+                            </div>
                         </div>
-                    </li>
-                    <li class="history-item">
-                        <strong>Sarah Jenkins</strong>
-                        <div class="history-details">
-                            <span>2125 11th Ave, Regina, SK</span>
-                            <span>Plasma (Group: A-Negative)</span>
+                        <span class="badge emergency-appt-badge"
+                            style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;">Emergency Broadcast</span>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <!-- Fallback if no emergency history rows exist yet -->
+                    <div class="appointment-item"
+                        style="justify-content: center; text-align: center; color: var(--text-muted);">
+                        <div class="appt-info">
+                            <strong>No Emergency History</strong>
+                            <small>No recent emergency broadcast dispatches found for this facility.</small>
                         </div>
-                    </li>
-                    <li class="history-item">
-                        <strong>David Ross</strong>
-                        <div class="history-details">
-                            <span>4400 4th Ave, Regina, SK</span>
-                            <span>Blood (Group: O-Negative)</span>
-                        </div>
-                    </li>
-                </ul>
+                    </div>
+                    {% endif %}
+                </div>
             </section>
 
         </div>

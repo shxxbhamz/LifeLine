@@ -4,7 +4,7 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 
 
-from .models import DonorProfiles, Facilities, StaffProfiles, Users, BloodInventory
+from .models import DonorProfiles, Facilities, StaffProfiles, Users, BloodInventory, EmergencyRequests
 from appointments.models import Appointments
 
 from .utils import send_welcome_email
@@ -99,6 +99,7 @@ def staff_dashboard_view(request):
     current_user = None
     scheduled_appointments = []
     inventory_items = []
+    emergency_history = []
     try:
         current_user = Users.objects.get(id=user_id)
         staff_profile = StaffProfiles.objects.get(user_id=user_id)
@@ -106,34 +107,23 @@ def staff_dashboard_view(request):
             facility_name = staff_profile.facility.name
             facility_type = staff_profile.facility.facility_type.lower()
             
+            # Fetch scheduled appointments linked specifically to this facility
             scheduled_appointments = Appointments.objects.filter(
                 facility=staff_profile.facility
             ).select_related('donor__user')
 
-            # Fetch raw inventory rows from Neon
+            # Fetch blood inventory linked specifically to this facility
             raw_inventory = BloodInventory.objects.filter(
                 facility=staff_profile.facility
             )
             
-            # Map component rows into a dictionary grouped by blood type
-            inventory_dict = {}
-            for item in raw_inventory:
-                b_type = item.blood_type
-                if b_type not in inventory_dict:
-                    inventory_dict[b_type] = {'blood_type': b_type, 'whole_blood': 0, 'plasma': 0, 'status': 'Normal'}
-                
-                if item.component_type == 'WHOLE_BLOOD':
-                    inventory_dict[b_type]['whole_blood'] = item.units_available
-                elif item.component_type == 'PLASMA':
-                    inventory_dict[b_type]['plasma'] = item.units_available
-                
-                # Determine status based on thresholds
-                if item.units_available <= item.critical_threshold:
-                    inventory_dict[b_type]['status'] = 'Critical'
-                elif item.units_available <= item.low_threshold and inventory_dict[b_type]['status'] != 'Critical':
-                    inventory_dict[b_type]['status'] = 'Low'
+            # ... (keep your inventory dictionary mapping logic here) ...
 
-            inventory_items = list(inventory_dict.values())
+            # Fetch real emergency requests/history for this facility from the database
+            # (Adjust 'EmergencyRequests' to match your exact model name if needed)
+            emergency_history = EmergencyRequests.objects.filter(
+                facility=staff_profile.facility
+            ).select_related('donor__user').order_by('-created_at')[:5]
             
     except (Users.DoesNotExist, StaffProfiles.DoesNotExist, Facilities.DoesNotExist):
         pass
@@ -141,9 +131,10 @@ def staff_dashboard_view(request):
     context = {
         'facility_name': facility_name,
         'facility_type': facility_type,
-        'logged_in_user': current_user,  # Custom user object for first/last name display
-        'scheduled_appointments': scheduled_appointments,  # Dynamic appointments for this facility
-        'inventory_items': inventory_items,  # Dynamic inventory data for this facility
+        'logged_in_user': current_user,
+        'scheduled_appointments': scheduled_appointments,
+        'inventory_items': inventory_items,
+        'emergency_history': emergency_history,  # Pass emergency history to template
     }
     return render(request, "organization/index.html", context)
 
