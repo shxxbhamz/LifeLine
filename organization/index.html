@@ -60,158 +60,133 @@
         <div class="dashboard-grid">
 
             <!-- Left Column: Inventory & Appointments -->
-            <div class="dash-column">
+            <!-- Blood & Plasma Inventory Module -->
+            <section class="dash-card" id="inventory">
+                <div class="card-header">
+                    <h3>Inventory Management</h3>
+                    <span class="status-indicator optimal">Stock Stable</span>
+                </div>
 
-                <!-- Blood & Plasma Inventory Module -->
-                <section class="dash-card" id="inventory">
-                    <div class="card-header">
-                        <h3>Inventory Management</h3>
-                        <span class="status-indicator optimal">Stock Stable</span>
-                    </div>
+                <div class="inventory-table-container">
+                    <table class="inventory-table">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Whole Blood (Units)</th>
+                                <th>Plasma (Units)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if inventory_items %}
+                            {% for item in inventory_items %}
+                            <tr>
+                                <td><strong>{{ item.blood_type }}</strong></td>
+                                <td>{{ item.whole_blood_units|default:0 }}</td>
+                                <td>{{ item.plasma_units|default:0 }}</td>
+                                <td>
+                                    {% if item.status == 'CRITICAL' or item.whole_blood_units <= 2 %} <span
+                                        class="badge red">Critical</span>
+                                        {% elif item.status == 'LOW' or item.whole_blood_units <= 5 %} <span
+                                            class="badge yellow">Low</span>
+                                            {% else %}
+                                            <span class="badge green">Normal</span>
+                                            {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <!-- Fallback message if no inventory rows exist for this facility yet -->
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: var(--text-muted);">
+                                    No inventory records found for this facility.
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
-                    <div class="inventory-table-container">
-                        <table class="inventory-table">
-                            <thead>
-                                <tr>
-                                    <th>Type</th>
-                                    <th>Whole Blood (Units)</th>
-                                    <th>Plasma (Units)</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><strong>A+</strong></td>
-                                    <td>18</td>
-                                    <td>12</td>
-                                    <td><span class="badge green">Normal</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>A-</strong></td>
-                                    <td>4</td>
-                                    <td>2</td>
-                                    <td><span class="badge yellow">Low</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>B+</strong></td>
-                                    <td>14</td>
-                                    <td>9</td>
-                                    <td><span class="badge green">Normal</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>B-</strong></td>
-                                    <td>3</td>
-                                    <td>1</td>
-                                    <td><span class="badge red">Critical</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>O+</strong></td>
-                                    <td>22</td>
-                                    <td>15</td>
-                                    <td><span class="badge green">Normal</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>O-</strong></td>
-                                    <td>2</td>
-                                    <td>1</td>
-                                    <td><span class="badge red">Critical</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>AB+</strong></td>
-                                    <td>9</td>
-                                    <td>6</td>
-                                    <td><span class="badge green">Normal</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>AB-</strong></td>
-                                    <td>5</td>
-                                    <td>3</td>
-                                    <td><span class="badge yellow">Low</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
+            <!-- Donor Appointments Module -->
+            <section class="dash-card" id="appointments">
+                <div class="card-header">
+                    <h3>Scheduled Donor Appointments</h3>
+                    <span class="badge-count">{{ scheduled_appointments|length }} Incoming Today</span>
+                </div>
 
-                <!-- Donor Appointments Module -->
-                <section class="dash-card" id="appointments">
-                    <div class="card-header">
-                        <h3>Scheduled Donor Appointments</h3>
-                        <span class="badge-count">{{ scheduled_appointments|length }} Incoming Today</span>
-                    </div>
-
-                    <div class="appointment-list">
-                        {% if scheduled_appointments %}
-                        {% for appt in scheduled_appointments %}
-                        <div class="appointment-item">
-                            <div class="appt-info">
-                                <strong>{{ appt.donor.user.first_name }} {{ appt.donor.user.last_name }}</strong>
-                                <span class="badge yellow">{{ appt.donor.blood_type }}</span>
-                                <small>Type: {{ appt.donation_type }} • Slot: {{ appt.scheduled_at|time:"g:i
-                                    A"|default:"Scheduled Slot" }}</small>
-                            </div>
+                <div class="appointment-list">
+                    {% if scheduled_appointments %}
+                    {% for appt in scheduled_appointments %}
+                    <div class="appointment-item">
+                        <div class="appt-info">
+                            <strong>{{ appt.donor.user.first_name }} {{ appt.donor.user.last_name }}</strong>
+                            <span class="badge yellow">{{ appt.donor.blood_type }}</span>
+                            <small>Type: {{ appt.donation_type }} • Slot: {{ appt.scheduled_at|time:"g:i
+                                A"|default:"Scheduled Slot" }}</small>
                         </div>
-                        {% endfor %}
-                        {% else %}
-                        <div class="appointment-item">
-                            <div class="appt-info">
-                                <strong>No Appointments</strong>
-                                <small>No scheduled appointments found for this facility.</small>
-                            </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="appointment-item">
+                        <div class="appt-info">
+                            <strong>No Appointments</strong>
+                            <small>No scheduled appointments found for this facility.</small>
                         </div>
-                        {% endif %}
                     </div>
-                </section>
-            </div>
+                    {% endif %}
+                </div>
+            </section>
+        </div>
 
-            <!-- Right Column: Emergency Dispatches & Proximity Map -->
-            <div class="dash-column">
+        <!-- Right Column: Emergency Dispatches & Proximity Map -->
+        <div class="dash-column">
 
-                <!-- Active Emergency Requests & Live Proximity Map Module -->
-                <section class="dash-card map-card" id="dispatches">
-                    <div class="card-header">
-                        <h3>Active Emergency Dispatches & Proximity Map</h3>
-                        <span class="badge red-pulse">Live Broadcast Active</span>
-                    </div>
+            <!-- Active Emergency Requests & Live Proximity Map Module -->
+            <section class="dash-card map-card" id="dispatches">
+                <div class="card-header">
+                    <h3>Active Emergency Dispatches & Proximity Map</h3>
+                    <span class="badge red-pulse">Live Broadcast Active</span>
+                </div>
 
-                    <!-- Simulated Interactive Map Container -->
-                    <div class="map-container">
+                <!-- Simulated Interactive Map Container -->
+                <div class="map-container">
 
-                    </div>
+                </div>
 
-                </section>
+            </section>
 
-                <!-- Broadcast Audit & History Log -->
-                <section class="dash-card" id="audit-log">
-                    <div class="card-header">
-                        <h3>Recent Emergency History</h3>
-                    </div>
-                    <ul class="history-list">
-                        <li class="history-item">
-                            <strong>Marcus Vance</strong>
-                            <div class="history-details">
-                                <span>1850 Lorne St, Regina, SK</span>
-                                <span>Blood (Group: O-Positive)</span>
-                            </div>
-                        </li>
-                        <li class="history-item">
-                            <strong>Sarah Jenkins</strong>
-                            <div class="history-details">
-                                <span>2125 11th Ave, Regina, SK</span>
-                                <span>Plasma (Group: A-Negative)</span>
-                            </div>
-                        </li>
-                        <li class="history-item">
-                            <strong>David Ross</strong>
-                            <div class="history-details">
-                                <span>4400 4th Ave, Regina, SK</span>
-                                <span>Blood (Group: O-Negative)</span>
-                            </div>
-                        </li>
-                    </ul>
-                </section>
+            <!-- Broadcast Audit & History Log -->
+            <section class="dash-card" id="audit-log">
+                <div class="card-header">
+                    <h3>Recent Emergency History</h3>
+                </div>
+                <ul class="history-list">
+                    <li class="history-item">
+                        <strong>Marcus Vance</strong>
+                        <div class="history-details">
+                            <span>1850 Lorne St, Regina, SK</span>
+                            <span>Blood (Group: O-Positive)</span>
+                        </div>
+                    </li>
+                    <li class="history-item">
+                        <strong>Sarah Jenkins</strong>
+                        <div class="history-details">
+                            <span>2125 11th Ave, Regina, SK</span>
+                            <span>Plasma (Group: A-Negative)</span>
+                        </div>
+                    </li>
+                    <li class="history-item">
+                        <strong>David Ross</strong>
+                        <div class="history-details">
+                            <span>4400 4th Ave, Regina, SK</span>
+                            <span>Blood (Group: O-Negative)</span>
+                        </div>
+                    </li>
+                </ul>
+            </section>
 
-            </div>
+        </div>
 
         </div>
     </main>
