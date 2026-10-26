@@ -103,13 +103,14 @@ class StaffProfiles(models.Model):
     class Meta:
         managed = False
         db_table = "staff_profiles"
-        
+
 class BloodInventory(models.Model):
     id = models.BigAutoField(primary_key=True)
     facility = models.ForeignKey(
         Facilities,
         models.DO_NOTHING,
         db_column='facility_id',
+        related_name='facility_blood_inventory',  # <--- Add this unique related_name
     )
     blood_type = models.CharField(max_length=5)
     whole_blood_units = models.IntegerField(default=0)
@@ -119,4 +120,4 @@ class BloodInventory(models.Model):
 
     class Meta:
         managed = False
-        db_table = "blood_inventory"  # Change this if your actual table name in Neon is different
+        db_table = "blood_inventory"
