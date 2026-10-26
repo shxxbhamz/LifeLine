@@ -118,7 +118,33 @@ def staff_dashboard_view(request):
                 facility=staff_profile.facility
             )
             
-            # Fetch real emergency requests/history for this facility from the database (WITHOUT select_related donor)
+            # Group raw inventory rows by blood type for template display
+            inventory_dict = {}
+            for inv in raw_inventory:
+                b_type = inv.blood_type
+                if b_type not in inventory_dict:
+                    inventory_dict[b_type] = {
+                        'blood_type': b_type, 
+                        'whole_blood': 0, 
+                        'plasma': 0, 
+                        'status': 'Normal'
+                    }
+                
+                comp = inv.component_type.lower()
+                if 'whole' in comp:
+                    inventory_dict[b_type]['whole_blood'] += inv.units_available
+                elif 'plasma' in comp:
+                    inventory_dict[b_type]['plasma'] += inv.units_available
+
+                # Determine status based on thresholds
+                if inv.units_available <= inv.critical_threshold:
+                    inventory_dict[b_type]['status'] = 'Critical'
+                elif inv.units_available <= inv.low_threshold and inventory_dict[b_type]['status'] != 'Critical':
+                    inventory_dict[b_type]['status'] = 'Low'
+
+            inventory_items = list(inventory_dict.values())
+            
+            # Fetch real emergency requests/history for this facility from the database
             emergency_history = EmergencyRequests.objects.filter(
                 facility=staff_profile.facility
             ).order_by('-created_at')
