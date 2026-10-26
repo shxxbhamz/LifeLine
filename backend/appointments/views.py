@@ -71,21 +71,43 @@ def staff_create_donation_request_view(request):
 
     # Prevent multiple open requests for the same facility,
     # blood type and component.
+    
     duplicate_request = DonationRequests.objects.filter(
         facility=facility,
         required_blood_type=blood_type,
         component_type=component_type,
         status="OPEN",
-    ).exists()
+    ).first()
 
     if duplicate_request:
+        confirm_add = request.POST.get("confirm_add_to_existing")
+
+        if confirm_add == "1":
+            duplicate_request.units_required += units_required
+            duplicate_request.updated_at = timezone.now()
+
+            duplicate_request.save(
+                update_fields=[
+                    "units_required",
+                    "updated_at",
+                ]
+            )
+
+            messages.success(
+                request,
+                f"{units_required} additional unit(s) added to the existing "
+                f"{blood_type} {component_type.replace('_', ' ').title()} request. "
+                f"New total: {duplicate_request.units_required} unit(s).",
+            )
+
+            return redirect("staff_inventory")
+
         messages.error(
             request,
-            f"An open donation request already exists for "
-            f"{blood_type} {component_type.replace('_', ' ').title()}.",
+            "An open donation request already exists.",
         )
         return redirect("staff_inventory")
-
+    
     now = timezone.now()
 
     DonationRequests.objects.create(

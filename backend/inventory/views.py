@@ -6,6 +6,7 @@ from django.utils import timezone
 from core.models import StaffProfiles
 
 from .models import BloodInventory, InventoryTransactions
+from appointments.models import DonationRequests
 
 
 BLOOD_TYPES = [
@@ -249,9 +250,24 @@ def staff_inventory(request):
 
         inventory_rows.append(row)
 
+    open_donation_requests = {}
+
+    for donation_request in DonationRequests.objects.filter(
+        facility=facility,
+        status="OPEN",
+    ):
+        key = (
+            donation_request.required_blood_type
+            + "|"
+            + donation_request.component_type
+        )
+
+        open_donation_requests[key] = donation_request.units_required
+    
     context = {
         "facility": facility,
         "inventory_rows": inventory_rows,
+        "open_donation_requests": open_donation_requests,
     }
 
     return render(
