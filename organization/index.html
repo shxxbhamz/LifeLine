@@ -57,7 +57,7 @@
                 inventory and emergency dispatches below.</p>
         </section>
 
-           <div class="dash-column">
+        <div class="dash-column">
 
             <!-- Active Emergency Requests & Live Proximity Map Module -->
             <section class="dash-card map-card" id="dispatches">
@@ -72,7 +72,9 @@
                 </div>
 
             </section>
-           </div>
+        </div>
+
+        <div style="margin-bottom: 2rem;"></div>
 
         <!-- Dashboard Grid Layout -->
         <div class="dashboard-grid">
@@ -138,7 +140,8 @@
                         <div class="appt-info">
                             <strong>{{ appt.donor.user.first_name }} {{ appt.donor.user.last_name }}</strong>
                             <span class="badge yellow">{{ appt.donor.blood_type }}</span>
-                            <small>Type: {{ appt.donation_type }} • Slot: {{ appt.scheduled_at|time:"g:i A"|default:"Scheduled Slot" }}</small>
+                            <small>Type: {{ appt.donation_type }} • Slot: {{ appt.scheduled_at|time:"g:i
+                                A"|default:"Scheduled Slot" }}</small>
                         </div>
                     </div>
                     {% endfor %}
@@ -156,21 +159,6 @@
 
         <!-- Right Column: Emergency Dispatches & Proximity Map -->
         <div class="dash-column">
-
-            <!-- Active Emergency Requests & Live Proximity Map Module -->
-            <section class="dash-card map-card" id="dispatches">
-                <div class="card-header">
-                    <h3>Active Emergency Dispatches & Proximity Map</h3>
-                    <span class="badge red-pulse">Live Broadcast Active</span>
-                </div>
-
-                <!-- Simulated Interactive Map Container -->
-                <div class="map-container">
-
-                </div>
-
-            </section>
-
             <!-- Broadcast Audit & History Log -->
             <section class="dash-card" id="audit-log">
                 <div class="card-header">
