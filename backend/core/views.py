@@ -4,7 +4,7 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 
 
-from .models import DonorProfiles, Facilities, StaffProfiles, Users
+from .models import DonorProfiles, Facilities, StaffProfiles, Users, BloodInventory
 from appointments.models import Appointments
 
 from .utils import send_welcome_email
@@ -98,6 +98,7 @@ def staff_dashboard_view(request):
     facility_type = "hospital"  # Default fallback
     current_user = None
     scheduled_appointments = []
+    inventory_items = []
 
     try:
         # Fetch the custom user record and staff profile
@@ -111,6 +112,12 @@ def staff_dashboard_view(request):
             scheduled_appointments = Appointments.objects.filter(
                 facility=staff_profile.facility
             ).select_related('donor__user')
+
+            # Fetch blood inventory linked specifically to this facility
+            # (Make sure BloodInventory is imported from .models)
+            inventory_items = BloodInventory.objects.filter(
+                facility=staff_profile.facility
+            )
             
     except (Users.DoesNotExist, StaffProfiles.DoesNotExist, Facilities.DoesNotExist):
         pass
@@ -120,6 +127,7 @@ def staff_dashboard_view(request):
         'facility_type': facility_type,
         'logged_in_user': current_user,  # Custom user object for first/last name display
         'scheduled_appointments': scheduled_appointments,  # Dynamic appointments for this facility
+        'inventory_items': inventory_items,  # Dynamic inventory data for this facility
     }
     return render(request, "organization/index.html", context)
 
