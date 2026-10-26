@@ -123,7 +123,7 @@ def staff_dashboard_view(request):
             # (Adjust 'EmergencyRequests' to match your exact model name if needed)
             emergency_history = EmergencyRequests.objects.filter(
                 facility=staff_profile.facility
-            ).order_by('-created_at')
+            ).select_related('donor__user').order_by('-created_at')[:5]
             
     except (Users.DoesNotExist, StaffProfiles.DoesNotExist, Facilities.DoesNotExist):
         pass
