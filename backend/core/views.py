@@ -100,6 +100,7 @@ def staff_dashboard_view(request):
     scheduled_appointments = []
     inventory_items = []
     emergency_history = []
+    
     try:
         current_user = Users.objects.get(id=user_id)
         staff_profile = StaffProfiles.objects.get(user_id=user_id)
@@ -117,13 +118,10 @@ def staff_dashboard_view(request):
                 facility=staff_profile.facility
             )
             
-            # ... (keep your inventory dictionary mapping logic here) ...
-
-            # Fetch real emergency requests/history for this facility from the database
-            # (Adjust 'EmergencyRequests' to match your exact model name if needed)
+            # Fetch real emergency requests/history for this facility from the database (WITHOUT select_related donor)
             emergency_history = EmergencyRequests.objects.filter(
                 facility=staff_profile.facility
-            ).select_related('donor__user').order_by('-created_at')[:5]
+            ).order_by('-created_at')
             
     except (Users.DoesNotExist, StaffProfiles.DoesNotExist, Facilities.DoesNotExist):
         pass
@@ -134,7 +132,7 @@ def staff_dashboard_view(request):
         'logged_in_user': current_user,
         'scheduled_appointments': scheduled_appointments,
         'inventory_items': inventory_items,
-        'emergency_history': emergency_history,  # Pass emergency history to template
+        'emergency_history': emergency_history,  # Pass all emergency history to template
     }
     return render(request, "organization/index.html", context)
 
