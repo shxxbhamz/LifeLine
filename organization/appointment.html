@@ -57,68 +57,45 @@
         <div class="dashboard-grid" style="grid-template-columns: 1fr;">
             
             <section class="dash-card" id="appointments">
-                <div class="card-header">
-                    <h3>Incoming Schedule Today</h3>
-                    <span class="badge-count">4 Incoming Today</span>
+    <div class="card-header">
+        <h3>Incoming Schedule Today</h3>
+        <span class="badge-count">{{ scheduled_appointments|length }} Incoming Today</span>
+    </div>
+    
+    <div class="appointment-list">
+        {% if scheduled_appointments %}
+            {% for appt in scheduled_appointments %}
+            <div class="appointment-item" {% if appt.is_emergency or appt.appointment_type == 'EMERGENCY' %}style="border-left: 4px solid var(--primary-red);"{% endif %}>
+                <div class="donor-profile-group">
+                    <!-- Donor Avatar / Initials Fallback -->
+                    <div class="donor-avatar" style="display: flex; align-items: center; justify-content: center; background: #fee2e2; color: #dc2626; font-weight: bold; border-radius: 50%; width: 40px; height: 40px;">
+                        {{ appt.donor.user.first_name|slice:":1" }}{{ appt.donor.user.last_name|slice:":1" }}
+                    </div>
+                    <div class="appt-info">
+                        <strong>{{ appt.donor.user.first_name }} {{ appt.donor.user.last_name }} 
+                            <span class="badge blood-badge">{{ appt.donor.blood_type }}</span>
+                        </strong>
+                        <div>
+                            <span class="donor-contact">{{ appt.donor.phone }}</span>
+                            <span class="donation-type-tag">{{ appt.donation_type|title|default:"Blood Donation" }}</span>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="appointment-list">
-
-                    <div class="appointment-item">
-                        <div class="donor-profile-group">
-                            <img src="{% static 'organization/img/donor-placeholder-1.png' %}" alt="donor name" class="donor-avatar">
-                            <div class="appt-info">
-                                <strong>Marcus Vance <span class="badge blood-badge">O-Positive</span></strong>
-                                <div>
-                                    <span class="donor-contact">(306) 555-0142</span>
-                                    <span class="donation-type-tag">Blood Donation</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="appointment-item" style="border-left: 4px solid var(--primary-red);">
-                        <div class="donor-profile-group">
-                            <img src="#profileimg" alt="donor name" class="donor-avatar">
-                            <div class="appt-info">
-                                <strong>Sarah Jenkins <span class="badge blood-badge">A-Negative</span></strong>
-                                <div>
-                                    <span class="donor-contact">(306) 555-0198</span>
-                                    <span class="donation-type-tag">Emergency Blood</span>
-                                </div>
-                            </div>
-                        </div>
-                        <span class="badge emergency-appt-badge">Emergency Appointment</span>
-                    </div>
-
-                    <div class="appointment-item">
-                        <div class="donor-profile-group">
-                            <img src="#profileimg" alt="donor name" class="donor-avatar">
-                            <div class="appt-info">
-                                <strong>David Ross <span class="badge plasma-badge">AB-Positive</span></strong>
-                                <div>
-                                    <span class="donor-contact">(306) 555-0234</span>
-                                    <span class="donation-type-tag" style="background:#eeffef; color:#27ae60;">Plasma Donation</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="appointment-item">
-                        <div class="donor-profile-group">
-                            <img src="#profileimg" alt="donor name" class="donor-avatar">
-                            <div class="appt-info">
-                                <strong>Elena Rostova <span class="badge blood-badge">B-Negative</span></strong>
-                                <div>
-                                    <span class="donor-contact">(306) 555-0871</span>
-                                    <span class="donation-type-tag" style="background:#eaf2f8; color:#2980b9;">Platelets</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+                {% if appt.is_emergency or appt.appointment_type == 'EMERGENCY' %}
+                <span class="badge emergency-appt-badge">Emergency Appointment</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="appointment-item" style="justify-content: center; text-align: center; color: var(--text-muted);">
+                <div class="appt-info">
+                    <strong>No Appointments Scheduled</strong>
+                    <small>There are no incoming appointments for your facility today.</small>
                 </div>
-            </section>
+            </div>
+        {% endif %}
+    </div>
+</section>
 
         </div>
     </main>
