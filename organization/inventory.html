@@ -307,40 +307,78 @@
         </div>
     </div>
 
+
+    {{ open_donation_requests|json_script:"openDonationRequestsData" }}
     <!-- Request Restock / Fulfillment Modal Component -->
     <div id="fulfillmentModal" class="modal-overlay">
         <div class="modal-content">
             <h3>Request for Restock</h3>
               
-            <form id="fulfillmentForm" onsubmit="submitFulfillmentRequest(event)">
+            <form
+                id="fulfillmentForm"
+                method="POST"
+                action="{% url 'staff_create_donation_request' %}"
+                onsubmit="return confirmRestockRequest()"
+            >
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="confirm_add_to_existing"
+                    id="confirmAddToExisting"
+                    value="0"
+                >
                 
                 <div class="modal-section">
                     <label class="modal-label" for="targetBloodGroup">Blood Group</label>
-                    <select id="targetBloodGroup" class="modal-select" style="width: 100%;" required>
+                    <select
+                        id="targetBloodGroup"
+                        name="restock_blood_type"
+                        class="modal-select"
+                        style="width: 100%;"
+                        required
+                    >
                         <option value="" disabled selected>Select blood type</option>
-                        <option value="A-Positive (A+)">A-Positive (A+)</option>
-                        <option value="A-Negative (A-)">A-Negative (A-)</option>
-                        <option value="B-Positive (B+)">B-Positive (B+)</option>
-                        <option value="B-Negative (B-)">B-Negative (B-)</option>
-                        <option value="O-Positive (O+)">O-Positive (O+)</option>
-                        <option value="O-Negative (O-)">O-Negative (O-)</option>
-                        <option value="AB-Positive (AB+)">AB-Positive (AB+)</option>
-                        <option value="AB-Negative (AB-)">AB-Negative (AB-)</option>
+                        <option value="A+">A-Positive (A+)</option>
+                        <option value="A-">A-Negative (A-)</option>
+                        <option value="B+">B-Positive (B+)</option>
+                        <option value="B-">B-Negative (B-)</option>
+                        <option value="O+">O-Positive (O+)</option>
+                        <option value="O-">O-Negative (O-)</option>
+                        <option value="AB+">AB-Positive (AB+)</option>
+                        <option value="AB-">AB-Negative (AB-)</option>
                     </select>
                 </div>
 
                 <div class="modal-section">
                     <label class="modal-label" for="targetComponent">Component Type</label>
-                    <select id="targetComponent" class="modal-select" style="width: 100%;" required>
-                        <option value="Whole Blood">Whole Blood</option>
-                        <option value="Platelets">Platelets</option>
-                        <option value="Plasma">Plasma</option>
+                    <select
+                        id="targetComponent"
+                        name="restock_component"
+                        class="modal-select"
+                        style="width: 100%;"
+                        required
+                    >
+                        <option value="WHOLE_BLOOD">Whole Blood</option>
+                        <option value="RED_BLOOD_CELLS">Red Blood Cells</option>
+                        <option value="PLATELETS">Platelets</option>
+                        <option value="PLASMA">Plasma</option>
                     </select>
                 </div>
 
                 <div class="modal-section">
                     <label class="modal-label" for="requestedUnits">Required Units</label>
-                    <input type="number" id="requestedUnits" value="5" min="1" class="modal-input" style="width: 100%;" required>
+                    <input
+                        type="number"
+                        id="requestedUnits"
+                        name="restock_units"
+                        value="1"
+                        min="1"
+                        step="1"
+                        class="modal-input"
+                        style="width: 100%;"
+                        required
+                    >
                 </div>
 
 
@@ -405,7 +443,6 @@
         <p>&copy; 2026 Lifeline. Secure Medical Staff Console. All rights reserved.</p>
     </footer>
 
-    <!-- JavaScript for Actions, Dropdown & Modal -->
     <!-- JavaScript for Actions, Dropdown & Modal -->
     <script>
         let currentSelectedBloodType = "";
@@ -596,6 +633,62 @@
         }
 
         // --- Restock / Fulfillment Modal Functions ---
+        function confirmRestockRequest() {
+            const bloodType =
+                document.getElementById("targetBloodGroup").value;
+
+            const component =
+                document.getElementById("targetComponent").value;
+
+            const units =
+                Number(document.getElementById("requestedUnits").value);
+
+            const dataElement =
+                document.getElementById("openDonationRequestsData");
+
+            const openRequests =
+                JSON.parse(dataElement.textContent);
+
+            const requestKey =
+                bloodType + "|" + component;
+
+            const existingUnits =
+                openRequests[requestKey];
+
+            document.getElementById("confirmAddToExisting").value = "0";
+
+            if (existingUnits !== undefined) {
+
+                const componentName =
+                    component
+                        .replaceAll("_", " ")
+                        .toLowerCase()
+                        .replace(/\b\w/g, letter => letter.toUpperCase());
+
+                const confirmed = window.confirm(
+                    "There is already an open request for " +
+                    bloodType +
+                    " " +
+                    componentName +
+                    " with " +
+                    existingUnits +
+                    " unit(s).\n\n" +
+                    "Do you want to add " +
+                    units +
+                    " more unit(s) to this request?"
+                );
+
+                if (!confirmed) {
+                    return false;
+                }
+
+                document.getElementById(
+                    "confirmAddToExisting"
+                ).value = "1";
+            }
+
+            return true;
+        }
         function openFulfillmentModal() {
             document.getElementById("fulfillmentModal").style.display = "flex";
         }
@@ -603,18 +696,6 @@
         function closeFulfillmentModal() {
             document.getElementById("fulfillmentModal").style.display = "none";
             document.getElementById("fulfillmentForm").reset();
-        }
-
-        function submitFulfillmentRequest(event) {
-            event.preventDefault();
-            const bloodGroup = document.getElementById("targetBloodGroup").value;
-            const component = document.getElementById("targetComponent").value;
-            const units = document.getElementById("requestedUnits").value;
-
-            console.log("Restock Fulfillment Request Sent:", { bloodGroup, component, units });
-
-            alert(`Successfully submitted restock request for ${units} unit(s) of ${component} (${bloodGroup})!`);
-            closeFulfillmentModal();
         }
 
         function openAddStockModal() {
