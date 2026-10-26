@@ -187,8 +187,7 @@
                                         }}</span>
                                 </div>
                                 <small style="color: var(--text-muted); display: block; margin-top: 2px;">
-                                    📍 {{ em.donor.street_address }}, {{ em.donor.city }} (Requested: {{ em.created_at|date:"M
-                                    j, g:i A" }})
+                                     {{ em.donor.street_address }}, {{ em.donor.city }} (Requested: {{ em.created_at|date:"Mj, g:i A" }})
                                 </small>
                             </div>
                         </div>
@@ -211,39 +210,6 @@
     <div class="card-header">
         <h3>Recent Emergency History</h3>
         <span class="badge red-pulse">Live Dispatches</span>
-    </div>
-
-    <div class="appointment-list">
-        {% if emergency_history %}
-            {% for em in emergency_history %}
-            <div class="appointment-item" style="border-left: 4px solid var(--primary-red);">
-                <div class="donor-profile-group">
-                    <!-- Emergency Alert Icon/Avatar -->
-                    <div class="donor-avatar" style="display: flex; align-items: center; justify-content: center; background: #fee2e2; color: #dc2626; font-weight: bold; border-radius: 50%; width: 40px; height: 40px;">
-                        🚨
-                    </div>
-                    <div class="appt-info">
-                        <strong>Emergency Dispatch: {{ em.required_blood_type }} <span class="badge blood-badge">{{ em.component_type|title }}</span></strong>
-                        <div>
-                            <span class="donor-contact">Units Required: {{ em.units_required }}</span> • 
-                            <span class="donation-type-tag">Urgency: {{ em.urgency_level }}</span>
-                        </div>
-                        <small style="color: var(--text-muted); display: block; margin-top: 2px;">
-                            Status: {{ em.status|title }} • Dispatched: {{ em.created_at|date:"M j, g:i A" }}
-                        </small>
-                    </div>
-                </div>
-                <span class="badge emergency-appt-badge" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;">Active Alert</span>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="appointment-item" style="justify-content: center; text-align: center; color: var(--text-muted);">
-                <div class="appt-info">
-                    <strong>No Emergency History</strong>
-                    <small>No emergency broadcast dispatches found for this facility.</small>
-                </div>
-            </div>
-        {% endif %}
     </div>
 </section>
 
