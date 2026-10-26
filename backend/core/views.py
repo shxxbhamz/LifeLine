@@ -99,25 +99,41 @@ def staff_dashboard_view(request):
     current_user = None
     scheduled_appointments = []
     inventory_items = []
-
     try:
-        # Fetch the custom user record and staff profile
         current_user = Users.objects.get(id=user_id)
         staff_profile = StaffProfiles.objects.get(user_id=user_id)
         if staff_profile.facility:
             facility_name = staff_profile.facility.name
             facility_type = staff_profile.facility.facility_type.lower()
             
-            # Fetch scheduled appointments linked specifically to this facility
             scheduled_appointments = Appointments.objects.filter(
                 facility=staff_profile.facility
             ).select_related('donor__user')
 
-            # Fetch blood inventory linked specifically to this facility
-            # (Make sure BloodInventory is imported from .models)
-            inventory_items = BloodInventory.objects.filter(
+            # Fetch raw inventory rows from Neon
+            raw_inventory = BloodInventory.objects.filter(
                 facility=staff_profile.facility
             )
+            
+            # Map component rows into a dictionary grouped by blood type
+            inventory_dict = {}
+            for item in raw_inventory:
+                b_type = item.blood_type
+                if b_type not in inventory_dict:
+                    inventory_dict[b_type] = {'blood_type': b_type, 'whole_blood': 0, 'plasma': 0, 'status': 'Normal'}
+                
+                if item.component_type == 'WHOLE_BLOOD':
+                    inventory_dict[b_type]['whole_blood'] = item.units_available
+                elif item.component_type == 'PLASMA':
+                    inventory_dict[b_type]['plasma'] = item.units_available
+                
+                # Determine status based on thresholds
+                if item.units_available <= item.critical_threshold:
+                    inventory_dict[b_type]['status'] = 'Critical'
+                elif item.units_available <= item.low_threshold and inventory_dict[b_type]['status'] != 'Critical':
+                    inventory_dict[b_type]['status'] = 'Low'
+
+            inventory_items = list(inventory_dict.values())
             
     except (Users.DoesNotExist, StaffProfiles.DoesNotExist, Facilities.DoesNotExist):
         pass
