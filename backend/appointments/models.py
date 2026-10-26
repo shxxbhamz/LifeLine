@@ -22,6 +22,55 @@ class FacilityHours(models.Model):
         db_table = "facility_hours"
         unique_together = (("facility", "day_of_week"),)
 
+class DonationRequests(models.Model):
+    id = models.BigAutoField(primary_key=True)
+
+    facility = models.ForeignKey(
+        Facilities,
+        models.DB_CASCADE,
+    )
+
+    created_by = models.ForeignKey(
+        StaffProfiles,
+        models.DO_NOTHING,
+        db_column="created_by",
+    )
+
+    required_blood_type = models.CharField(max_length=3)
+    component_type = models.CharField(max_length=30)
+    units_required = models.IntegerField()
+
+    status = models.CharField(max_length=20)
+
+    notes = models.TextField(
+        blank=True,
+        null=True,
+    )
+
+    expires_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    idempotency_key = models.CharField(
+        max_length=64,
+        unique=True,
+        blank=True,
+        null=True,
+    )
+
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
+
+    fulfilled_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        managed = False
+        db_table = "donation_requests"
+
 
 class Appointments(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -38,6 +87,13 @@ class Appointments(models.Model):
 
     request_match = models.OneToOneField(
         "emergencies.RequestMatches",
+        models.DB_SET_NULL,
+        blank=True,
+        null=True,
+    )
+
+    donation_request = models.ForeignKey(
+        "appointments.DonationRequests",
         models.DB_SET_NULL,
         blank=True,
         null=True,
