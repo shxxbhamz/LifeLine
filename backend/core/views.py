@@ -672,3 +672,26 @@ def staff_edit_profile_view(request):
             "facility": facility,
         },
     )
+
+def staff_appointments_view(request):
+    # Only logged-in staff can access this page.
+    if request.session.get("user_id") is None or request.session.get("role") != "HOSPITAL_STAFF":
+        return redirect("login")
+
+    user_id = request.session.get("user_id")
+    scheduled_appointments = []
+
+    try:
+        staff_profile = StaffProfiles.objects.get(user_id=user_id)
+        if staff_profile.facility:
+            # Fetch appointments linked to this facility, with donor and user data preloaded
+            scheduled_appointments = Appointments.objects.filter(
+                facility=staff_profile.facility
+            ).select_related('donor__user').order_by('appointment_date', 'appointment_time')
+    except (StaffProfiles.DoesNotExist, Facilities.DoesNotExist):
+        pass
+
+    context = {
+        'scheduled_appointments': scheduled_appointments,
+    }
+    return render(request, "organization/appointments.html", context)
