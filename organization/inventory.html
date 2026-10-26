@@ -307,6 +307,8 @@
         </div>
     </div>
 
+
+    {{ open_donation_requests|json_script:"openDonationRequestsData" }}
     <!-- Request Restock / Fulfillment Modal Component -->
     <div id="fulfillmentModal" class="modal-overlay">
         <div class="modal-content">
@@ -316,8 +318,16 @@
                 id="fulfillmentForm"
                 method="POST"
                 action="{% url 'staff_create_donation_request' %}"
+                onsubmit="return confirmRestockRequest()"
             >
                 {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="confirm_add_to_existing"
+                    id="confirmAddToExisting"
+                    value="0"
+                >
                 
                 <div class="modal-section">
                     <label class="modal-label" for="targetBloodGroup">Blood Group</label>
@@ -623,6 +633,62 @@
         }
 
         // --- Restock / Fulfillment Modal Functions ---
+        function confirmRestockRequest() {
+            const bloodType =
+                document.getElementById("targetBloodGroup").value;
+
+            const component =
+                document.getElementById("targetComponent").value;
+
+            const units =
+                Number(document.getElementById("requestedUnits").value);
+
+            const dataElement =
+                document.getElementById("openDonationRequestsData");
+
+            const openRequests =
+                JSON.parse(dataElement.textContent);
+
+            const requestKey =
+                bloodType + "|" + component;
+
+            const existingUnits =
+                openRequests[requestKey];
+
+            document.getElementById("confirmAddToExisting").value = "0";
+
+            if (existingUnits !== undefined) {
+
+                const componentName =
+                    component
+                        .replaceAll("_", " ")
+                        .toLowerCase()
+                        .replace(/\b\w/g, letter => letter.toUpperCase());
+
+                const confirmed = window.confirm(
+                    "There is already an open request for " +
+                    bloodType +
+                    " " +
+                    componentName +
+                    " with " +
+                    existingUnits +
+                    " unit(s).\n\n" +
+                    "Do you want to add " +
+                    units +
+                    " more unit(s) to this request?"
+                );
+
+                if (!confirmed) {
+                    return false;
+                }
+
+                document.getElementById(
+                    "confirmAddToExisting"
+                ).value = "1";
+            }
+
+            return true;
+        }
         function openFulfillmentModal() {
             document.getElementById("fulfillmentModal").style.display = "flex";
         }
