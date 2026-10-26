@@ -110,12 +110,13 @@ class BloodInventory(models.Model):
         Facilities,
         models.DO_NOTHING,
         db_column='facility_id',
-        related_name='facility_blood_inventory',  # <--- Add this unique related_name
+        related_name='facility_blood_inventory',
     )
     blood_type = models.CharField(max_length=5)
-    whole_blood_units = models.IntegerField(default=0)
-    plasma_units = models.IntegerField(default=0)
-    status = models.CharField(max_length=20, default='NORMAL')
+    component_type = models.CharField(max_length=30)
+    units_available = models.IntegerField(default=0)
+    low_threshold = models.IntegerField(default=5)
+    critical_threshold = models.IntegerField(default=2)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

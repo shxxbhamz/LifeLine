@@ -82,25 +82,23 @@
                             {% for item in inventory_items %}
                             <tr>
                                 <td><strong>{{ item.blood_type }}</strong></td>
-                                <td>{{ item.whole_blood_units|default:0 }}</td>
-                                <td>{{ item.plasma_units|default:0 }}</td>
+                                <td>{{ item.whole_blood }}</td>
+                                <td>{{ item.plasma }}</td>
                                 <td>
-                                    {% if item.status == 'CRITICAL' or item.whole_blood_units <= 2 %} <span
-                                        class="badge red">Critical</span>
-                                        {% elif item.status == 'LOW' or item.whole_blood_units <= 5 %} <span
-                                            class="badge yellow">Low</span>
-                                            {% else %}
-                                            <span class="badge green">Normal</span>
-                                            {% endif %}
+                                    {% if item.status == 'Critical' %}
+                                    <span class="badge red">Critical</span>
+                                    {% elif item.status == 'Low' %}
+                                    <span class="badge yellow">Low</span>
+                                    {% else %}
+                                    <span class="badge green">Normal</span>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}
                             {% else %}
-                            <!-- Fallback message if no inventory rows exist for this facility yet -->
                             <tr>
-                                <td colspan="4" style="text-align: center; color: var(--text-muted);">
-                                    No inventory records found for this facility.
-                                </td>
+                                <td colspan="4" style="text-align: center;">No inventory records found for this
+                                    facility.</td>
                             </tr>
                             {% endif %}
                         </tbody>
