@@ -684,10 +684,10 @@ def staff_appointments_view(request):
     try:
         staff_profile = StaffProfiles.objects.get(user_id=user_id)
         if staff_profile.facility:
-            # Fetch appointments linked to this facility, with donor and user data preloaded
+            # Fetch all appointments for this facility without strict date restriction
             scheduled_appointments = Appointments.objects.filter(
                 facility=staff_profile.facility
-            ).select_related('donor__user').order_by('appointment_date', 'appointment_time')
+            ).select_related('donor__user').order_by('-id')
     except (StaffProfiles.DoesNotExist, Facilities.DoesNotExist):
         pass
 
