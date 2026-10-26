@@ -131,14 +131,13 @@ class EmergencyRequests(models.Model):
         db_column='facility_id',
         related_name='facility_emergency_requests',
     )
-    blood_type_needed = models.CharField(max_length=5)
-    component_type = models.CharField(max_length=30)
-    units_required = models.IntegerField(default=1)
-    urgency_level = models.CharField(max_length=20, default='Critical')
-    status = models.CharField(max_length=20, default='active')
-    created_at = models.DateTimeField(auto_now_add=True)
+    required_blood_type = models.CharField(max_length=5, db_column='required_blood_type')
+    component_type = models.CharField(max_length=30, db_column='component_type')
+    units_required = models.IntegerField(default=1, db_column='units_required')
+    urgency_level = models.CharField(max_length=20, default='Critical', db_column='urgency_level')
+    status = models.CharField(max_length=20, default='active', db_column='status')
+    created_at = models.DateTimeField(auto_now_add=True, db_column='created_at')
 
     class Meta:
         managed = False
         db_table = "emergency_requests"
-        
