@@ -56,19 +56,19 @@
         <!-- Dashboard Grid Layout -->
         <div class="dashboard-grid" style="grid-template-columns: 1fr;">
             
-            <section class="dash-card" id="appointments">
+           <section class="dash-card" id="appointments">
     <div class="card-header">
-        <h3>Incoming Schedule Today</h3>
-        <span class="badge-count">{{ scheduled_appointments|length }} Incoming Today</span>
+        <h3>Incoming Schedule & Dispatches</h3>
+        <span class="badge-count">{{ scheduled_appointments|length|add:emergency_requests|length }} Total Items</span>
     </div>
     
     <div class="appointment-list">
+        <!-- Render Normal Appointments -->
         {% if scheduled_appointments %}
             {% for appt in scheduled_appointments %}
-            <div class="appointment-item" {% if appt.is_emergency or appt.appointment_type == 'EMERGENCY' %}style="border-left: 4px solid var(--primary-red);"{% endif %}>
+            <div class="appointment-item">
                 <div class="donor-profile-group">
-                    <!-- Donor Avatar / Initials Fallback -->
-                    <div class="donor-avatar" style="display: flex; align-items: center; justify-content: center; background: #fee2e2; color: #dc2626; font-weight: bold; border-radius: 50%; width: 40px; height: 40px;">
+                    <div class="donor-avatar" style="display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #475569; font-weight: bold; border-radius: 50%; width: 40px; height: 40px;">
                         {{ appt.donor.user.first_name|slice:":1" }}{{ appt.donor.user.last_name|slice:":1" }}
                     </div>
                     <div class="appt-info">
@@ -81,16 +81,39 @@
                         </div>
                     </div>
                 </div>
-                {% if appt.is_emergency or appt.appointment_type == 'EMERGENCY' %}
-                <span class="badge emergency-appt-badge">Emergency Appointment</span>
-                {% endif %}
+                <span class="badge" style="background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;">Normal Appointment</span>
             </div>
             {% endfor %}
-        {% else %}
+        {% endif %}
+
+        <!-- Render Emergency Requests inside the same list -->
+        {% if emergency_requests %}
+            {% for em in emergency_requests %}
+            <div class="appointment-item" style="border-left: 4px solid var(--primary-red);">
+                <div class="donor-profile-group">
+                    <div class="donor-avatar" style="display: flex; align-items: center; justify-content: center; background: #fee2e2; color: #dc2626; font-weight: bold; border-radius: 50%; width: 40px; height: 40px;">
+                    </div>
+                    <div class="appt-info">
+                        <strong>Emergency Dispatch: {{ em.required_blood_type }} 
+                            <span class="badge blood-badge">{{ em.component_type|title }}</span>
+                        </strong>
+                        <div>
+                            <span class="donor-contact">Units Required: {{ em.units_required }}</span>
+                            <span class="donation-type-tag" style="background:#fef2f2; color:#dc2626;">Emergency Request</span>
+                        </div>
+                    </div>
+                </div>
+                <span class="badge emergency-appt-badge">Active Emergency</span>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Fallback if both are empty -->
+        {% if not scheduled_appointments and not emergency_requests %}
             <div class="appointment-item" style="justify-content: center; text-align: center; color: var(--text-muted);">
                 <div class="appt-info">
-                    <strong>No Appointments Scheduled</strong>
-                    <small>There are no incoming appointments for your facility today.</small>
+                    <strong>No Appointments or Dispatches Found</strong>
+                    <small>There are no scheduled appointments or emergency requests for your facility.</small>
                 </div>
             </div>
         {% endif %}
