@@ -7,6 +7,7 @@ from django.utils import timezone
 from .models import DonorProfiles, Facilities, StaffProfiles, Users, BloodInventory, EmergencyRequests
 from appointments.models import Appointments
 
+
 from .utils import send_welcome_email
 
 def home_view(request):
@@ -674,7 +675,9 @@ def staff_edit_profile_view(request):
     )
 
 
+
 def staff_appointments_view(request):
+    # 1. Ensure user is logged in and is hospital staff
     if request.session.get("user_id") is None or request.session.get("role") != "HOSPITAL_STAFF":
         return redirect("login")
 
@@ -683,25 +686,24 @@ def staff_appointments_view(request):
     emergency_requests = []
 
     try:
-        staff_profile = StaffProfiles.objects.get(user_id=user_id)
-        if staff_profile.facility:
-            scheduled_appointments = list(Appointments.objects.filter(
-                facility=staff_profile.facility
-            ).select_related('donor__user').order_by('-id'))
-
-            emergency_requests = list(EmergencyRequests.objects.filter(
-                facility=staff_profile.facility
-            ).order_by('-created_at'))
+        # 2. Find the staff profile for this user ID
+        staff_profile = StaffProfiles.objects.select_related('facility').get(user_id=user_id)
         
-        # Fallback for testing/visibility if facility linkage differs
-        if not scheduled_appointments:
-            scheduled_appointments = list(Appointments.objects.all().select_related('donor__user').order_by('-id')[:10])
-        if not emergency_requests:
-            emergency_requests = list(EmergencyRequests.objects.all().order_by('-created_at')[:10])
+        # 3. If a facility is linked, pull data strictly for that facility ID
+        if staff_profile.facility:
+            facility_id = staff_profile.facility.id
             
-    except (StaffProfiles.DoesNotExist, Facilities.DoesNotExist):
-        scheduled_appointments = list(Appointments.objects.all().select_related('donor__user').order_by('-id')[:10])
-        emergency_requests = list(EmergencyRequests.objects.all().order_by('-created_at')[:10])
+            scheduled_appointments = Appointments.objects.filter(
+                facility_id=facility_id
+            ).select_related('donor__user').order_by('-id')
+
+            emergency_requests = EmergencyRequests.objects.filter(
+                facility_id=facility_id
+            ).order_by('-created_at')
+            
+    except StaffProfiles.DoesNotExist:
+        # If no staff profile exists for this user, lists remain empty
+        pass
 
     context = {
         'scheduled_appointments': scheduled_appointments,
