@@ -674,29 +674,49 @@ def staff_edit_profile_view(request):
     )
 
 def staff_appointments_view(request):
-    if request.session.get("user_id") is None or request.session.get("role") != "HOSPITAL_STAFF":
+    # Only logged-in hospital staff can access this page.
+    if (
+        request.session.get("user_id") is None
+        or request.session.get("role") != "HOSPITAL_STAFF"
+    ):
         return redirect("login")
 
-    user_id = request.session.get("user_id")
-    scheduled_appointments = []
-    emergency_requests = []
+    user_id = request.session["user_id"]
 
     try:
         staff_profile = StaffProfiles.objects.get(user_id=user_id)
-        if staff_profile.facility:
-            scheduled_appointments = Appointments.objects.filter(
-                facility=staff_profile.facility
-            ).select_related('donor__user').order_by('-id')
+    except StaffProfiles.DoesNotExist:
+        request.session.flush()
+        return redirect("login")
 
-            emergency_requests = EmergencyRequests.objects.filter(
-                facility=staff_profile.facility
-            ).order_by('-created_at')
-            
-    except (StaffProfiles.DoesNotExist, Facilities.DoesNotExist):
-        pass
+    # Get appointments for this staff member's facility.
+    scheduled_appointments = (
+        Appointments.objects
+        .filter(facility=staff_profile.facility)
+        .order_by("-scheduled_at")
+    )
+
+    # Get emergency requests for this facility.
+    emergency_requests = (
+        EmergencyRequests.objects
+        .filter(facility=staff_profile.facility)
+        .order_by("-created_at")
+    )
+
+    # Calculate the combined total.
+    total_items = (
+        scheduled_appointments.count()
+        + emergency_requests.count()
+    )
 
     context = {
-        'scheduled_appointments': scheduled_appointments,
-        'emergency_requests': emergency_requests,
+        "scheduled_appointments": scheduled_appointments,
+        "emergency_requests": emergency_requests,
+        "total_items": total_items,
     }
-    return render(request, "organization/appointments.html", context)
+
+    return render(
+        request,
+        "organization/appointment.html",
+        context,
+    )

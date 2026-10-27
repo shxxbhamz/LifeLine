@@ -4,6 +4,7 @@ from django.db import models
 from core.models import DonorProfiles, Facilities, StaffProfiles
 
 
+
 class FacilityHours(models.Model):
     id = models.BigAutoField(primary_key=True)
 
