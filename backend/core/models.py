@@ -2,6 +2,7 @@
 from django.db import models
 
 
+
 class Users(models.Model):
     id = models.BigAutoField(primary_key=True)
     username = models.CharField(unique=True, max_length=50)
