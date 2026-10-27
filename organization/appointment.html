@@ -54,73 +54,103 @@
         </section>
 
         <!-- Dashboard Grid Layout -->
-        <div class="dashboard-grid" style="grid-template-columns: 1fr;">
+       <div class="dashboard-grid" style="grid-template-columns: 1fr; gap: 20px;">
             
-           <section class="dash-card" id="appointments">
-    <div class="card-header">
-        <h3>Incoming Schedule & Dispatches</h3>
-        <span class="badge-count">{{ total_items }} Total Items</span>
-    </div>
-    
-    <div class="appointment-list">
-        <!-- Render Normal Appointments -->
-        {% if scheduled_appointments %}
-            {% for appt in scheduled_appointments %}
-            <div class="appointment-item">
-                <div class="donor-profile-group">
-                    <div class="donor-avatar" style="display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #475569; font-weight: bold; border-radius: 50%; width: 40px; height: 40px;">
-                        {{ appt.donor.user.first_name|slice:":1" }}{{ appt.donor.user.last_name|slice:":1" }}
-                    </div>
-                    <div class="appt-info">
-                        <strong>{{ appt.donor.user.first_name }} {{ appt.donor.user.last_name }} 
-                            <span class="badge blood-badge">{{ appt.donor.blood_type }}</span>
-                        </strong>
-                        <div>
-                            <span class="donor-contact">{{ appt.donor.phone }}</span>
-                            <span class="donation-type-tag">{{ appt.donation_type|title|default:"Blood Donation" }}</span>
+            <!-- TOP CARD: Emergency Requests -->
+            <section class="dash-card" id="emergency-dispatches">
+                <div class="card-header">
+                    <h3>Active Emergency Dispatches</h3>
+                    <span class="badge red-pulse" style="background: #fee2e2; color: #dc2626; padding: 4px 10px; border-radius: 12px; font-weight: bold;">{{ emergency_requests|length }} Emergency</span>
+                </div>
+                
+                <div class="appointment-list">
+                    {% if emergency_requests %}
+                        {% for em in emergency_requests %}
+                        <div class="appointment-item" style="border-left: 4px solid var(--primary-red);">
+                            <div class="donor-profile-group">
+                                <div class="donor-avatar" style="display: flex; align-items: center; justify-content: center; background: #fee2e2; color: #dc2626; font-weight: bold; border-radius: 50%; width: 40px; height: 40px;">
+                                    🚨
+                                </div>
+                                <div class="appt-info">
+                                    <strong>Emergency Dispatch: {{ em.required_blood_type }} 
+                                        <span class="badge blood-badge">{{ em.component_type|title }}</span>
+                                    </strong>
+                                    <div>
+                                        <span class="donor-contact">Units Required: {{ em.units_required }}</span>
+                                        <span class="donation-type-tag" style="background:#fef2f2; color:#dc2626;">Emergency Request</span>
+                                    </div>
+                                    <small style="color: var(--text-muted); display: block; margin-top: 2px;">
+                                        Status: {{ em.status|title }} • Created: {{ em.created_at|date:"M j, g:i A" }}
+                                    </small>
+                                </div>
+                            </div>
+                            <span class="badge emergency-appt-badge" style="background: #fee2e2; color: #dc2626;">Active Alert</span>
                         </div>
-                    </div>
-                </div>
-                <span class="badge" style="background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;">Normal Appointment</span>
-            </div>
-            {% endfor %}
-        {% endif %}
-
-        <!-- Render Emergency Requests inside the same list -->
-        {% if emergency_requests %}
-            {% for em in emergency_requests %}
-            <div class="appointment-item" style="border-left: 4px solid var(--primary-red);">
-                <div class="donor-profile-group">
-                    <div class="donor-avatar" style="display: flex; align-items: center; justify-content: center; background: #fee2e2; color: #dc2626; font-weight: bold; border-radius: 50%; width: 40px; height: 40px;">
-                    </div>
-                    <div class="appt-info">
-                        <strong>Emergency Dispatch: {{ em.required_blood_type }} 
-                            <span class="badge blood-badge">{{ em.component_type|title }}</span>
-                        </strong>
-                        <div>
-                            <span class="donor-contact">Units Required: {{ em.units_required }}</span>
-                            <span class="donation-type-tag" style="background:#fef2f2; color:#dc2626;">Emergency Request</span>
+                        {% endfor %}
+                    {% else %}
+                        <div class="appointment-item" style="justify-content: center; text-align: center; color: var(--text-muted);">
+                            <div class="appt-info">
+                                <strong>No Emergency Dispatches</strong>
+                                <small>There are no emergency requests active for your facility.</small>
+                            </div>
                         </div>
-                    </div>
+                    {% endif %}
                 </div>
-                <span class="badge emergency-appt-badge">Active Emergency</span>
-            </div>
-            {% endfor %}
-        {% endif %}
+            </section>
 
-        <!-- Fallback if both are empty -->
-        {% if not scheduled_appointments and not emergency_requests %}
-            <div class="appointment-item" style="justify-content: center; text-align: center; color: var(--text-muted);">
-                <div class="appt-info">
-                    <strong>No Appointments or Dispatches Found</strong>
-                    <small>There are no scheduled appointments or emergency requests for your facility.</small>
+            <!-- BOTTOM CARD: Normal Scheduled Appointments -->
+            <section class="dash-card" id="normal-appointments">
+                <div class="card-header">
+                    <h3>Incoming Scheduled Appointments</h3>
+                    <span class="badge-count" style="background: #f0fdf4; color: #16a34a; padding: 4px 10px; border-radius: 12px; font-weight: bold;">{{ scheduled_appointments|length }} Normal</span>
                 </div>
-            </div>
-        {% endif %}
-    </div>
-</section>
+                
+                <div class="appointment-list">
+                    {% if scheduled_appointments %}
+                        {% for appt in scheduled_appointments %}
+                        <div class="appointment-item">
+                            <div class="donor-profile-group">
+                                <div class="donor-avatar" style="display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #475569; font-weight: bold; border-radius: 50%; width: 40px; height: 40px;">
+                                    {% if appt.donor and appt.donor.user %}
+                                        {{ appt.donor.user.first_name|slice:":1" }}{{ appt.donor.user.last_name|slice:":1" }}
+                                    {% else %}
+                                        👤
+                                    {% endif %}
+                                </div>
+                                <div class="appt-info">
+                                    <strong>
+                                        {% if appt.donor and appt.donor.user %}
+                                            {{ appt.donor.user.first_name }} {{ appt.donor.user.last_name }}
+                                        {% else %}
+                                            Scheduled Donor
+                                        {% endif %}
+                                        <span class="badge blood-badge">{{ appt.donor.blood_type|default:"O+" }}</span>
+                                    </strong>
+                                    <div>
+                                        <span class="donor-contact">{{ appt.donor.phone|default:"No phone provided" }}</span>
+                                        <span class="donation-type-tag">{{ appt.donation_type|title|default:"Whole Blood" }}</span>
+                                    </div>
+                                    <small style="color: var(--text-muted); display: block; margin-top: 2px;">
+                                        Scheduled: {{ appt.scheduled_at|date:"M j, g:i A"|default:"Today" }}
+                                    </small>
+                                </div>
+                            </div>
+                            <span class="badge" style="background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;">Normal Appointment</span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="appointment-item" style="justify-content: center; text-align: center; color: var(--text-muted);">
+                            <div class="appt-info">
+                                <strong>No Scheduled Appointments</strong>
+                                <small>There are no incoming normal appointments for your facility today.</small>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
 
         </div>
+        
     </main>
 
     <!-- Footer -->
