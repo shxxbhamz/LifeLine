@@ -672,6 +672,8 @@ def staff_edit_profile_view(request):
             "facility": facility,
         },
     )
+
+
 def staff_appointments_view(request):
     if request.session.get("user_id") is None or request.session.get("role") != "HOSPITAL_STAFF":
         return redirect("login")
@@ -683,7 +685,6 @@ def staff_appointments_view(request):
     try:
         staff_profile = StaffProfiles.objects.get(user_id=user_id)
         if staff_profile.facility:
-            # Try filtering by facility first
             scheduled_appointments = list(Appointments.objects.filter(
                 facility=staff_profile.facility
             ).select_related('donor__user').order_by('-id'))
@@ -692,7 +693,7 @@ def staff_appointments_view(request):
                 facility=staff_profile.facility
             ).order_by('-created_at'))
         
-        # Fallback: if nothing found for this specific facility, grab recent records for testing/visibility
+        # Fallback for testing/visibility if facility linkage differs
         if not scheduled_appointments:
             scheduled_appointments = list(Appointments.objects.all().select_related('donor__user').order_by('-id')[:10])
         if not emergency_requests:
@@ -702,11 +703,8 @@ def staff_appointments_view(request):
         scheduled_appointments = list(Appointments.objects.all().select_related('donor__user').order_by('-id')[:10])
         emergency_requests = list(EmergencyRequests.objects.all().order_by('-created_at')[:10])
 
-    total_items = len(scheduled_appointments) + len(emergency_requests)
-
     context = {
         'scheduled_appointments': scheduled_appointments,
         'emergency_requests': emergency_requests,
-        'total_items': total_items,
     }
     return render(request, "organization/appointment.html", context)
