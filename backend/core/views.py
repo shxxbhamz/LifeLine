@@ -696,4 +696,4 @@ def staff_appointments_view(request):
         'scheduled_appointments': scheduled_appointments,
         'emergency_requests': emergency_requests,
     }
-    return render(request, "organization/appointments.html", context)
+    return render(request, "organization/appointment.html", context)
