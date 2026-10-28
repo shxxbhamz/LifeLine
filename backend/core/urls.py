@@ -14,9 +14,8 @@ urlpatterns = [
     path("staff/profile/edit/", views.staff_edit_profile_view, name="staff_edit_profile"),
     path("logout/", views.logout_view, name="logout"),
     path("staff/appointments/", views.staff_appointments_view, name="staff_appointments"),
-    
+    path("staff/emergencies/", views.staff_emergencies_view, name="staff_emergencies"), 
     # Commented out until their view functions are created in views.py:
-    # path("staff/emergencies/", views.staff_emergencies_view, name="staff_emergencies"), 
     # path("staff/inventory/", views.staff_inventory_view, name="staff_inventory"),      
     # path("staff/audit-log/", views.staff_audit_log_view, name="staff_audit_log"),      
 ]
