@@ -683,25 +683,39 @@ def staff_appointments_view(request):
     user_id = request.session.get("user_id")
     scheduled_appointments = []
     emergency_requests = []
+    responding_emergency_donors = []
 
     try:
         staff_profile = StaffProfiles.objects.select_related('facility').get(user_id=user_id)
         if staff_profile.facility:
             facility_id = staff_profile.facility.id
-            scheduled_appointments = Appointments.objects.filter(facility_id=facility_id).select_related('donor__user').order_by('-id')
-            emergency_requests = EmergencyRequests.objects.filter(facility_id=facility_id).order_by('-created_at')
+            scheduled_appointments = Appointments.objects.filter(
+                facility_id=facility_id
+            ).select_related('donor__user').order_by('-id')
+            
+            emergency_requests = EmergencyRequests.objects.filter(
+                facility_id=facility_id
+            ).order_by('-created_at')
+            
+            # Fetch accepted emergency responding donors for this facility
+            responding_emergency_donors = Appointments.objects.filter(
+                facility_id=facility_id,
+                appointment_source='EMERGENCY'
+            ).select_related('donor', 'donor__user').order_by('-id')
+            
     except StaffProfiles.DoesNotExist:
         pass
 
     context = {
         'scheduled_appointments': scheduled_appointments,
         'emergency_requests': emergency_requests,
+        'responding_emergency_donors': responding_emergency_donors,
     }
     return render(request, "organization/appointment.html", context)
 
 
 def staff_emergencies_view(request):
-    # Match the exact same authentication check as staff_appointments_view
+    # 1. Ensure staff is logged in with hospital staff role
     if request.session.get("user_id") is None or request.session.get("role") != "HOSPITAL_STAFF":
         return redirect("login")
 
@@ -712,26 +726,29 @@ def staff_emergencies_view(request):
     responding_emergency_donors = []
 
     try:
-        # Pull staff profile linked to the session user_id, exactly like appointments view
+        # 2. Get the logged-in staff member's facility
         staff_profile = StaffProfiles.objects.select_related('facility').get(user_id=user_id)
         if staff_profile.facility:
             facility_id = staff_profile.facility.id
     except StaffProfiles.DoesNotExist:
         pass
 
-    # Fallback to facility 4 if session lookup doesn't resolve a facility
+    # Fallback facility ID if session/profile isn't mapped
     if not facility_id:
         facility_id = 4
 
     if facility_id:
+        # 3. Fetch active emergency requests broadcasted by this facility (Right Card)
         emergency_requests = EmergencyRequests.objects.filter(
             facility_id=facility_id, 
+            status='ACTIVE'
         ).order_by('-created_at')
         
-        # Fetch emergency appointments with related donor and user info
+        # 4. Fetch accepted emergency donors from the appointments table (Left Card)
+        # Using select_related('donor', 'donor__user') to fetch profile pictures, names, and phones cleanly
         responding_emergency_donors = Appointments.objects.filter(
             facility_id=facility_id,
-            donation_type__iexact='Emergency'
+            appointment_source='EMERGENCY'
         ).select_related('donor', 'donor__user').order_by('-id')
 
     context = {
