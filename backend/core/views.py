@@ -697,3 +697,34 @@ def staff_appointments_view(request):
         'emergency_requests': emergency_requests,
     }
     return render(request, "organization/appointment.html", context)
+
+def staff_emergencies_view(request):
+    try:
+        staff_profile = StaffProfiles.objects.get(user=request.user)
+        facility_id = staff_profile.facility_id
+    except StaffProfiles.DoesNotExist:
+        staff_profile = None
+        facility_id = None
+
+    # Fetch active emergency requests for this facility
+    emergency_requests = []
+    responding_emergency_donors = []
+    
+    if facility_id:
+        emergency_requests = EmergencyRequests.objects.filter(
+            facility_id=facility_id, 
+            status='ACTIVE'
+        ).order_by('-created_at')
+        
+        # Fetch emergency appointments/donors responding to facility requests
+        responding_emergency_donors = Appointments.objects.filter(
+            facility_id=facility_id, 
+            appointment_type__iexact='Emergency'
+        ).order_by('-created_at')
+
+    context = {
+        'staff_profile': staff_profile,
+        'emergency_requests': emergency_requests,
+        'responding_emergency_donors': responding_emergency_donors,
+    }
+    return render(request, "organization/emergencies.html", context)

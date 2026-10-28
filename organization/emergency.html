@@ -37,11 +37,11 @@
     </header>
 
     <!-- Sub Navigation Bar / Quick Links -->
-    <nav class="sub-nav">
+   <nav class="sub-nav">
         <ul>
             <li><a href="{% url 'staff_dashboard' %}">Home</a></li>
-            <li><a href="{% url 'staff_appointments' %}">Appointments</a></li>
-            <li><a href="{% url 'staff_emergencies' %}" class="active">Active Emergency Dispatches</a></li>
+            <li><a href="{% url 'staff_appointments' %}" class="active">Appointments</a></li>
+            <li><a href="{% url 'staff_emergencies' %}">Active Emergency Dispatches</a></li>
             <li><a href="{% url 'staff_inventory' %}">Blood & Plasma Inventory</a></li>
             <li><a href="{% url 'staff_audit_log' %}">Broadcast Audit Log</a></li>
         </ul>
@@ -73,30 +73,33 @@
             </section>
 <div style="display: flex; gap: 20px; width: 100%;">
             <!-- Below Map: Active Emergency Donor Profiles & Details -->
-            <section class="dash-card" id="emergency-donors" style="flex: 1;">
-                <div class="card-header">
-                    <h3>Responding Emergency Donors</h3>
-                </div>
-             
-                <div class="appointment-list">
-                    
-                    <!-- Emergency Donor 1 -->
-                    <div class="appointment-item" style="border-left: 4px solid var(--primary-red);">
-                        <div class="donor-profile-group">
-                            <img src="#prolfeimg" alt="donar name" class="donor-avatar">
-                            <div class="appt-info">
-                                <strong>Sarah Jenkins <span class="badge blood-badge">A-Negative</span></strong>
-                                <div>
-                                    <span class="donor-contact">(306) 555-0198</span>
-                                </div>
-                                <small style="display: block; margin-top: 4px; color: var(--text-main);"> 2125 11th Ave, Regina, SK • Distance: 1.2 km away</small>
-                            </div>
-                        </div>
-                        <span class="badge emergency-appt-badge">Emergency</span>
+          <section class="dash-card" id="emergency-donors" style="flex: 1; min-width: 300px;">
+                    <div class="card-header">
+                        <h3>Responding Emergency Donors</h3>
                     </div>
-
-                </div>
-            </section>
+                   
+                    <div class="appointment-list">
+                        {% if responding_emergency_donors %}
+                            {% for donor_appt in responding_emergency_donors %}
+                            <div class="appointment-item" style="border-left: 4px solid var(--primary-red);">
+                                <div class="donor-profile-group">
+                                    <img src="{% static 'organization/img/default-avatar.png' %}" alt="donor" class="donor-avatar">
+                                    <div class="appt-info">
+                                        <strong>{{ donor_appt.donor_name|default:"Emergency Donor" }} <span class="badge blood-badge">{{ donor_appt.blood_type }}</span></strong>
+                                        <div>
+                                            <span class="donor-contact">{{ donor_appt.contact_number|default:"Contact on file" }}</span>
+                                        </div>
+                                        <small style="display: block; margin-top: 4px; color: var(--text-main);">Scheduled: {{ donor_appt.appointment_date }}</small>
+                                    </div>
+                                </div>
+                                <span class="badge emergency-appt-badge">Emergency</span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="padding: 16px; color: var(--text-muted); text-align: center;">No active emergency donor responses at this time.</p>
+                        {% endif %}
+                    </div>
+                </section>
 
              <!-- RIGHT COLUMN: Organization Emergency Requests Generated -->
                 <section class="dash-card" id="organization-emergency-requests" style="flex: 1;">
