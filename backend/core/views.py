@@ -701,16 +701,28 @@ def staff_appointments_view(request):
 
 
 def staff_emergencies_view(request):
-    try:
-        staff_profile = StaffProfiles.objects.first()
-        facility_id = staff_profile.facility_id if staff_profile else 4
-    except Exception:
-        staff_profile = None
-        facility_id = 4
+    # Match the exact same authentication check as staff_appointments_view
+    if request.session.get("user_id") is None or request.session.get("role") != "HOSPITAL_STAFF":
+        return redirect("login")
 
+    user_id = request.session.get("user_id")
+    staff_profile = None
+    facility_id = None
     emergency_requests = []
     responding_emergency_donors = []
-    
+
+    try:
+        # Pull staff profile linked to the session user_id, exactly like appointments view
+        staff_profile = StaffProfiles.objects.select_related('facility').get(user_id=user_id)
+        if staff_profile.facility:
+            facility_id = staff_profile.facility.id
+    except StaffProfiles.DoesNotExist:
+        pass
+
+    # Fallback to facility 4 if session lookup doesn't resolve a facility
+    if not facility_id:
+        facility_id = 4
+
     if facility_id:
         emergency_requests = EmergencyRequests.objects.filter(
             facility_id=facility_id, 
