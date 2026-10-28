@@ -73,59 +73,55 @@
             </section>
 <div style="display: flex; gap: 20px; width: 100%;">
             <!-- Below Map: Active Emergency Donor Profiles & Details -->
-        <section class="dash-card" id="emergency-donors" style="flex: 1; min-width: 300px;">
+        
+<section class="dash-card" id="emergency-donors" style="flex: 1; min-width: 300px;">
     <div class="card-header">
-        <h3>Responding Emergency Donors</h3>
+        <h3>Emergency Requests</h3>
     </div>
-   
+
     <div class="appointment-list">
-        {% if responding_emergency_donors %}
-            {% for donor_appt in responding_emergency_donors %}
-            <div class="appointment-item" style="border-left: 4px solid var(--primary-red);">
-                <div class="donor-profile-group">
-                    {% if donor_appt.donor and donor_appt.donor.profile_picture %}
-                        <img src="{{ donor_appt.donor.profile_picture.url }}" alt="donor" class="donor-avatar">
-                    {% else %}
-                        <img src="{% static 'organization/img/default-avatar.png' %}" alt="donor" class="donor-avatar">
-                    {% endif %}
-                    
+        {% if emergency_requests %}
+            {% for em in emergency_requests %}
+                <div class="appointment-item"
+                     style="border-left: 4px solid var(--primary-red);">
+
                     <div class="appt-info">
                         <strong>
-                            {% if donor_appt.donor and donor_appt.donor.user %}
-                                {{ donor_appt.donor.user.first_name }} {{ donor_appt.donor.user.last_name }}
-                            {% else %}
-                                Emergency Donor
-                            {% endif %}
+                            Emergency Request #{{ em.id }}
                             <span class="badge blood-badge">
-                                {% if donor_appt.donor and donor_appt.donor.blood_type %}
-                                    {{ donor_appt.donor.blood_type }}
-                                {% else %}
-                                    O+
-                                {% endif %}
+                                {{ em.required_blood_type }}
                             </span>
                         </strong>
+
                         <div>
-                            <span class="donor-contact">
-                                {% if donor_appt.donor and donor_appt.donor.phone %}
-                                    {{ donor_appt.donor.phone }}
-                                {% else %}
-                                    Contact on file
-                                {% endif %}
+                            <span>
+                                Component: {{ em.component_type|title }}
+                            </span>
+                            <br>
+                            <span>
+                                Units Required: {{ em.units_required }}
                             </span>
                         </div>
-                        <small style="display: block; margin-top: 4px; color: var(--text-main);">
-                            Scheduled: {{ donor_appt.scheduled_at|date:"M d, Y, P" }}
+
+                        <small style="display: block; margin-top: 4px;">
+                            Status: {{ em.status|title }}
+                        </small>
+
+                        <small style="display: block;">
+                            Created: {{ em.created_at|date:"M d, Y, P" }}
                         </small>
                     </div>
+
                 </div>
-                <span class="badge emergency-appt-badge">Emergency</span>
-            </div>
             {% endfor %}
         {% else %}
-            <p style="padding: 16px; color: var(--text-muted); text-align: center;">No active emergency donor responses at this time.</p>
+            <p style="padding: 16px; text-align: center;">
+                No emergency requests found for this facility.
+            </p>
         {% endif %}
     </div>
 </section>
+
 
              <!-- RIGHT COLUMN: Organization Emergency Requests Generated -->
                 <section class="dash-card" id="organization-emergency-requests" style="flex: 1;">
