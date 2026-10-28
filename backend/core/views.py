@@ -726,7 +726,6 @@ def staff_emergencies_view(request):
     if facility_id:
         emergency_requests = EmergencyRequests.objects.filter(
             facility_id=facility_id, 
-            status='ACTIVE'
         ).order_by('-created_at')
         
         # Fetch emergency appointments with related donor and user info
