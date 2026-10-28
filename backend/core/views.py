@@ -729,4 +729,4 @@ def staff_emergencies_view(request):
         'emergency_requests': emergency_requests,
         'responding_emergency_donors': responding_emergency_donors,
     }
-    return render(request, "organization/emergencies.html", context)
+    return render(request, "organization/emergency.html", context)
