@@ -166,3 +166,5 @@ def staff_appointments_view(request):
 
     # Display the existing staff appointments page.
     return render(request, "organization/appointment.html")
+
+
