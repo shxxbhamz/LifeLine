@@ -675,78 +675,25 @@ def staff_edit_profile_view(request):
     )
 
 
-
 def staff_appointments_view(request):
-    if (
-        request.session.get("user_id") is None
-        or request.session.get("role") != "HOSPITAL_STAFF"
-    ):
+    if request.session.get("user_id") is None or request.session.get("role") != "HOSPITAL_STAFF":
         return redirect("login")
 
     user_id = request.session.get("user_id")
-
-    print("\n===== STAFF APPOINTMENTS DEBUG =====")
-    print("Session user_id:", user_id)
-    print("Session role:", request.session.get("role"))
-
     scheduled_appointments = []
     emergency_requests = []
 
     try:
-        staff_profile = StaffProfiles.objects.select_related(
-            "facility"
-        ).get(user_id=user_id)
-
-        print("Staff profile found:", staff_profile)
-        print("Staff facility ID:", staff_profile.facility_id)
-
-        if staff_profile.facility_id:
-            facility_id = staff_profile.facility_id
-
-            scheduled_appointments = list(
-                Appointments.objects.filter(
-                    facility_id=facility_id
-                ).select_related(
-                    "donor__user"
-                ).order_by("-id")
-            )
-
-            emergency_requests = list(
-                EmergencyRequests.objects.filter(
-                    facility_id=facility_id
-                ).order_by("-created_at")
-            )
-
-            print("Appointments found:", len(scheduled_appointments))
-
-            for appt in scheduled_appointments:
-                print(
-                    "Appointment ID:", appt.pk,
-                    "| Facility ID:", appt.facility_id,
-                    "| Donor ID:", appt.donor_id,
-                    "| Scheduled:", appt.scheduled_at,
-                    "| Status:", appt.status,
-                )
-
-        else:
-            print("ERROR: Staff has no facility assigned.")
-
+        staff_profile = StaffProfiles.objects.select_related('facility').get(user_id=user_id)
+        if staff_profile.facility:
+            facility_id = staff_profile.facility.id
+            scheduled_appointments = Appointments.objects.filter(facility_id=facility_id).select_related('donor__user').order_by('-id')
+            emergency_requests = EmergencyRequests.objects.filter(facility_id=facility_id).order_by('-created_at')
     except StaffProfiles.DoesNotExist:
-        print("ERROR: No StaffProfiles record for user:", user_id)
-
-    except Exception as exc:
-        print("APPOINTMENT DEBUG ERROR:", repr(exc))
-        raise
+        pass
 
     context = {
-        "scheduled_appointments": scheduled_appointments,
-        "emergency_requests": emergency_requests,
+        'scheduled_appointments': scheduled_appointments,
+        'emergency_requests': emergency_requests,
     }
-
-    print("====================================\n")
-
-    return render(
-        request,
-        "organization/appointment.html",
-        context,
-    )
+    return render(request, "organization/appointments.html", context)
