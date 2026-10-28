@@ -702,7 +702,7 @@ def staff_appointments_view(request):
 
 def staff_emergencies_view(request):
     try:
-        staff_profile = StaffProfiles.objects.first() # Falls back gracefully if unauthenticated
+        staff_profile = StaffProfiles.objects.first()
         facility_id = staff_profile.facility_id if staff_profile else 4
     except Exception:
         staff_profile = None
@@ -718,10 +718,10 @@ def staff_emergencies_view(request):
             status='ACTIVE'
         ).order_by('-created_at')
         
-        # Fetch emergency appointments/donors responding to facility requests
+        # Fixed query using valid field choices ('donation_type' or 'status')
         responding_emergency_donors = Appointments.objects.filter(
             facility_id=facility_id, 
-            appointment_type__iexact='Emergency'
+            donation_type__iexact='Emergency'
         ).order_by('-created_at')
 
     context = {
