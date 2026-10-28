@@ -712,15 +712,16 @@ def staff_emergencies_view(request):
     responding_emergency_donors = []
     
     if facility_id:
-        # Pull all emergency requests for this facility
         emergency_requests = EmergencyRequests.objects.filter(
-            facility_id=facility_id
+            facility_id=facility_id, 
+            status='ACTIVE'
         ).order_by('-created_at')
         
-        # Pull all appointments/donors for this facility so they show up on the left
+        # Fetch emergency appointments with related donor and user info
         responding_emergency_donors = Appointments.objects.filter(
-            facility_id=facility_id
-        ).select_related('donor').order_by('-id')
+            facility_id=facility_id,
+            donation_type__iexact='Emergency'
+        ).select_related('donor', 'donor__user').order_by('-id')
 
     context = {
         'staff_profile': staff_profile,
