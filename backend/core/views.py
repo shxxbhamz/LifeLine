@@ -6,9 +6,10 @@ from django.utils import timezone
 
 from .models import DonorProfiles, Facilities, StaffProfiles, Users, BloodInventory, EmergencyRequests
 from appointments.models import Appointments
-
+from django.contrib.auth.decorators import login_required
 
 from .utils import send_welcome_email
+@login_required(login_url='login')
 
 def home_view(request):
     return render(request, "index.html")
@@ -697,6 +698,8 @@ def staff_appointments_view(request):
         'emergency_requests': emergency_requests,
     }
     return render(request, "organization/appointment.html", context)
+
+
 
 def staff_emergencies_view(request):
     try:
