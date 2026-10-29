@@ -127,8 +127,8 @@
     </div>
 </section>
 
-             <!-- RIGHT COLUMN: Organization Emergency Requests Generated -->
-                <!-- RIGHT COLUMN: Organization Emergency Requests Generated -->
+
+ <!-- RIGHT COLUMN: Organization Emergency Requests Generated -->
 <section class="dash-card" id="organization-emergency-requests" style="flex: 1;">
     <div class="card-header">
         <h3>Organization Emergency Requests</h3>
@@ -138,13 +138,15 @@
         {% if emergency_requests %}
             {% for req in emergency_requests %}
             <div class="appointment-item generated-request-card">
-                <div class="generated-request-content">
+                <div class="generated-request-content" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                     <div>
-                        <strong class="generated-request-title">{{ req.component_type }} ({{ req.required_blood_type }})</strong>
+                        <strong class="generated-request-title">{{ req.component_type|title }} ({{ req.required_blood_type }})</strong>
                         <p class="generated-request-desc">{{ req.notes|default:"Critical trauma surgery requiring immediate units..." }}</p>
-                        <small class="generated-request-time">Generated: {{ req.created_at|date:"M j, Y, P" }} • Units Required: {{ req.units_required }}</small>
+                        <small class="generated-request-time">
+                            Generated: {{ req.created_at|date:"M j, Y, P" }} • Units: {{ req.units_required }} • Status: Broadcasted to {{ req.notified_count|default:0 }} Donors
+                        </small>
                     </div>
-                    <span class="badge {% if req.status == 'ACTIVE' %}red{% else %}secondary{% endif %}">{{ req.status }}</span>
+                    <span class="badge {% if req.status == 'ACTIVE' %}red{% else %}secondary{% endif %}">{{ req.status|title }}</span>
                 </div>
             </div>
             {% endfor %}
