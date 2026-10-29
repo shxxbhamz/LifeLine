@@ -127,25 +127,77 @@
     </div>
 </section>
 
-             <!-- RIGHT COLUMN: Organization Emergency Requests Generated -->
-                <section class="dash-card" id="organization-emergency-requests" style="flex: 1;">
-                    <div class="card-header">
-                        <h3>Organization Emergency Requests</h3>
-                    </div>
-                    <div class="appointment-list" id="generatedRequestsList">
-                        <!-- Sample Static Request 1 (Initial State) -->
-                        <div class="appointment-item generated-request-card">
-                            <div class="generated-request-content">
-                                <div>
-                                    <strong class="generated-request-title">Blood (O-Negative)</strong>
-                                    <p class="generated-request-desc">Critical trauma surgery requiring immediate units...</p>
-                                    <small class="generated-request-time">Generated: Just now • Status: Broadcasted to 45 Donors</small>
-                                </div>
-                                <span class="badge red">Active</span>
-                            </div>
+
+
+<!-- RIGHT COLUMN: Organization Emergency Requests -->
+<section class="dash-card" id="organization-emergency-requests" style="flex: 1;">
+    <div class="card-header">
+        <h3>Organization Emergency Requests</h3>
+    </div>
+
+    <div class="appointment-list" id="generatedRequestsList">
+
+        {% if emergency_requests %}
+            {% for req in emergency_requests %}
+                <div class="appointment-item generated-request-card">
+                    <div class="generated-request-content"
+                         style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; gap: 15px;">
+
+                        <div>
+                            <strong class="generated-request-title">
+                                {{ req.component_type|title }}
+                                ({{ req.required_blood_type }})
+                            </strong>
+
+                            <p class="generated-request-desc">
+                                {% if req.notes %}
+                                    {{ req.notes }}
+                                {% else %}
+                                    No additional notes provided.
+                                {% endif %}
+                            </p>
+
+                            <small class="generated-request-time">
+                                Request ID: {{ req.id }}
+                                <br>
+                                Urgency: {{ req.urgency_level|title }}
+                                <br>
+                                Created: {{ req.created_at|date:"M j, Y, P" }}
+                                <br>
+                                Last Updated: {{ req.updated_at|date:"M j, Y, P" }}
+                                <br>
+
+                                {% if req.expires_at %}
+                                    Expires: {{ req.expires_at|date:"M j, Y, P" }}
+                                    <br>
+                                {% endif %}
+
+                                {% if req.fulfilled_at %}
+                                    Fulfilled: {{ req.fulfilled_at|date:"M j, Y, P" }}
+                                {% endif %}
+                            </small>
                         </div>
+
+                        <span class="badge {% if req.status == 'ACTIVE' %}red{% else %}secondary{% endif %}">
+                            {{ req.status|title }}
+                        </span>
+
                     </div>
-                </section>
+                </div>
+            {% endfor %}
+
+        {% else %}
+            <div class="appointment-item generated-request-card">
+                <p class="generated-request-desc"
+                   style="color: #64748b; font-style: italic;">
+                    No emergency requests found for this facility.
+                </p>
+            </div>
+        {% endif %}
+
+    </div>
+</section>
+
 </div>
 
         </div>
