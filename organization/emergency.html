@@ -149,17 +149,9 @@
                                 ({{ req.required_blood_type }})
                             </strong>
 
-                            <p class="generated-request-desc">
-                                {% if req.notes %}
-                                    {{ req.notes }}
-                                {% else %}
-                                    No additional notes provided.
-                                {% endif %}
-                            </p>
+                           <p class="generated-request-desc">{{ req.notes|default:"No notes available." }}</p>
 
                             <small class="generated-request-time">
-                                Request ID: {{ req.id }}
-                                <br>
                                 Urgency: {{ req.urgency_level|title }}
                                 <br>
                                 Created: {{ req.created_at|date:"M j, Y, P" }}
