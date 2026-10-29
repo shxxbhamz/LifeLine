@@ -124,20 +124,39 @@ class BloodInventory(models.Model):
         managed = False
         db_table = "blood_inventory"
 
+
 class EmergencyRequests(models.Model):
     id = models.BigAutoField(primary_key=True)
+
     facility = models.ForeignKey(
         Facilities,
         models.DO_NOTHING,
-        db_column='facility_id',
-        related_name='facility_emergency_requests',
+        db_column="facility_id",
+        related_name="facility_emergency_requests",
     )
-    required_blood_type = models.CharField(max_length=5, db_column='required_blood_type')
-    component_type = models.CharField(max_length=30, db_column='component_type')
-    units_required = models.IntegerField(default=1, db_column='units_required')
-    urgency_level = models.CharField(max_length=20, default='Critical', db_column='urgency_level')
-    status = models.CharField(max_length=20, default='active', db_column='status')
-    created_at = models.DateTimeField(auto_now_add=True, db_column='created_at')
+
+    created_by = models.BigIntegerField()
+
+    required_blood_type = models.CharField(max_length=5)
+    component_type = models.CharField(max_length=30)
+    units_required = models.IntegerField()
+    urgency_level = models.CharField(max_length=20)
+    radius_km = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20)
+
+    # This is the missing field for your notes
+    notes = models.TextField(blank=True, null=True)
+
+    expires_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
+    fulfilled_at = models.DateTimeField(blank=True, null=True)
+
+    idempotency_key = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         managed = False
