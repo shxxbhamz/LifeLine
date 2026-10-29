@@ -714,46 +714,51 @@ def staff_appointments_view(request):
     return render(request, "organization/appointment.html", context)
 
 
+
 def staff_emergencies_view(request):
-    # 1. Ensure staff is logged in with hospital staff role
-    if request.session.get("user_id") is None or request.session.get("role") != "HOSPITAL_STAFF":
+    # 1. Ensure hospital staff is logged in
+    if (
+        request.session.get("user_id") is None
+        or request.session.get("role") != "HOSPITAL_STAFF"
+    ):
         return redirect("login")
 
     user_id = request.session.get("user_id")
-    staff_profile = None
-    facility_id = None
-    emergency_requests = []
-    responding_emergency_donors = []
 
+    # 2. Find the logged-in staff member and their facility
     try:
-        # 2. Get the logged-in staff member's facility
-        staff_profile = StaffProfiles.objects.select_related('facility').get(user_id=user_id)
-        if staff_profile.facility:
-            facility_id = staff_profile.facility.id
+        staff_profile = StaffProfiles.objects.select_related(
+            "facility"
+        ).get(user_id=user_id)
     except StaffProfiles.DoesNotExist:
-        pass
+        return redirect("login")
 
-    # Fallback facility ID if session/profile isn't mapped
-    if not facility_id:
-        facility_id = 4
+    # 3. Default to empty querysets if no facility is assigned
+    emergency_requests = EmergencyRequests.objects.none()
+    responding_emergency_donors = Appointments.objects.none()
 
-    if facility_id:
-        # 3. Fetch active emergency requests broadcasted by this facility (Right Card)
+    if staff_profile.facility:
+        facility_id = staff_profile.facility.id
+
+        # 4. Fetch ALL emergency requests belonging to this facility
         emergency_requests = EmergencyRequests.objects.filter(
-            facility_id=facility_id, 
-            status='ACTIVE'
-        ).order_by('-created_at')
-        
-        # 4. Fetch accepted emergency donors from the appointments table (Left Card)
-        # Using select_related('donor', 'donor__user') to fetch profile pictures, names, and phones cleanly
-        responding_emergency_donors = Appointments.objects.filter(
-            facility_id=facility_id,
-            appointment_source='EMERGENCY'
-        ).select_related('donor', 'donor__user').order_by('-id')
+            facility_id=facility_id
+        ).order_by("-created_at")
+
+        # 5. Fetch emergency appointments for this facility
+        responding_emergency_donors = (
+            Appointments.objects.filter(
+                facility_id=facility_id,
+                appointment_source="EMERGENCY",
+            )
+            .select_related("donor", "donor__user")
+            .order_by("-id")
+        )
 
     context = {
-        'staff_profile': staff_profile,
-        'emergency_requests': emergency_requests,
-        'responding_emergency_donors': responding_emergency_donors,
+        "staff_profile": staff_profile,
+        "emergency_requests": emergency_requests,
+        "responding_emergency_donors": responding_emergency_donors,
     }
+
     return render(request, "organization/emergency.html", context)
