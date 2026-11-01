@@ -9,5 +9,6 @@ urlpatterns = [
     path("staff/appointments/", views.staff_appointments_view, name="staff_appointments"),
     path("staff/donation-requests/create/", views.staff_create_donation_request_view, name="staff_create_donation_request"),
     path("staff/appointments/<int:appointment_id>/confirm/", views.staff_confirm_appointment_view, name="staff_confirm_appointment"),
+    path("staff/appointments/<int:appointment_id>/cancel/", views.staff_cancel_appointment_view, name="staff_cancel_appointment"),
     
 ]
