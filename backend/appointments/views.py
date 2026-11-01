@@ -222,6 +222,7 @@ def staff_appointments_view(request):
         "scheduled_appointments": scheduled_appointments,
         "emergency_requests": emergency_requests,
         "responding_emergency_donors": responding_emergency_donors,
+        "emergency_form_token": uuid.uuid4().hex,
     }
 
     return render(

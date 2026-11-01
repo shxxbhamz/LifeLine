@@ -1,3 +1,4 @@
+import uuid
 from django.contrib import messages
 from django.db import transaction
 from django.shortcuts import redirect, render
@@ -268,6 +269,7 @@ def staff_inventory(request):
         "facility": facility,
         "inventory_rows": inventory_rows,
         "open_donation_requests": open_donation_requests,
+        "emergency_form_token": uuid.uuid4().hex,
     }
 
     return render(
