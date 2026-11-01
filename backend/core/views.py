@@ -4,8 +4,10 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 
 
-from .models import DonorProfiles, Facilities, StaffProfiles, Users, BloodInventory, EmergencyRequests
+from .models import DonorProfiles, Facilities, StaffProfiles, Users
 from appointments.models import Appointments
+from inventory.models import BloodInventory
+from emergencies.models import EmergencyRequests
 
 
 from .utils import send_welcome_email
@@ -674,91 +676,3 @@ def staff_edit_profile_view(request):
             "facility": facility,
         },
     )
-
-
-def staff_appointments_view(request):
-    if request.session.get("user_id") is None or request.session.get("role") != "HOSPITAL_STAFF":
-        return redirect("login")
-
-    user_id = request.session.get("user_id")
-    scheduled_appointments = []
-    emergency_requests = []
-    responding_emergency_donors = []
-
-    try:
-        staff_profile = StaffProfiles.objects.select_related('facility').get(user_id=user_id)
-        if staff_profile.facility:
-            facility_id = staff_profile.facility.id
-            scheduled_appointments = Appointments.objects.filter(
-                facility_id=facility_id
-            ).select_related('donor__user').order_by('-id')
-            
-            emergency_requests = EmergencyRequests.objects.filter(
-                facility_id=facility_id
-            ).order_by('-created_at')
-            
-            # Fetch accepted emergency responding donors for this facility
-            responding_emergency_donors = Appointments.objects.filter(
-                facility_id=facility_id,
-                appointment_source='EMERGENCY'
-            ).select_related('donor', 'donor__user').order_by('-id')
-            
-    except StaffProfiles.DoesNotExist:
-        pass
-
-    context = {
-        'scheduled_appointments': scheduled_appointments,
-        'emergency_requests': emergency_requests,
-        'responding_emergency_donors': responding_emergency_donors,
-    }
-    return render(request, "organization/appointment.html", context)
-
-
-
-def staff_emergencies_view(request):
-    # 1. Ensure hospital staff is logged in
-    if (
-        request.session.get("user_id") is None
-        or request.session.get("role") != "HOSPITAL_STAFF"
-    ):
-        return redirect("login")
-
-    user_id = request.session.get("user_id")
-
-    # 2. Find the logged-in staff member and their facility
-    try:
-        staff_profile = StaffProfiles.objects.select_related(
-            "facility"
-        ).get(user_id=user_id)
-    except StaffProfiles.DoesNotExist:
-        return redirect("login")
-
-    # 3. Default to empty querysets if no facility is assigned
-    emergency_requests = EmergencyRequests.objects.none()
-    responding_emergency_donors = Appointments.objects.none()
-
-    if staff_profile.facility:
-        facility_id = staff_profile.facility.id
-
-        # 4. Fetch ALL emergency requests belonging to this facility
-        emergency_requests = EmergencyRequests.objects.filter(
-            facility_id=facility_id
-        ).order_by("-created_at")
-
-        # 5. Fetch emergency appointments for this facility
-        responding_emergency_donors = (
-            Appointments.objects.filter(
-                facility_id=facility_id,
-                appointment_source="EMERGENCY",
-            )
-            .select_related("donor", "donor__user")
-            .order_by("-id")
-        )
-
-    context = {
-        "staff_profile": staff_profile,
-        "emergency_requests": emergency_requests,
-        "responding_emergency_donors": responding_emergency_donors,
-    }
-
-    return render(request, "organization/emergency.html", context)
