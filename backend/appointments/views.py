@@ -230,3 +230,73 @@ def staff_appointments_view(request):
     )
 
 
+def staff_confirm_appointment_view(request, appointment_id):
+    # Only hospital staff can confirm appointments.
+    if (
+        request.session.get("user_id") is None
+        or request.session.get("role") != "HOSPITAL_STAFF"
+    ):
+        return redirect("login")
+
+    # Confirmation must only happen through POST.
+    if request.method != "POST":
+        return redirect("staff_appointments")
+
+    user_id = request.session.get("user_id")
+
+    try:
+        staff_profile = StaffProfiles.objects.select_related(
+            "facility"
+        ).get(user_id=user_id)
+    except StaffProfiles.DoesNotExist:
+        request.session.flush()
+        return redirect("login")
+
+    if not staff_profile.facility:
+        messages.error(
+            request,
+            "Your staff account is not connected to a facility.",
+        )
+        return redirect("staff_appointments")
+
+    appointment = (
+        Appointments.objects.filter(
+            id=appointment_id,
+            facility=staff_profile.facility,
+        )
+        .exclude(appointment_source="EMERGENCY")
+        .first()
+    )
+
+    if appointment is None:
+        messages.error(
+            request,
+            "Appointment not found for your facility.",
+        )
+        return redirect("staff_appointments")
+
+    if appointment.status != "PENDING":
+        messages.error(
+            request,
+            "Only pending appointments can be confirmed.",
+        )
+        return redirect("staff_appointments")
+
+    appointment.status = "CONFIRMED"
+    appointment.confirmed_by = staff_profile
+    appointment.updated_at = timezone.now()
+
+    appointment.save(
+        update_fields=[
+            "status",
+            "confirmed_by",
+            "updated_at",
+        ]
+    )
+
+    messages.success(
+        request,
+        "Appointment confirmed successfully.",
+    )
+
+    return redirect("staff_appointments")

@@ -8,5 +8,6 @@ urlpatterns = [
     path("donor/history/", views.donor_history_view, name="donor_history"),
     path("staff/appointments/", views.staff_appointments_view, name="staff_appointments"),
     path("staff/donation-requests/create/", views.staff_create_donation_request_view, name="staff_create_donation_request"),
+    path("staff/appointments/<int:appointment_id>/confirm/", views.staff_confirm_appointment_view, name="staff_confirm_appointment"),
     
 ]

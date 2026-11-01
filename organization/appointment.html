@@ -153,6 +153,25 @@
                                     </small>
                                 </div>
                             </div>
+                            <p>
+                                Status:
+                                <strong>{{ appt.status|title }}</strong>
+                            </p>
+
+                            {% if appt.status == "PENDING" %}
+                            <form method="POST"
+                                action="{% url 'staff_confirm_appointment' appt.id %}"
+                                style="margin-top: 10px;">
+
+                                {% csrf_token %}
+
+                                <button type="submit"
+                                        class="btn btn-primary"
+                                        onclick="return confirm('Confirm this appointment?');">
+                                    Confirm Appointment
+                                </button>
+                            </form>
+                            {% endif %}
                         </div>
                         {% endfor %}
                     {% else %}
