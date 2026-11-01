@@ -54,6 +54,16 @@
             <h1>Active Emergency Dispatches</h1>
         </section>
 
+        {% if messages %}
+            <div class="system-messages">
+                {% for message in messages %}
+                    <div class="system-message system-message-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <!-- Dashboard Grid Layout -->
         <div class="dashboard-grid" style="grid-template-columns: 1fr;">
             
@@ -205,23 +215,40 @@
         <div class="emergency-modal-content">
             <h3>Create Emergency Donation Request</h3>
             
-            <form id="emergencyRequestForm" onsubmit="submitEmergencyRequest(event)">
-                
-                <!-- Component Type Selection (Mutually Exclusive Radio Buttons) -->
+            <form id="emergencyRequestForm"
+                method="POST"
+                action="{% url 'staff_create_emergency_request' %}">
+
+                {% csrf_token %}
+
+                <input type="hidden"
+                    name="idempotency_key"
+                    value="{{ emergency_form_token }}">
+
+                <!-- Blood Component -->
                 <div class="em-form-group">
-                    <label>Select Component Type (Choose Exactly One):</label>
-                    <div class="component-options">
-                        <label><input type="radio" name="componentType" value="Blood" onclick="updateBloodGroupOptions('Blood')" checked> Blood</label>
-                        <label><input type="radio" name="componentType" value="Plasma" onclick="updateBloodGroupOptions('Plasma')"> Plasma</label>
-                        <label><input type="radio" name="componentType" value="Platelets" onclick="updateBloodGroupOptions('Platelets')"> Platelets</label>
-                    </div>
+                    <label for="emComponentType">Blood Component:</label>
+
+                    <select id="emComponentType"
+                            name="component_type"
+                            required>
+                        <option value="" disabled selected>Select component</option>
+                        <option value="WHOLE_BLOOD">Whole Blood</option>
+                        <option value="RED_BLOOD_CELLS">Red Blood Cells</option>
+                        <option value="PLASMA">Plasma</option>
+                        <option value="PLATELETS">Platelets</option>
+                    </select>
                 </div>
 
-                <!-- Blood Group Dropdown with Dynamic Label Update -->
+                <!-- Required Blood Type -->
                 <div class="em-form-group">
-                    <label for="emBloodGroup" id="bloodGroupLabel">Target Blood Group (Blood):</label>
-                    <select id="emBloodGroup" required>
-                        <option value="" disabled selected>Select blood group</option>
+                    <label for="emBloodGroup">Required Blood Type:</label>
+
+                    <select id="emBloodGroup"
+                            name="required_blood_type"
+                            required>
+                        <option value="" disabled selected>Select blood type</option>
+                        <option value="ANY">Any Compatible Type</option>
                         <option value="A+">A+</option>
                         <option value="A-">A-</option>
                         <option value="B+">B+</option>
@@ -233,17 +260,69 @@
                     </select>
                 </div>
 
-                <!-- Description Box -->
+                <!-- Units Required -->
                 <div class="em-form-group">
-                    <label for="emDescription">Emergency Description / Case Details:</label>
-                    <textarea id="emDescription" placeholder="e.g., Critical trauma surgery requiring immediate units..." required></textarea>
+                    <label for="emUnitsRequired">Units Required:</label>
+
+                    <input type="number"
+                        id="emUnitsRequired"
+                        name="units_required"
+                        min="1"
+                        step="1"
+                        placeholder="e.g. 2"
+                        required>
                 </div>
 
-                <!-- Centered Submit Button & Cancel Action -->
-                <div class="em-modal-actions">
-                    <button type="button" class="em-btn-secondary" onclick="closeEmergencyModal()">Cancel</button>
-                    <button type="submit" class="em-btn-danger">Broadcast Request</button>
+                <!-- Urgency -->
+                <div class="em-form-group">
+                    <label for="emUrgency">Urgency:</label>
+
+                    <select id="emUrgency"
+                            name="urgency"
+                            required>
+                        <option value="" disabled selected>Select urgency</option>
+                        <option value="URGENT">Urgent</option>
+                        <option value="CRITICAL">Critical</option>
+                    </select>
                 </div>
+
+                <!-- Search Radius -->
+                <div class="em-form-group">
+                    <label for="emRadius">Donor Search Radius (km):</label>
+
+                    <input type="number"
+                        id="emRadius"
+                        name="radius_km"
+                        min="1"
+                        step="1"
+                        value="25"
+                        required>
+                </div>
+
+                <!-- Notes -->
+                <div class="em-form-group">
+                    <label for="emDescription">
+                        Emergency Description / Case Details:
+                    </label>
+
+                    <textarea id="emDescription"
+                            name="notes"
+                            placeholder="e.g. Critical trauma case requiring immediate blood units..."></textarea>
+                </div>
+
+                <div class="em-modal-actions">
+                    <button type="button"
+                            class="em-btn-secondary"
+                            onclick="closeEmergencyModal()">
+                        Cancel
+                    </button>
+
+                    <button type="submit"
+                            class="em-btn-danger">
+                        Create Emergency Request
+                    </button>
+                </div>
+
             </form>
         </div>
     </div>
@@ -279,30 +358,8 @@
         function closeEmergencyModal() {
             document.getElementById("globalEmergencyModal").style.display = "none";
             document.getElementById("emergencyRequestForm").reset();
-            document.getElementById("bloodGroupLabel").innerText = "Target Blood Group (Blood):";
         }
 
-        function updateBloodGroupOptions(componentType) {
-            const label = document.getElementById("bloodGroupLabel");
-            label.innerText = `Target Blood Group (${componentType}):`;
-        }
-
-        function submitEmergencyRequest(event) {
-            event.preventDefault();
-            
-            const description = document.getElementById("emDescription").value;
-            const selectedComponent = document.querySelector('input[name="componentType"]:checked').value;
-            const bloodGroup = document.getElementById("emBloodGroup").value;
-
-            console.log("Broadcasting Emergency Request:", {
-                description,
-                component: selectedComponent,
-                bloodGroup
-            });
-
-            alert(`Emergency broadcast successfully dispatched for ${selectedComponent} (${bloodGroup})!`);
-            closeEmergencyModal();
-        }
     </script>
 </body>
 </html>
