@@ -21,7 +21,7 @@ class EmergencyRequests(models.Model):
     required_blood_type = models.CharField(max_length=3)
     component_type = models.CharField(max_length=30)
     units_required = models.IntegerField()
-    urgency_level = models.CharField(max_length=20)
+    urgency = models.CharField(max_length=20, db_column="urgency_level")
     radius_km = models.DecimalField(max_digits=6, decimal_places=2)
     status = models.CharField(max_length=20)
     notes = models.TextField(blank=True, null=True)
