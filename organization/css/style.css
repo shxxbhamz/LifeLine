@@ -518,6 +518,12 @@ footer {
   margin: 0;
 }
 
+.appointment-button-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* Confirm appointment button */
 .confirm-appointment-btn {
   appearance: none;
@@ -560,6 +566,47 @@ footer {
   box-shadow:
     0 0 0 3px rgba(22, 160, 133, 0.20),
     0 2px 5px rgba(22, 160, 133, 0.22);
+}
+
+/* Cancel appointment button */
+.cancel-appointment-btn {
+  appearance: none;
+  outline: none;
+  background: #ffffff;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 9px 15px;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.cancel-appointment-btn:hover {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 7px rgba(220, 38, 38, 0.12);
+}
+
+.cancel-appointment-btn:active {
+  transform: translateY(0);
+}
+
+.cancel-appointment-btn:focus-visible {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.14);
 }
 
 /* Mobile layout */

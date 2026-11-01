@@ -160,19 +160,51 @@
                                 </span>
 
                                 {% if appt.status == "PENDING" %}
+                                <div class="appointment-button-group">
+
+                                    <form method="POST"
+                                        action="{% url 'staff_confirm_appointment' appt.id %}"
+                                        class="appointment-action-form">
+
+                                        {% csrf_token %}
+
+                                        <button type="submit"
+                                                class="confirm-appointment-btn"
+                                                onclick="return confirm('Are you sure you want to confirm this appointment?');">
+                                            ✓ Confirm
+                                        </button>
+                                    </form>
+
+                                    <form method="POST"
+                                        action="{% url 'staff_cancel_appointment' appt.id %}"
+                                        class="appointment-action-form">
+
+                                        {% csrf_token %}
+
+                                        <button type="submit"
+                                                class="cancel-appointment-btn"
+                                                onclick="return confirm('Are you sure you want to cancel this appointment?');">
+                                            Cancel
+                                        </button>
+                                    </form>
+
+                                </div>
+
+                                {% elif appt.status == "CONFIRMED" %}
+
                                 <form method="POST"
-                                    action="{% url 'staff_confirm_appointment' appt.id %}"
+                                    action="{% url 'staff_cancel_appointment' appt.id %}"
                                     class="appointment-action-form">
 
                                     {% csrf_token %}
 
                                     <button type="submit"
-                                            class="confirm-appointment-btn"
-                                            onclick="return confirm('Are you sure you want to confirm this appointment?');">
-                                        ✓ Confirm Appointment
+                                            class="cancel-appointment-btn"
+                                            onclick="return confirm('Are you sure you want to cancel this confirmed appointment?');">
+                                        Cancel Appointment
                                     </button>
-
                                 </form>
+
                                 {% endif %}
 
                             </div>

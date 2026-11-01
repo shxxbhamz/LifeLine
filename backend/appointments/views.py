@@ -300,3 +300,77 @@ def staff_confirm_appointment_view(request, appointment_id):
     )
 
     return redirect("staff_appointments")
+
+def staff_cancel_appointment_view(request, appointment_id):
+    # Only hospital staff can cancel appointments.
+    if (
+        request.session.get("user_id") is None
+        or request.session.get("role") != "HOSPITAL_STAFF"
+    ):
+        return redirect("login")
+
+    # Cancellation must only happen through POST.
+    if request.method != "POST":
+        return redirect("staff_appointments")
+
+    user_id = request.session.get("user_id")
+
+    try:
+        staff_profile = StaffProfiles.objects.select_related(
+            "facility"
+        ).get(user_id=user_id)
+    except StaffProfiles.DoesNotExist:
+        request.session.flush()
+        return redirect("login")
+
+    if not staff_profile.facility:
+        messages.error(
+            request,
+            "Your staff account is not connected to a facility.",
+        )
+        return redirect("staff_appointments")
+
+    appointment = (
+        Appointments.objects.filter(
+            id=appointment_id,
+            facility=staff_profile.facility,
+        )
+        .exclude(appointment_source="EMERGENCY")
+        .first()
+    )
+
+    if appointment is None:
+        messages.error(
+            request,
+            "Appointment not found for your facility.",
+        )
+        return redirect("staff_appointments")
+
+    if appointment.status not in ["PENDING", "CONFIRMED"]:
+        messages.error(
+            request,
+            "Only pending or confirmed appointments can be cancelled.",
+        )
+        return redirect("staff_appointments")
+
+    now = timezone.now()
+
+    appointment.status = "CANCELLED"
+    appointment.cancelled_at = now
+    appointment.updated_at = now
+
+    appointment.save(
+        update_fields=[
+            "status",
+            "cancelled_at",
+            "updated_at",
+        ]
+    )
+
+    messages.success(
+        request,
+        "Appointment cancelled successfully.",
+    )
+
+    return redirect("staff_appointments")
+
