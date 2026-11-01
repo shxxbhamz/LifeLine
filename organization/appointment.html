@@ -153,25 +153,29 @@
                                     </small>
                                 </div>
                             </div>
-                            <p>
-                                Status:
-                                <strong>{{ appt.status|title }}</strong>
-                            </p>
+                            <div class="appointment-actions">
 
-                            {% if appt.status == "PENDING" %}
-                            <form method="POST"
-                                action="{% url 'staff_confirm_appointment' appt.id %}"
-                                style="margin-top: 10px;">
+                                <span class="appointment-status status-{{ appt.status|lower }}">
+                                    {{ appt.status|title }}
+                                </span>
 
-                                {% csrf_token %}
+                                {% if appt.status == "PENDING" %}
+                                <form method="POST"
+                                    action="{% url 'staff_confirm_appointment' appt.id %}"
+                                    class="appointment-action-form">
 
-                                <button type="submit"
-                                        class="btn btn-primary"
-                                        onclick="return confirm('Confirm this appointment?');">
-                                    Confirm Appointment
-                                </button>
-                            </form>
-                            {% endif %}
+                                    {% csrf_token %}
+
+                                    <button type="submit"
+                                            class="confirm-appointment-btn"
+                                            onclick="return confirm('Are you sure you want to confirm this appointment?');">
+                                        ✓ Confirm Appointment
+                                    </button>
+
+                                </form>
+                                {% endif %}
+
+                            </div>
                         </div>
                         {% endfor %}
                     {% else %}
