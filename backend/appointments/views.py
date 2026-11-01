@@ -5,7 +5,9 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 
 from core.models import StaffProfiles
-from .models import DonationRequests
+from .models import Appointments, DonationRequests
+from emergencies.models import EmergencyRequests
+
 
 def staff_create_donation_request_view(request):
     # Only logged-in hospital/blood-bank staff can create requests.
@@ -160,11 +162,71 @@ def donor_history_view(request):
 
 
 def staff_appointments_view(request):
-    # Only logged-in hospital staff can access this page.
-    if request.session.get("user_id") is None or request.session.get("role") != "HOSPITAL_STAFF":
+    if (
+        request.session.get("user_id") is None
+        or request.session.get("role") != "HOSPITAL_STAFF"
+    ):
         return redirect("login")
 
-    # Display the existing staff appointments page.
-    return render(request, "organization/appointment.html")
+    user_id = request.session.get("user_id")
+
+    try:
+        staff_profile = StaffProfiles.objects.select_related(
+            "facility"
+        ).get(user_id=user_id)
+    except StaffProfiles.DoesNotExist:
+        request.session.flush()
+        return redirect("login")
+
+    scheduled_appointments = Appointments.objects.none()
+    emergency_requests = EmergencyRequests.objects.none()
+    responding_emergency_donors = Appointments.objects.none()
+
+    if staff_profile.facility:
+        facility = staff_profile.facility
+
+        # Normal and restock-request appointments.
+        # Emergency appointments are displayed separately below.
+        scheduled_appointments = (
+            Appointments.objects.filter(
+                facility=facility,
+            )
+            .exclude(
+                appointment_source="EMERGENCY",
+            )
+            .select_related(
+                "donor",
+                "donor__user",
+            )
+            .order_by("scheduled_at")
+        )
+
+        emergency_requests = EmergencyRequests.objects.filter(
+            facility=facility,
+        ).order_by("-created_at")
+
+        responding_emergency_donors = (
+            Appointments.objects.filter(
+                facility=facility,
+                appointment_source="EMERGENCY",
+            )
+            .select_related(
+                "donor",
+                "donor__user",
+            )
+            .order_by("-id")
+        )
+
+    context = {
+        "scheduled_appointments": scheduled_appointments,
+        "emergency_requests": emergency_requests,
+        "responding_emergency_donors": responding_emergency_donors,
+    }
+
+    return render(
+        request,
+        "organization/appointment.html",
+        context,
+    )
 
 
