@@ -5,6 +5,7 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 
 from core.models import StaffProfiles
+from core.utils import send_appointment_status_email
 from .models import Appointments, DonationRequests
 from emergencies.models import EmergencyRequests
 
@@ -260,7 +261,12 @@ def staff_confirm_appointment_view(request, appointment_id):
         return redirect("staff_appointments")
 
     appointment = (
-        Appointments.objects.filter(
+        Appointments.objects.select_related(
+            "donor",
+            "donor__user",
+            "facility",
+        )
+        .filter(
             id=appointment_id,
             facility=staff_profile.facility,
         )
@@ -292,6 +298,15 @@ def staff_confirm_appointment_view(request, appointment_id):
             "confirmed_by",
             "updated_at",
         ]
+    )
+
+    send_appointment_status_email(
+        user_email=appointment.donor.user.email,
+        first_name=appointment.donor.user.first_name,
+        facility_name=staff_profile.facility.name,
+        scheduled_at=appointment.scheduled_at,
+        donation_type=appointment.donation_type,
+        status="CONFIRMED",
     )
 
     messages.success(
@@ -331,7 +346,12 @@ def staff_cancel_appointment_view(request, appointment_id):
         return redirect("staff_appointments")
 
     appointment = (
-        Appointments.objects.filter(
+        Appointments.objects.select_related(
+            "donor",
+            "donor__user",
+            "facility",
+        )
+        .filter(
             id=appointment_id,
             facility=staff_profile.facility,
         )
@@ -365,6 +385,15 @@ def staff_cancel_appointment_view(request, appointment_id):
             "cancelled_at",
             "updated_at",
         ]
+    )
+
+    send_appointment_status_email(
+        user_email=appointment.donor.user.email,
+        first_name=appointment.donor.user.first_name,
+        facility_name=staff_profile.facility.name,
+        scheduled_at=appointment.scheduled_at,
+        donation_type=appointment.donation_type,
+        status="CANCELLED",
     )
 
     messages.success(
