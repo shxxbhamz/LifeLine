@@ -73,8 +73,16 @@ def staff_audit_log(request):
     ):
         return redirect("login")
 
+    context = {
+        "emergency_form_token": uuid.uuid4().hex,
+    }
+
     # Display the Broadcast Audit Log page.
-    return render(request, "organization/audit_log.html")
+    return render(
+        request,
+        "organization/audit_log.html",
+        context,
+    )
 
 
 def staff_create_emergency_request_view(request):

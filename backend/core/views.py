@@ -1,3 +1,4 @@
+import uuid
 from django.contrib.auth.hashers import check_password, make_password
 from django.db import transaction
 from django.shortcuts import redirect, render
@@ -163,6 +164,7 @@ def staff_dashboard_view(request):
         'scheduled_appointments': scheduled_appointments,
         'inventory_items': inventory_items,
         'emergency_history': emergency_history,  # Pass all emergency history to template
+        'emergency_form_token': uuid.uuid4().hex,
     }
     return render(request, "organization/index.html", context)
 

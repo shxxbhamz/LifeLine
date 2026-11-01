@@ -228,52 +228,7 @@
     </footer>
 
     <!-- Emergency Request Modal Popup -->
-    <div id="globalEmergencyModal" class="emergency-modal-overlay">
-        <div class="emergency-modal-content">
-            <h3>Create Emergency Donation Request</h3>
-            
-            <form id="emergencyRequestForm" onsubmit="submitEmergencyRequest(event)">
-                
-                <!-- Component Type Selection -->
-                <div class="em-form-group">
-                    <label>Select Component Type (Choose Exactly One):</label>
-                    <div class="component-options">
-                        <label><input type="radio" name="componentType" value="Blood" onclick="updateBloodGroupOptions('Blood')" checked> Blood</label>
-                        <label><input type="radio" name="componentType" value="Plasma" onclick="updateBloodGroupOptions('Plasma')"> Plasma</label>
-                        <label><input type="radio" name="componentType" value="Platelets" onclick="updateBloodGroupOptions('Platelets')"> Platelets</label>
-                    </div>
-                </div>
-
-                <!-- Blood Group Dropdown with Dynamic Label Update -->
-                <div class="em-form-group">
-                    <label for="emBloodGroup" id="bloodGroupLabel">Target Blood Group (Blood):</label>
-                    <select id="emBloodGroup" required>
-                        <option value="" disabled selected>Select blood group</option>
-                        <option value="A+">A+</option>
-                        <option value="A-">A-</option>
-                        <option value="B+">B+</option>
-                        <option value="B-">B-</option>
-                        <option value="AB+">AB+</option>
-                        <option value="AB-">AB-</option>
-                        <option value="O+">O+</option>
-                        <option value="O-">O-</option>
-                    </select>
-                </div>
-
-                <!-- Description Box -->
-                <div class="em-form-group">
-                    <label for="emDescription">Emergency Description / Case Details:</label>
-                    <textarea id="emDescription" placeholder="e.g., Critical trauma surgery requiring immediate units..." required></textarea>
-                </div>
-
-                <!-- Centered Submit Button & Cancel Action -->
-                <div class="em-modal-actions">
-                    <button type="button" class="em-btn-secondary" onclick="closeEmergencyModal()">Cancel</button>
-                    <button type="submit" class="em-btn-danger">Broadcast Request</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    {% include 'organization/partials/emergency_create_modal.html' %}
 
     <!-- JavaScript for Dropdown, Modal, and Form Actions -->
     <script>
@@ -306,30 +261,8 @@
         function closeEmergencyModal() {
             document.getElementById("globalEmergencyModal").style.display = "none";
             document.getElementById("emergencyRequestForm").reset();
-            document.getElementById("bloodGroupLabel").innerText = "Target Blood Group (Blood):";
         }
 
-        function updateBloodGroupOptions(componentType) {
-            const label = document.getElementById("bloodGroupLabel");
-            label.innerText = `Target Blood Group (${componentType}):`;
-        }
-
-        function submitEmergencyRequest(event) {
-            event.preventDefault();
-            
-            const description = document.getElementById("emDescription").value;
-            const selectedComponent = document.querySelector('input[name="componentType"]:checked').value;
-            const bloodGroup = document.getElementById("emBloodGroup").value;
-
-            console.log("Broadcasting Emergency Request:", {
-                description,
-                component: selectedComponent,
-                bloodGroup
-            });
-
-            alert(`Emergency broadcast successfully dispatched for ${selectedComponent} (${bloodGroup})!`);
-            closeEmergencyModal();
-        }
     </script>
 </body>
 </html>
