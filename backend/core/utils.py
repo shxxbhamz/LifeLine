@@ -22,9 +22,9 @@ def _send_email_async(payload, api_key):
             timeout=20,
         )
         response.raise_for_status()
-        logger.info("Brevo successfully accepted the welcome email request.")
+        logger.info("Brevo successfully accepted the email request.")
     except requests.RequestException as e:
-        logger.exception("Brevo failed to send the welcome email in background thread: %s", e)
+        logger.exception("Brevo failed to send the email in background thread: %s",e,)
 
 
 def send_welcome_email(user_email, username, role):
@@ -99,4 +99,125 @@ LifeLine Emergency Team
         args=(payload, api_key),
     )
     email_thread.start()
+    return True
+
+
+
+def send_appointment_status_email(
+    user_email,
+    first_name,
+    facility_name,
+    scheduled_at,
+    donation_type,
+    status,
+):
+    """
+    Send an appointment confirmation or cancellation email
+    asynchronously using the existing Brevo API configuration.
+    """
+
+    if not user_email:
+        logger.error("Appointment email skipped: recipient email is empty.")
+        return False
+
+    api_key = getattr(settings, "BREVO_API_KEY", None)
+    sender_email = getattr(settings, "BREVO_SENDER_EMAIL", None)
+    sender_name = getattr(
+        settings,
+        "BREVO_SENDER_NAME",
+        "LifeLine Emergency Team",
+    )
+
+    if not api_key or not sender_email:
+        logger.error("Brevo email configuration is missing or invalid.")
+        return False
+
+    donor_name = first_name or "Donor"
+    facility_name = facility_name or "your selected LifeLine facility"
+
+    if scheduled_at:
+        appointment_time = scheduled_at.strftime(
+            "%B %d, %Y at %I:%M %p"
+        )
+    else:
+        appointment_time = "your scheduled time"
+
+    donation_label = (
+        donation_type.replace("_", " ").title()
+        if donation_type
+        else "Donation"
+    )
+
+    status = (status or "").upper()
+
+    if status == "CONFIRMED":
+        subject = "Your LifeLine Appointment Has Been Confirmed"
+
+        message = f"""Hello {donor_name},
+
+Your donation appointment has been confirmed by {facility_name}.
+
+Appointment Details:
+Facility: {facility_name}
+Donation Type: {donation_label}
+Scheduled Time: {appointment_time}
+Status: Confirmed
+
+Please arrive on time and follow any preparation instructions provided by the facility.
+
+Thank you for supporting LifeLine and helping save lives.
+
+Best regards,
+LifeLine Team
+"""
+
+    elif status == "CANCELLED":
+        subject = "Your LifeLine Appointment Has Been Cancelled"
+
+        message = f"""Hello {donor_name},
+
+Your donation appointment at {facility_name} has been cancelled.
+
+Appointment Details:
+Facility: {facility_name}
+Donation Type: {donation_label}
+Scheduled Time: {appointment_time}
+Status: Cancelled
+
+You may book another appointment when scheduling becomes available.
+
+Thank you for supporting LifeLine.
+
+Best regards,
+LifeLine Team
+"""
+
+    else:
+        logger.error(
+            "Appointment email skipped: unsupported status %s.",
+            status,
+        )
+        return False
+
+    payload = {
+        "sender": {
+            "name": sender_name,
+            "email": sender_email,
+        },
+        "to": [
+            {
+                "email": user_email,
+                "name": donor_name,
+            }
+        ],
+        "subject": subject,
+        "textContent": message,
+    }
+
+    email_thread = threading.Thread(
+        target=_send_email_async,
+        args=(payload, api_key),
+    )
+    email_thread.start()
+
     return True
