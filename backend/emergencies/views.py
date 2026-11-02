@@ -9,7 +9,7 @@ from django.db import IntegrityError
 from appointments.models import Appointments
 from core.models import StaffProfiles
 
-from .models import EmergencyRequests
+from .models import EmergencyRequests, RequestMatches
 from .matching import run_emergency_matching
 
 
@@ -32,7 +32,7 @@ def staff_emergencies_view(request):
         return redirect("login")
 
     emergency_requests = EmergencyRequests.objects.none()
-    responding_emergency_donors = Appointments.objects.none()
+    responding_emergency_donors = RequestMatches.objects.none()
 
     if staff_profile.facility:
         facility = staff_profile.facility
@@ -42,15 +42,16 @@ def staff_emergencies_view(request):
         ).order_by("-created_at")
 
         responding_emergency_donors = (
-            Appointments.objects.filter(
-                facility=facility,
-                appointment_source="EMERGENCY",
+            RequestMatches.objects.filter(
+                request__facility=facility,
+                response_status="ACCEPTED",
             )
             .select_related(
+                "request",
                 "donor",
                 "donor__user",
             )
-            .order_by("-id")
+            .order_by("-responded_at", "-id")
         )
 
     context = {
