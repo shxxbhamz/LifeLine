@@ -1,3 +1,4 @@
+/* Heer Patel */
 /* Colour Palette Variables */
 :root {
   --teal: #3AAFA9;
@@ -22,7 +23,7 @@ body {
   color: var(--text-color);
 }
 
-/* Header Styling - Compact Height */
+/* Header Styling; Compact Height */
 .main-header {
   background-color: var(--teal);
   padding: 6px 30px;
@@ -36,7 +37,7 @@ body {
   margin: 0 auto;
 }
 
-/* Header Actions Wrapper (Donor Name + Dropdown Alignment) */
+/* Header Actions Wrapper; Donor Name + Dropdown Alignment */
 .header-actions {
   display: flex;
   align-items: center;
@@ -50,7 +51,7 @@ body {
   line-height: 1;
 }
 
-/* Custom Logo Image Scaling */
+/* Logo Image Scaling */
 .logo a {
   display: flex;
   align-items: center;
@@ -63,7 +64,7 @@ body {
   object-fit: contain;
 }
 
-/* Dropdown Menu (3-lines hamburger) */
+/* Dropdown Menu */
 .dropdown {
   position: relative;
   display: flex;
@@ -311,8 +312,6 @@ main .section {
   transform: translateY(-1px);
 }
 
-
-
 /* Edit Profile Page Form Styles */
 
 /* Show section for multi-page setup */
@@ -401,7 +400,7 @@ main .section {
 /* Button & Action Bar Alignment */
 .form-actions {
   display: flex;
-  justify-content: center; /* <--- Change flex-end to center */
+  justify-content: center; 
   margin-top: 15px;
   padding-top: 15px;
   border-top: 1px solid var(--border-color, #E0E0E0);
@@ -427,27 +426,23 @@ main .section {
 .btn-save:active {
   transform: translateY(0);
 }
+
 /* Responsive Mobile Layout */
 @media (max-width: 768px) {
   .form-row {
     flex-direction: column;
     gap: 15px;
   }
-
   .empty-spacer {
     display: none;
   }
-
   .form-actions {
     justify-content: center;
   }
-
   .btn-save {
     width: 100%;
   }
 }
-
-
 
 /* Custom solid white link style */
 .white-link-bold {
@@ -466,9 +461,6 @@ main .section {
   color: #FFFFFF !important;
   text-decoration: none !important;
 }
-
-
-
 
 /* Centralized Main Layout */
 .home-container {
@@ -510,7 +502,6 @@ main .section {
   align-items: center;
   gap: 10px;
 }
-
 
 .appointment-header h2 {
   color: #2B7A78;
@@ -759,10 +750,7 @@ main .section {
   border-radius: 6px; 
 }
 
-/* ==========================================================================
-   Schedule Donation Modal Styles (Active Requests Page)
-   ========================================================================== */
-
+/* Schedule Donation Modal Styles (Active Requests Page) */
 /* Centered Dialog Window */
 .modal {
   position: fixed;
@@ -898,7 +886,7 @@ main .section {
   gap: 10px;
 }
 
-/* Circular Avatar Image Styling */
+/* Avatar Image Styling (Circular) */
 .donor-avatar {
   width: 36px;
   height: 36px;
@@ -949,6 +937,13 @@ main .section {
 .avatar-label:hover .change-photo-link {
   color: var(--teal-dark, #2B7A78);
 }
+/* Heer Patel */
+
+
+
+
+
+
 
 /* =========================================================
    EMERGENCY EMAIL SCREENING PAGE

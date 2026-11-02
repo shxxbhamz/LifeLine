@@ -175,8 +175,12 @@
         <!-- 3. Preferred Timing Field (Mandatory) -->
         <div class="form-group">
           <label for="preferredTiming" class="form-label">Preferred Timing to Visit:</label>
-          <input type="text" id="preferredTiming" name="preferredTiming" class="form-input"
-            placeholder="e.g., Tomorrow between 10:00 AM - 12:00 PM" required>
+          <select id="preferredTiming" name="preferredTiming" class="form-input" required>
+            <option value="" disabled selected>Select preferred time slot</option>
+            <option value="Morning (10:00 AM - 12:00 PM)">10:00 AM - 12:00 PM</option>
+            <option value="Afternoon (12:00 PM - 2:00 PM)">12:00 PM - 2:00 PM</option>
+            <option value="Evening (2:00 PM - 4:00 PM)">2:00 PM - 4:00 PM</option>
+          </select>
         </div>
 
         <!-- Actions -->
