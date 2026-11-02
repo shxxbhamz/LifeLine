@@ -22,13 +22,11 @@
       <!-- User Profile & Hamburger Menu Container -->
       <div class="header-actions">
         <span class="donor-name">Donor Name</span>
-        
+
+        <!-- Dropdown triggered directly by Profile Image click/hover -->
         <div class="dropdown" tabindex="0">
-          <button class="hamburger-btn" aria-label="Toggle Menu">
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
+          <img src="{% static 'donor/image/default-avatar.png' %}" alt="Donor Profile" class="donor-avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;">
+          
           <div class="dropdown-content">
             <a href="{% url 'donor_edit_profile' %}">Edit Profile</a>
             <a href="{% url 'logout' %}">Logout</a>
