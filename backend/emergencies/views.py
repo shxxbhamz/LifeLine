@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.db import IntegrityError
+from django.db.models import Count
 
 from appointments.models import Appointments
 from core.models import StaffProfiles
@@ -67,7 +68,6 @@ def staff_emergencies_view(request):
         context,
     )
 
-
 def staff_audit_log(request):
     # Only logged-in hospital staff can access this page.
     if (
@@ -76,7 +76,28 @@ def staff_audit_log(request):
     ):
         return redirect("login")
 
+    user_id = request.session.get("user_id")
+
+    try:
+        staff_profile = StaffProfiles.objects.select_related("facility").get(user_id=user_id)
+    except StaffProfiles.DoesNotExist:
+        request.session.flush()
+        return redirect("login")
+
+    emergency_requests = EmergencyRequests.objects.none()
+
+    if staff_profile.facility:
+        facility = staff_profile.facility
+        # Fetch requests for this facility and count matching/notified donors
+        emergency_requests = (
+            EmergencyRequests.objects.filter(facility=facility)
+            .annotate(notified_count=Count("request_matches"))
+            .order_by("-created_at")
+        )
+
     context = {
+        "staff_profile": staff_profile,
+        "emergency_requests": emergency_requests,
         "emergency_form_token": uuid.uuid4().hex,
     }
 
