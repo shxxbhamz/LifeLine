@@ -88,7 +88,7 @@ def staff_audit_log(request):
 
     if staff_profile.facility:
         facility = staff_profile.facility
-        # Fetch requests for this facility and count matching/notified donors
+        # Fetch requests for this facility and count matching/notified donors dynamically
         emergency_requests = (
             EmergencyRequests.objects.filter(facility=facility)
             .annotate(notified_count=Count("request_matches"))
@@ -101,13 +101,14 @@ def staff_audit_log(request):
         "emergency_form_token": uuid.uuid4().hex,
     }
 
-    # Display the Broadcast Audit Log page.
+    # Render the Broadcast Audit Log page with valid context
     return render(
         request,
         "organization/audit_log.html",
         context,
-    )
 
+        
+    )
 
 def staff_create_emergency_request_view(request):
     # Only authenticated hospital staff may create emergency requests.
