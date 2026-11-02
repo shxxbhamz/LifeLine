@@ -79,7 +79,7 @@
         <!-- Account Credentials Row -->
         <div class="form-row">
           <div class="form-group">
-            <label for="username">Username (e.g. dusername)</label>
+            <label for="username">Username (e.g. dousername)</label>
             <input type="text" id="username" name="username" value="{{ form_data.username|default:user.username }}" required>
           </div>
           <div class="form-group">
@@ -145,6 +145,16 @@
               <option value="O-" {% if form_data and form_data.bloodGroup == "O-" or not form_data and donor_profile.blood_type == "O-" %}selected{% endif %}>O Negative (O-)</option>
             </select>
           </div>
+
+        <!-- Existing Profile Preview & Change Link -->
+        <div class="profile-upload-container">
+          <label for="profilePicture" class="avatar-label">
+            <img src="./image/default-avatar.png" alt="Current Profile" class="current-avatar">
+            <span class="change-photo-link">Change Profile Picture</span>
+          </label>
+          <!-- Hidden file input linked directly to label -->
+          <input type="file" id="profilePicture" name="profilePicture" accept="image/*" hidden>
+        </div>  
 
         <!-- Submit Button -->
         <div class="form-actions">
