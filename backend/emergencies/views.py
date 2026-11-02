@@ -69,7 +69,7 @@ def staff_emergencies_view(request):
     )
 
 def staff_audit_log(request):
-    # Only logged-in hospital staff can access this page.
+    # Check staff session
     if (
         request.session.get("user_id") is None
         or request.session.get("role") != "HOSPITAL_STAFF"
@@ -79,35 +79,41 @@ def staff_audit_log(request):
     user_id = request.session.get("user_id")
 
     try:
-        staff_profile = StaffProfiles.objects.select_related("facility").get(user_id=user_id)
+        staff_profile = StaffProfiles.objects.select_related(
+            "facility"
+        ).get(user_id=user_id)
+
     except StaffProfiles.DoesNotExist:
         request.session.flush()
         return redirect("login")
 
-    emergency_requests = EmergencyRequests.objects.none()
+    # Start with an empty queryset
+    confirmed_appointments = Appointments.objects.none()
 
+    # Only show donations belonging to this staff member's facility
     if staff_profile.facility:
-        facility = staff_profile.facility
-        # Fetch requests for this facility and count matching/notified donors dynamically
-        emergency_requests = (
-            EmergencyRequests.objects.filter(facility=facility)
-            .annotate(notified_count=Count("request_matches"))
-            .order_by("-created_at")
+        confirmed_appointments = (
+            Appointments.objects.filter(
+                facility=staff_profile.facility,
+                status="CONFIRMED",
+            )
+            .select_related(
+                "donor",
+                "donor__user",
+                "facility",
+            )
+            .order_by("-scheduled_at")
         )
 
     context = {
         "staff_profile": staff_profile,
-        "emergency_requests": emergency_requests,
-        "emergency_form_token": uuid.uuid4().hex,
+        "confirmed_appointments": confirmed_appointments,
     }
 
-    # Render the Broadcast Audit Log page with valid context
     return render(
         request,
         "organization/audit_log.html",
         context,
-
-        
     )
 
 def staff_create_emergency_request_view(request):
