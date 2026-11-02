@@ -10,6 +10,8 @@ from appointments.models import Appointments
 from core.models import StaffProfiles
 
 from .models import EmergencyRequests
+from .matching import run_emergency_matching
+
 
 
 def staff_emergencies_view(request):
@@ -239,7 +241,7 @@ def staff_create_emergency_request_view(request):
         return redirect("staff_emergencies")
 
     try:
-        EmergencyRequests.objects.create(
+        emergency_request = EmergencyRequests.objects.create(
             facility=staff_profile.facility,
             created_by=staff_profile,
             required_blood_type=required_blood_type,
@@ -261,9 +263,29 @@ def staff_create_emergency_request_view(request):
         )
         return redirect("staff_emergencies")
 
-    messages.success(
-        request,
-        "Emergency request created successfully.",
-    )
+    try:
+        matched_donors = run_emergency_matching(
+            emergency_request
+        )
+
+    except Exception:
+        # The emergency request itself has already been saved.
+        # Matching failures must not destroy the request.
+        messages.warning(
+            request,
+            "Emergency request was created, but donor matching could not be completed.",
+        )
+
+    else:
+        if matched_donors:
+            messages.success(
+                request,
+                f"Emergency request created and {len(matched_donors)} donor candidate(s) matched.",
+            )
+        else:
+            messages.warning(
+                request,
+                "Emergency request created, but no eligible donor candidates were found within the selected radius.",
+            )
 
     return redirect("staff_emergencies")

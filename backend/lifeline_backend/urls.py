@@ -30,6 +30,7 @@ urlpatterns = [
     path("", include("appointments.urls")),
     path("", include("emergencies.urls")),
     path("", include("inventory.urls")),
+    path("", include("screening.urls")),
 ]
 
 # Serve media files (like profile pictures) during development
