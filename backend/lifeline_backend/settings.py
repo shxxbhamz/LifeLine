@@ -149,3 +149,8 @@ BREVO_SENDER_NAME = os.getenv(
     "LifeLine Emergency Team",
 )
 DEFAULT_FROM_EMAIL = BREVO_SENDER_EMAIL
+
+LIFELINE_BASE_URL = os.getenv(
+    "LIFELINE_BASE_URL",
+    "https://lifeline-85fz.onrender.com",
+).rstrip("/")

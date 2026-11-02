@@ -2,12 +2,15 @@ import uuid
 
 from django.contrib import messages
 from django.shortcuts import redirect, render
+
+from emergencies.models import RequestMatches
 from django.utils import timezone
 
 from core.models import StaffProfiles
 from core.utils import send_appointment_status_email
 from .models import Appointments, DonationRequests
 from emergencies.models import EmergencyRequests
+
 
 
 def staff_create_donation_request_view(request):
@@ -137,11 +140,46 @@ def staff_create_donation_request_view(request):
 
 def donor_active_requests_view(request):
     # Only logged-in donors can access the Active Requests page.
-    if request.session.get("user_id") is None or request.session.get("role") != "DONOR":
+    if (
+        request.session.get("user_id") is None
+        or request.session.get("role") != "DONOR"
+    ):
         return redirect("login")
 
-    # Display the existing non-emergency donation requests page.
-    return render(request, "donor/active_requests.html")
+    user_id = request.session.get("user_id")
+
+    emergency_matches = (
+        RequestMatches.objects
+        .filter(
+            donor_id=user_id,
+            request__status="ACTIVE",
+            response_status="PENDING",
+            notification_status__in=[
+                "SENT",
+                "VIEWED",
+            ],
+        )
+        .select_related(
+            "request",
+            "request__facility",
+            "donor",
+            "donor__user",
+        )
+        .order_by(
+            "-match_score",
+            "-matched_at",
+        )
+    )
+
+    context = {
+        "emergency_matches": emergency_matches,
+    }
+
+    return render(
+        request,
+        "donor/active_requests.html",
+        context,
+    )
 
 
 def donor_book_appointment_view(request):

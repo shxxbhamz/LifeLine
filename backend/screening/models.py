@@ -21,6 +21,13 @@ class EligibilityScreenings(models.Model):
         null=True,
     )
 
+    request_match = models.ForeignKey(
+        "emergencies.RequestMatches",
+        models.DB_CASCADE,
+        blank=True,
+        null=True,
+    )
+
     status = models.CharField(max_length=20)
     preliminary_result = models.CharField(max_length=30)
     rules_version = models.CharField(max_length=30)

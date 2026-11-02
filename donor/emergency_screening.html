@@ -1,0 +1,452 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>LifeLine - Emergency Donor Screening</title>
+
+  <link
+    rel="stylesheet"
+    href="{% static 'donor/css/styles.css' %}"
+  >
+</head>
+
+
+<body id="emergency-screening-page">
+
+  <main class="screening-page">
+
+    <div class="screening-logo">
+      <img
+        src="{% static 'donor/image/logo.png' %}"
+        alt="LifeLine"
+      >
+    </div>
+
+
+    <section class="emergency-card">
+
+      <h1>Emergency Donation Request</h1>
+
+      <p class="detail-row">
+        Hello
+        <strong>
+          {{ request_match.donor.user.first_name }}
+        </strong>,
+      </p>
+
+      <p>
+        You have been identified as a potential compatible
+        donor for the following emergency request.
+      </p>
+
+      <br>
+
+      <p class="detail-row">
+        <strong>Facility:</strong>
+        {{ facility.name }}
+      </p>
+
+      <p class="detail-row">
+        <strong>Required Blood Type:</strong>
+        {{ emergency_request.required_blood_type }}
+      </p>
+
+      <p class="detail-row">
+        <strong>Component:</strong>
+        {{ emergency_request.component_type }}
+      </p>
+
+      <p class="detail-row">
+        <strong>Urgency:</strong>
+        {{ emergency_request.urgency }}
+      </p>
+
+      <p class="detail-row">
+        <strong>Distance:</strong>
+
+        {% if request_match.distance_km %}
+          {{ request_match.distance_km }} km
+        {% else %}
+          Not available
+        {% endif %}
+      </p>
+
+    </section>
+
+    <section class="screening-card">
+
+  {% if screening_completed %}
+
+    <div class="screening-result">
+
+      {% if preliminary_result == "PRELIMINARY_ELIGIBLE" %}
+
+        <div class="result-icon eligible-icon">
+          ✓
+        </div>
+
+        <h2 class="result-title eligible-title">
+          Preliminary Screening Passed
+        </h2>
+
+        <p class="result-message">
+          Based on your responses, you appear to meet the
+          preliminary requirements for this emergency donation.
+        </p>
+
+        <div class="result-notice">
+          This is not a final medical eligibility decision.
+          Final eligibility will be confirmed by qualified staff
+          at the donation facility.
+        </div>
+
+        <div class="emergency-next-step">
+
+            {% if response_recorded %}
+
+                {% if response_status == "ACCEPTED" %}
+
+                <div class="response-confirmation accepted-confirmation">
+                    <h3>Response Confirmed</h3>
+
+                    <p>
+                    Thank you. You have confirmed that you are available
+                    to help with this emergency donation request.
+                    </p>
+
+                    <p>
+                    The requesting facility can now see your response.
+                    </p>
+                </div>
+
+                {% elif response_status == "DECLINED" %}
+
+                <div class="response-confirmation declined-confirmation">
+                    <h3>Response Recorded</h3>
+
+                    <p>
+                    You have declined this emergency donation request.
+                    </p>
+
+                    <p>
+                    Thank you for responding quickly.
+                    </p>
+                </div>
+
+                {% endif %}
+
+
+            {% else %}
+
+                <h3>Can you help with this emergency?</h3>
+
+                <p>
+                Please let the requesting facility know whether you are
+                available to donate.
+                </p>
+
+
+                <form
+                method="post"
+                action="{% url 'emergency_response' access_token %}"
+                class="response-form"
+                >
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    name="response_action"
+                    value="accept"
+                    class="response-button response-accept"
+                >
+                    I Can Donate
+                </button>
+
+                <button
+                    type="submit"
+                    name="response_action"
+                    value="decline"
+                    class="response-button response-decline"
+                >
+                    I Cannot Donate
+                </button>
+
+                </form>
+
+            {% endif %}
+
+        </div>
+
+
+      {% elif preliminary_result == "REVIEW_REQUIRED" %}
+
+        <div class="result-icon review-icon">
+          !
+        </div>
+
+        <h2 class="result-title review-title">
+          Additional Review Required
+        </h2>
+
+        <p class="result-message">
+          One or more of your answers require additional review
+          before you can proceed with this emergency donation.
+        </p>
+
+        <div class="result-notice review-notice">
+          LifeLine has not determined that you are ineligible.
+          Qualified facility staff should review the information
+          you provided before confirming donation eligibility.
+        </div>
+
+        <div class="emergency-next-step">
+
+            {% if response_recorded %}
+
+                <div class="response-confirmation declined-confirmation">
+                <h3>Response Recorded</h3>
+
+                <p>
+                    Your response has already been recorded.
+                </p>
+                </div>
+
+            {% else %}
+
+                <h3>What happens next?</h3>
+
+                <p>
+                Your screening requires additional review before you can
+                confirm that you are available to donate.
+                </p>
+
+                <form
+                method="post"
+                action="{% url 'emergency_response' access_token %}"
+                class="response-form"
+                >
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    name="response_action"
+                    value="decline"
+                    class="response-button response-decline"
+                >
+                    I Cannot Donate
+                </button>
+
+                </form>
+
+            {% endif %}
+
+        </div>
+
+
+      {% elif preliminary_result == "TEMPORARILY_INELIGIBLE" %}
+
+        <div class="result-icon ineligible-icon">
+          ×
+        </div>
+
+        <h2 class="result-title ineligible-title">
+          Unable to Proceed Right Now
+        </h2>
+
+        <p class="result-message">
+          Based on the information provided, you should not
+          continue with this emergency donation at this time.
+        </p>
+
+        <div class="result-notice ineligible-notice">
+          This is a preliminary LifeLine screening result and
+          is not a permanent medical eligibility determination.
+        </div>
+
+        <div class="emergency-next-step">
+
+            {% if response_recorded %}
+
+                <div class="response-confirmation declined-confirmation">
+                <h3>Response Recorded</h3>
+
+                <p>
+                    Your response has already been recorded.
+                </p>
+                </div>
+
+            {% else %}
+
+                <p>
+                You should not continue with this emergency donation at
+                this time.
+                </p>
+
+                <form
+                method="post"
+                action="{% url 'emergency_response' access_token %}"
+                class="response-form"
+                >
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    name="response_action"
+                    value="decline"
+                    class="response-button response-decline"
+                >
+                    I Cannot Donate
+                </button>
+
+                </form>
+
+            {% endif %}
+
+        </div>
+
+      {% endif %}
+
+    </div>
+
+
+  {% else %}
+
+    <h2>Emergency Pre-Screening</h2>
+
+    <div class="screening-note">
+      Please complete this short questionnaire before responding
+      to the emergency request. LifeLine provides a preliminary
+      screening result only. Final donation eligibility may require
+      review by qualified healthcare staff.
+    </div>
+
+
+    <form method="post">
+
+      {% csrf_token %}
+
+      {% if questions %}
+
+        {% for question in questions %}
+
+          <div class="screening-question">
+
+            <label class="question-label">
+              {{ forloop.counter }}.
+              {{ question.question_text }}
+
+              {% if question.is_required %}
+                *
+              {% endif %}
+            </label>
+
+            {% if question.validation_error %}
+                <p class="screening-error">
+                    {{ question.validation_error }}
+                </p>
+            {% endif %}
+
+
+            {% if question.answer_type == "BOOLEAN" %}
+
+              <div class="boolean-options">
+
+                <label>
+                  <input
+                    type="radio"
+                    name="question_{{ question.id }}"
+                    value="true"
+                    {% if question.submitted_answer == "true" %}checked{% endif %}
+                    {% if question.is_required %}required{% endif %}
+                  >
+                  Yes
+                </label>
+
+                <label>
+                  <input
+                    type="radio"
+                    name="question_{{ question.id }}"
+                    value="false"
+                    {% if question.submitted_answer == "false" %}checked{% endif %}
+                    {% if question.is_required %}required{% endif %}
+                  >
+                  No
+                </label>
+
+              </div>
+
+
+            {% elif question.answer_type == "TEXT" %}
+
+              <textarea
+                name="question_{{ question.id }}"
+                class="screening-input"
+                rows="4"
+                {% if question.is_required %}required{% endif %}
+              >{{ question.submitted_answer|default:"" }}</textarea>
+
+
+            {% elif question.answer_type == "DATE" %}
+
+              <input
+                type="date"
+                name="question_{{ question.id }}"
+                class="screening-input"
+                value="{{ question.submitted_answer|default:'' }}"
+                {% if question.is_required %}required{% endif %}
+              >
+
+
+            {% elif question.answer_type == "NUMBER" %}
+
+              <input
+                type="number"
+                name="question_{{ question.id }}"
+                class="screening-input"
+                value="{{ question.submitted_answer|default:'' }}"
+                {% if question.is_required %}required{% endif %}
+              >
+
+            {% endif %}
+
+          </div>
+
+        {% endfor %}
+
+
+        <button
+          type="submit"
+          class="submit-button"
+        >
+          Submit Emergency Screening
+        </button>
+
+      {% else %}
+
+        <p>
+          Screening questions are currently unavailable.
+          Please contact the requesting facility.
+        </p>
+
+      {% endif %}
+
+    </form>
+
+    <p class="privacy-note">
+      This secure link was generated specifically for your
+      emergency donor match. Please do not share it.
+    </p>
+
+  {% endif %}
+
+</section>
+</main>
+</body>
+</html>
