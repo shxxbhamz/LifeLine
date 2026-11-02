@@ -4,98 +4,170 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name{% load static %} <!DOCTYPE html>
-    <html lang="en">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Lifeline - Broadcast & Emergency Audit Log</title>
-        <!-- Linking centralized and page-specific stylesheets -->
-        <link rel="stylesheet" href="{% static 'organization/css/style.css' %}">
-    </head>
+    <title>LifeLine - Broadcast & Emergency Audit Log</title>
+
+    <link rel="stylesheet" href="{% static 'organization/css/style.css' %}">
+</head>
 
 <body data-facility-type="hospital">
 
     <!-- Top Navigation Bar -->
     <header>
         <a href="{% url 'staff_dashboard' %}" class="logo-link">
-            <img src="{% static 'organization/img/lifeline-logo.png' %}" alt="LifeLine Logo" class="brand-logo">
+            <img src="{% static 'organization/img/lifeline-logo.png' %}"
+                 alt="LifeLine Logo"
+                 class="brand-logo">
         </a>
 
         <div class="nav-right">
-            <!-- Emergency Create Action Button -->
-            <button class="btn-emergency-create" onclick="openEmergencyModal()">Create Emergency</button>
 
-            <!-- Three-Dash Hamburger Dropdown Menu -->
+            <button class="btn-emergency-create"
+                    onclick="openEmergencyModal()">
+                Create Emergency
+            </button>
+
             <div class="dropdown">
-                <button class="hamburger-btn" onclick="toggleDropdown()" aria-label="Menu">
+
+                <button class="hamburger-btn"
+                        onclick="toggleDropdown()"
+                        aria-label="Menu">
                     &#9776;
                 </button>
+
                 <div class="dropdown-content" id="navDropdown">
-                    <a href="{% url 'staff_edit_profile' %}">Edit Profile</a>
-                    <a href="{% url 'staff_appointments' %}">Notifications <span class="badge-count">3</span></a>
+
+                    <a href="{% url 'staff_edit_profile' %}">
+                        Edit Profile
+                    </a>
+
+                    <a href="{% url 'staff_appointments' %}">
+                        Notifications
+                        <span class="badge-count">3</span>
+                    </a>
+
                     <div class="dropdown-divider"></div>
-                    <a href="{% url 'logout' %}" class="logout-link">Logout</a>
+
+                    <a href="{% url 'logout' %}" class="logout-link">
+                        Logout
+                    </a>
+
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Sub Navigation Bar / Quick Links -->
+
+    <!-- Sub Navigation -->
     <nav class="sub-nav">
         <ul>
-            <li><a href="{% url 'staff_dashboard' %}">Home</a></li>
-            <li><a href="{% url 'staff_appointments' %}">Appointments</a></li>
-            <li><a href="{% url 'staff_emergencies' %}">Active Emergency Dispatches</a></li>
-            <li><a href="{% url 'staff_inventory' %}">Blood & Plasma Inventory</a></li>
-            <li><a href="{% url 'staff_audit_log' %}" class="active">Broadcast Audit Log</a></li>
+
+            <li>
+                <a href="{% url 'staff_dashboard' %}">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'staff_appointments' %}">
+                    Appointments
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'staff_emergencies' %}">
+                    Active Emergency Dispatches
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'staff_inventory' %}">
+                    Blood & Plasma Inventory
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'staff_audit_log' %}" class="active">
+                    Broadcast Audit Log
+                </a>
+            </li>
+
         </ul>
     </nav>
 
-    <!-- Main Content Area -->
+
+    <!-- Main Content -->
     <main>
-        <!-- Welcome Banner -->
+
         <section class="hero-section">
             <h1>Broadcast & Emergency Audit Log</h1>
         </section>
 
-        <!-- Dashboard Grid Layout -->
+
         <div class="dashboard-grid inventory-dashboard-grid">
 
-            <!-- Audit Log & Emergency Management Card -->
             <section class="dash-card">
+
                 <div class="card-header">
-                    <h3>Broadcast & Emergency Request Log</h3>
-                    <span class="badge-count">Active Dispatches Tracked</span>
+
+                    <h3>Responding Donor Requests</h3>
+
+                    <span class="badge-count">
+                        {{ confirmed_appointments|length }} Confirmed Donations
+                    </span>
+
                 </div>
 
+
                 <div class="inventory-table-container">
+
                     <table class="inventory-table">
+
                         <thead>
                             <tr>
+
                                 <th>Timestamp</th>
-                                <th>Component & Blood Type</th>
-                                <th>Units & Reach</th>
+
+                                <th>Donor Profile</th>
+
+                                <th>Contact Information</th>
+
                                 <th>Status</th>
-                                <th class="text-right">Actions</th>
+
+                                <th class="text-right">
+                                    Actions
+                                </th>
+
                             </tr>
                         </thead>
+
+
                         <tbody id="auditTableBody">
 
                             {% for appointment in confirmed_appointments %}
 
-                            <tr>
+                            <tr id="row-{{ appointment.id }}">
+
                                 <!-- Appointment Date -->
                                 <td>
                                     {{ appointment.scheduled_at|date:"M d, Y - H:i" }}
                                 </td>
 
+
                                 <!-- Donor Profile -->
                                 <td>
+
                                     <div class="donor-profile-cell">
 
+                                        <img
+                                            src="{% static 'organization/img/default-avatar.png' %}"
+                                            alt="Donor Avatar"
+                                            class="donor-avatar"
+                                        >
+
                                         <div>
+
                                             <strong>
                                                 {{ appointment.donor.user.first_name }}
                                                 {{ appointment.donor.user.last_name }}
@@ -112,15 +184,19 @@
 
                                             <small class="text-muted">
                                                 Donation:
-                                                {{ appointment.donation_type }}
+                                                {{ appointment.donation_type|default:"Not specified" }}
                                             </small>
+
                                         </div>
 
                                     </div>
+
                                 </td>
+
 
                                 <!-- Contact Information -->
                                 <td>
+
                                     Phone:
                                     {{ appointment.donor.phone|default:"Not provided" }}
 
@@ -129,297 +205,174 @@
                                     <small class="text-muted">
                                         {{ appointment.donor.user.email|default:"Not provided" }}
                                     </small>
+
                                 </td>
+
 
                                 <!-- Appointment Status -->
                                 <td>
-                                    <span class="badge green">
+
+                                    <span
+                                        class="badge green"
+                                        id="status-{{ appointment.id }}">
+
                                         {{ appointment.status }}
+
                                     </span>
+
                                 </td>
 
-                                <!-- Action -->
-                                <td class="text-right action-btns">
-                                    <button class="btn-success btn-sm" type="button" disabled
+
+                                <!-- Action Button -->
+                                <td class="text-right action-btns"
+                                    id="action-cell-{{ appointment.id }}">
+
+                                    <button
+                                        class="btn-success btn-sm"
+                                        type="button"
+                                        disabled
                                         title="Donation usage functionality will be added later">
+
                                         Use Donation
+
                                     </button>
+
                                 </td>
 
                             </tr>
 
+
                             {% empty %}
 
                             <tr>
-                                <td colspan="5" style="text-align: center; padding: 25px;">
-                                    No confirmed donations found for your facility.
+
+                                <td colspan="5"
+                                    style="text-align: center; padding: 25px;">
+
+                                    <strong>No confirmed donations found.</strong>
+
+                                    <br>
+
+                                    <small class="text-muted">
+                                        Confirmed appointments for your facility
+                                        will appear here.
+                                    </small>
+
                                 </td>
+
                             </tr>
 
                             {% endfor %}
 
                         </tbody>
+
                     </table>
+
                 </div>
+
             </section>
 
         </div>
+
     </main>
+
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2026 Lifeline. Secure Medical Staff Console. All rights reserved.</p>
+
+        <p>
+            &copy; 2026 LifeLine.
+            Secure Medical Staff Console.
+            All rights reserved.
+        </p>
+
     </footer>
 
-    <!-- Emergency Request Modal Popup -->
+
+    <!-- Emergency Request Modal -->
     {% include 'organization/partials/emergency_create_modal.html' %}
 
-    <!-- JavaScript Actions -->
+
+    <!-- JavaScript -->
     <script>
+
+        // Navigation dropdown
         function toggleDropdown() {
-            document.getElementById("navDropdown").classList.toggle("show");
+
+            document.getElementById("navDropdown")
+                .classList.toggle("show");
+
         }
 
-        window.onclick = function (event) {
+
+        // Close dropdown and modal
+        window.onclick = function(event) {
+
             if (!event.target.matches('.hamburger-btn')) {
-                var dropdowns = document.getElementsByClassName("dropdown-content");
+
+                var dropdowns =
+                    document.getElementsByClassName("dropdown-content");
+
                 for (var i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
-                    }
+
+                    dropdowns[i].classList.remove("show");
+
                 }
+
             }
 
-            const modal = document.getElementById("globalEmergencyModal");
+            const modal =
+                document.getElementById("globalEmergencyModal");
+
             if (modal && event.target === modal) {
-                closeEmergencyModal();
-            }
-        }
 
+                closeEmergencyModal();
+
+            }
+
+        };
+
+
+        // Open emergency modal
         function openEmergencyModal() {
-            const modal = document.getElementById("globalEmergencyModal");
+
+            const modal =
+                document.getElementById("globalEmergencyModal");
+
             if (modal) {
+
                 modal.style.display = "flex";
+
             }
+
         }
 
+
+        // Close emergency modal
         function closeEmergencyModal() {
-            const modal = document.getElementById("globalEmergencyModal");
+
+            const modal =
+                document.getElementById("globalEmergencyModal");
+
             if (modal) {
+
                 modal.style.display = "none";
+
             }
-            const form = document.getElementById("emergencyRequestForm");
+
+            const form =
+                document.getElementById("emergencyRequestForm");
+
             if (form) {
+
                 form.reset();
+
             }
+
         }
 
-        function expireEmergencyRequest(requestId, requestTitle) {
-            if (confirm("Confirm expiration for request: " + requestTitle + "? This will sync to the database, close the active broadcast, and increment life-save statistics for responding donors.")) {
 
-                const statusBadge = document.getElementById("status-" + requestId);
-                if (statusBadge) {
-                    statusBadge.className = "badge yellow";
-                    statusBadge.innerText = "Expired / Fulfilled";
-                }
-
-                const actionCell = document.getElementById("action-cell-" + requestId);
-                if (actionCell) {
-                    actionCell.innerHTML = `
-                        <button class="btn-secondary btn-sm" disabled style="opacity: 0.5;">Completed</button>
-                    `;
-                }
-
-                alert("Successfully recorded! Request status updated in database and donor statistics incremented.");
-            }
-        }
     </script>
+
 </body>
-
-</html>="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lifeline - Broadcast & Emergency Audit Log</title>
-<!-- Linking centralized and page-specific stylesheets -->
-<link rel="stylesheet" href="{% static 'organization/css/style.css' %}">
-</head>
-
-<body data-facility-type="hospital">
-
-    <!-- Top Navigation Bar -->
-    <header>
-        <a href="{% url 'staff_dashboard' %}" class="logo-link">
-            <img src="{% static 'organization/img/lifeline-logo.png' %}" alt="LifeLine Logo" class="brand-logo">
-        </a>
-
-        <div class="nav-right">
-            <!-- Emergency Create Action Button -->
-            <button class="btn-emergency-create" onclick="openEmergencyModal()">Create Emergency</button>
-
-            <!-- Three-Dash Hamburger Dropdown Menu -->
-            <div class="dropdown">
-                <button class="hamburger-btn" onclick="toggleDropdown()" aria-label="Menu">
-                    &#9776;
-                </button>
-                <div class="dropdown-content" id="navDropdown">
-                    <a href="{% url 'staff_edit_profile' %}">Edit Profile</a>
-                    <a href="{% url 'staff_appointments' %}">Notifications <span class="badge-count">3</span></a>
-                    <div class="dropdown-divider"></div>
-                    <a href="{% url 'logout' %}" class="logout-link">Logout</a>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Sub Navigation Bar / Quick Links -->
-    <nav class="sub-nav">
-        <ul>
-            <li><a href="{% url 'staff_dashboard' %}">Home</a></li>
-            <li><a href="{% url 'staff_appointments' %}">Appointments</a></li>
-            <li><a href="{% url 'staff_emergencies' %}">Active Emergency Dispatches</a></li>
-            <li><a href="{% url 'staff_inventory' %}">Blood & Plasma Inventory</a></li>
-            <li><a href="{% url 'staff_audit_log' %}" class="active">Broadcast Audit Log</a></li>
-        </ul>
-    </nav>
-
-    <!-- Main Content Area -->
-    <main>
-        <!-- Welcome Banner -->
-        <section class="hero-section">
-            <h1>Broadcast & Emergency Audit Log</h1>
-        </section>
-
-        <!-- Dashboard Grid Layout -->
-        <div class="dashboard-grid inventory-dashboard-grid">
-
-            <!-- Audit Log & Donor Management Card -->
-            <section class="dash-card">
-                <div class="card-header">
-                    <h3>Responding Donor Requests</h3>
-                </div>
-
-                <div class="inventory-table-container">
-                    <table class="inventory-table">
-                        <thead>
-                            <tr>
-                                <th>Timestamp</th>
-                                <th>Donor Profile</th>
-                                <th>Contact Information</th>
-                                <th>Status</th>
-                                <th class="text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="auditTableBody">
-                            <tr id="row-1">
-                                <td>Oct 24, 2026 - 14:32</td>
-                                <td>
-                                    <div class="donor-profile-cell">
-                                        <img src="{% static 'organization/img/donor-placeholder-1.png' %}"
-                                            alt="Donor Avatar" class="donor-avatar">
-                                        <div>
-                                            <strong>Sarah Jenkins</strong><br>
-                                            <small class="text-muted">Blood Type: O-</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    Phone: (555) 234-5678<br>
-                                    <small class="text-muted">sarah.j@example.com</small>
-                                </td>
-                                <td><span class="badge green" id="status-1">Active / Respond</span></td>
-                                <td class="text-right action-btns">
-                                    <button class="btn-success btn-sm"
-                                        onclick="markDonationUsed('1', 'Sarah Jenkins')">pending</button>
-                                </td>
-                            </tr>
-                            <tr id="row-2">
-                                <td>Oct 22, 2026 - 09:15</td>
-                                <td>
-                                    <div class="donor-profile-cell">
-                                        <img src="{% static 'organization/img/donor-placeholder-2.png' %}"
-                                            alt="Donor Avatar" class="donor-avatar">
-                                        <div>
-                                            <strong>Michael Chang</strong><br>
-                                            <small class="text-muted">Blood Type: A+</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    Phone: (555) 876-5432<br>
-                                    <small class="text-muted">m.chang@example.com</small>
-                                </td>
-                                <td><span class="badge green" id="status-2">Active / Respond</span></td>
-                                <td class="text-right action-btns">
-                                    <button class="btn-success btn-sm"
-                                        onclick="markDonationUsed('2', 'Michael Chang')">pending</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2026 Lifeline. Secure Medical Staff Console. All rights reserved.</p>
-    </footer>
-
-    <!-- Emergency Request Modal Popup -->
-    {% include 'organization/partials/emergency_create_modal.html' %}
-
-    <!-- JavaScript Actions -->
-    <script>
-        function toggleDropdown() {
-            document.getElementById("navDropdown").classList.toggle("show");
-        }
-
-        window.onclick = function (event) {
-            if (!event.target.matches('.hamburger-btn')) {
-                var dropdowns = document.getElementsByClassName("dropdown-content");
-                for (var i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
-                    }
-                }
-            }
-
-            // Close modal when clicking outside the modal content window
-            const modal = document.getElementById("globalEmergencyModal");
-            if (event.target === modal) {
-                closeEmergencyModal();
-            }
-        }
-
-        function openEmergencyModal() {
-            document.getElementById("globalEmergencyModal").style.display = "flex";
-        }
-
-        function closeEmergencyModal() {
-            document.getElementById("globalEmergencyModal").style.display = "none";
-            document.getElementById("emergencyRequestForm").reset();
-        }
-
-        function markDonationUsed(rowId, donorName) {
-            if (confirm("Confirm that " + donorName + "'s donation has been used? This will sync to the database and update their donor profile 'Life Saved' statistics.")) {
-                // Update status badge visually
-                const statusBadge = document.getElementById("status-" + rowId);
-                statusBadge.className = "badge yellow";
-                statusBadge.innerText = "Donation Used / Fulfilled";
-
-                // Update action button state
-                const row = document.getElementById("row-" + rowId);
-                const actionCell = row.querySelector(".action-btns");
-                actionCell.innerHTML = `
-                    <button class="btn-secondary btn-sm" disabled style="opacity: 0.5;">Completed</button>
-                `;
-
-                alert("Successfully recorded! Database updated and life-save count incremented for " + donorName + ".");
-            }
-        }
-    </script>
-</body>
-
 </html>
