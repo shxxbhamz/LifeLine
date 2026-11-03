@@ -6,11 +6,8 @@ from django.shortcuts import redirect, render
 from emergencies.models import RequestMatches
 from django.utils import timezone
 
-from core.models import (
-    StaffProfiles,
-    BloodInventory,
-    InventoryTransactions,
-)
+from core.models import StaffProfiles
+from inventory.models import BloodInventory, InventoryTransactions
 from core.utils import send_appointment_status_email
 from .models import Appointments, DonationRequests
 from emergencies.models import EmergencyRequests
