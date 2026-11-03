@@ -1684,3 +1684,10 @@ main .section {
     font-weight: 600;
     color: #b91c1c;
 }
+.progress-fill {
+  width: var(--progress-width, 0%);
+  height: 100%;
+  background-color: #e63946;
+  border-radius: inherit;
+  transition: width 0.4s ease;
+}

@@ -130,7 +130,10 @@
             <span>{{ donor_profile.total_donations|default:0 }} / {{ next_goal }}</span>
           </div>
           <div class="progress-bar-bg">
-          <div class="progress-fill" style="width: {{ progress_percent|default:0 }}%;"></div>
+          
+            <div class="progress-fill"
+     style="--progress-width: {{ progress_percent|default:0 }}%;">
+</div>
           </div>
         </div>
       </section>
