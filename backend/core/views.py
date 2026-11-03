@@ -4,6 +4,7 @@ from django.db import transaction
 from django.shortcuts import redirect, render
 from django.utils import timezone
 
+from django.contrib.auth.decorators import login_required
 
 from .models import DonorProfiles, Facilities, StaffProfiles, Users
 from appointments.models import Appointments
