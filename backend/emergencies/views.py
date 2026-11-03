@@ -34,6 +34,7 @@ def staff_emergencies_view(request):
 
     emergency_requests = EmergencyRequests.objects.none()
     responding_emergency_donors = RequestMatches.objects.none()
+    emergency_map_data = []
 
     if staff_profile.facility:
         facility = staff_profile.facility
@@ -55,11 +56,55 @@ def staff_emergencies_view(request):
             .order_by("-responded_at", "-id")
         )
 
+        # Prepare map data only for ongoing emergency requests.
+        if facility.latitude is not None and facility.longitude is not None:
+            active_emergencies = emergency_requests.filter(
+                status__in=["OPEN", "MATCHING", "ACTIVE"]
+            )
+
+            for emergency in active_emergencies:
+                donor_locations = []
+
+                # Only donors matched to this emergency are included.
+                matches = RequestMatches.objects.filter(
+                    request=emergency,
+                    response_status__in=["PENDING", "ACCEPTED"],
+                ).select_related("donor")
+
+                for match in matches:
+                    donor = match.donor
+
+                    if donor.latitude is None or donor.longitude is None:
+                        continue
+
+                    # Pending donors must have been notified successfully.
+                    if (
+                        match.response_status == "PENDING"
+                        and match.notification_status not in ["SENT", "VIEWED"]
+                    ):
+                        continue
+
+                    donor_locations.append({
+                        "latitude": float(donor.latitude),
+                        "longitude": float(donor.longitude),
+                        "status": match.response_status,
+                    })
+
+                emergency_map_data.append({
+                    "id": emergency.id,
+                    "blood_type": emergency.required_blood_type,
+                    "radius_km": float(emergency.radius_km),
+                    "latitude": float(facility.latitude),
+                    "longitude": float(facility.longitude),
+                    "donors": donor_locations,
+                })
+
     context = {
         "staff_profile": staff_profile,
         "emergency_requests": emergency_requests,
         "responding_emergency_donors": responding_emergency_donors,
         "emergency_form_token": uuid.uuid4().hex,
+        "emergency_map_data": emergency_map_data,
     }
 
     return render(

@@ -9,7 +9,7 @@ from .models import DonorProfiles, Facilities, StaffProfiles, Users
 from appointments.models import Appointments
 from inventory.models import BloodInventory
 from emergencies.models import EmergencyRequests
-
+from .geocoding import geocode_address
 
 from .utils import send_welcome_email
 
@@ -105,12 +105,36 @@ def staff_dashboard_view(request):
     scheduled_appointments = []
     inventory_items = []
     emergency_history = []
+    map_facilities = []
+    current_facility_id = None
     
     try:
         current_user = Users.objects.get(id=user_id)
         staff_profile = StaffProfiles.objects.get(user_id=user_id)
         if staff_profile.facility:
             facility_name = staff_profile.facility.name
+
+            current_facility_id = staff_profile.facility.id
+
+            # Only include registered facilities with valid map coordinates.
+            facilities_with_locations = Facilities.objects.filter(
+                latitude__isnull=False,
+                longitude__isnull=False,
+            )
+
+            for facility in facilities_with_locations:
+                map_facilities.append({
+                    "id": facility.id,
+                    "name": facility.name,
+                    "type": facility.facility_type,
+                    "address": (
+                        f"{facility.street_address}, {facility.city}, "
+                        f"{facility.province}, {facility.postal_code}"
+                    ),
+                    "latitude": float(facility.latitude),
+                    "longitude": float(facility.longitude),
+                })
+
             facility_type = staff_profile.facility.facility_type.lower()
             
             # Fetch scheduled appointments linked specifically to this facility
@@ -165,6 +189,8 @@ def staff_dashboard_view(request):
         'inventory_items': inventory_items,
         'emergency_history': emergency_history,  # Pass all emergency history to template
         'emergency_form_token': uuid.uuid4().hex,
+        'map_facilities': map_facilities,
+        'current_facility_id': current_facility_id,
     }
     return render(request, "organization/index.html", context)
 
@@ -249,6 +275,19 @@ def donor_signup_view(request):
             {"error": "You must accept the terms and privacy policy.", "form_data": form_data},
         )
 
+    # Convert the donor's registered address into geographic coordinates.
+    # If geocoding fails, registration can still proceed without coordinates.
+    coordinates = geocode_address(
+        street_address,
+        city,
+        province,
+        postal_code,
+        country,
+    )
+
+    latitude = coordinates[0] if coordinates else None
+    longitude = coordinates[1] if coordinates else None
+
     now = timezone.now()
 
     # Create the user and donor profile as one database transaction.
@@ -278,6 +317,8 @@ def donor_signup_view(request):
             postal_code=postal_code,
             country=country,
             emergency_available=True,
+            latitude=latitude,
+            longitude=longitude,
         )
 
     # Automatically send the welcome email immediately after successful registration
@@ -408,6 +449,19 @@ def organization_signup_view(request):
             },
         )
 
+    # Convert the organization's registered address into coordinates.
+    # If geocoding fails, registration can still proceed.
+    coordinates = geocode_address(
+        street_address,
+        city,
+        province,
+        postal_code,
+        country,
+    )
+
+    latitude = coordinates[0] if coordinates else None
+    longitude = coordinates[1] if coordinates else None
+
     now = timezone.now()
 
     # User, facility and staff profile creation are treated as one operation.
@@ -439,6 +493,8 @@ def organization_signup_view(request):
                 "city": city,
                 "province": province,
                 "created_at": now,
+                "latitude": latitude,
+                "longitude": longitude,
             },
         )
 
@@ -523,6 +579,29 @@ def donor_edit_profile_view(request):
                     "error": "That email address is already in use.",
                 },
             )
+
+        # Only geocode again if the donor's address has changed.
+        address_changed = (
+            donor_profile.street_address != address
+            or donor_profile.city != city
+            or donor_profile.province != province
+            or donor_profile.postal_code != postal_code
+            or donor_profile.country != country
+        )
+
+        if address_changed:
+            # Convert the updated address into new coordinates.
+            coordinates = geocode_address(
+                address,
+                city,
+                province,
+                postal_code,
+                country,
+            )
+
+            # Clear old coordinates if the new address cannot be located.
+            donor_profile.latitude = coordinates[0] if coordinates else None
+            donor_profile.longitude = coordinates[1] if coordinates else None
 
         # Update account information.
         user.first_name = first_name
@@ -644,6 +723,29 @@ def staff_edit_profile_view(request):
                     "error": "A facility with that name and postal code already exists.",
                 },
             )
+
+        # Check whether the facility's address has changed.
+        address_changed = (
+            facility.street_address != street_address
+            or facility.city != city
+            or facility.province != province
+            or facility.postal_code != postal_code
+            or facility.country != country
+        )
+
+        if address_changed:
+            # Convert the updated address into new coordinates.
+            coordinates = geocode_address(
+                street_address,
+                city,
+                province,
+                postal_code,
+                country,
+            )
+
+            # Replace old coordinates or clear them if geocoding fails.
+            facility.latitude = coordinates[0] if coordinates else None
+            facility.longitude = coordinates[1] if coordinates else None
 
         # Update account information.
         user.first_name = first_name
