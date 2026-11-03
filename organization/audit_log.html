@@ -16,23 +16,18 @@
     <!-- Top Navigation Bar -->
     <header>
         <a href="{% url 'staff_dashboard' %}" class="logo-link">
-            <img src="{% static 'organization/img/lifeline-logo.png' %}"
-                 alt="LifeLine Logo"
-                 class="brand-logo">
+            <img src="{% static 'organization/img/lifeline-logo.png' %}" alt="LifeLine Logo" class="brand-logo">
         </a>
 
         <div class="nav-right">
 
-            <button class="btn-emergency-create"
-                    onclick="openEmergencyModal()">
+            <button class="btn-emergency-create" onclick="openEmergencyModal()">
                 Create Emergency
             </button>
 
             <div class="dropdown">
 
-                <button class="hamburger-btn"
-                        onclick="toggleDropdown()"
-                        aria-label="Menu">
+                <button class="hamburger-btn" onclick="toggleDropdown()" aria-label="Menu">
                     &#9776;
                 </button>
 
@@ -160,11 +155,8 @@
 
                                     <div class="donor-profile-cell">
 
-                                        <img
-                                            src="{% static 'organization/img/default-avatar.png' %}"
-                                            alt="Donor Avatar"
-                                            class="donor-avatar"
-                                        >
+                                        <img src="{% static 'organization/img/default-avatar.png' %}" alt="Donor Avatar"
+                                            class="donor-avatar">
 
                                         <div>
 
@@ -212,9 +204,7 @@
                                 <!-- Appointment Status -->
                                 <td>
 
-                                    <span
-                                        class="badge green"
-                                        id="status-{{ appointment.id }}">
+                                    <span class="badge green" id="status-{{ appointment.id }}">
 
                                         {{ appointment.status }}
 
@@ -224,19 +214,19 @@
 
 
                                 <!-- Action Button -->
-                                <td class="text-right action-btns"
-                                    id="action-cell-{{ appointment.id }}">
-
-                                    <button
-                                        class="btn-success btn-sm"
-                                        type="button"
-                                        disabled
-                                        title="Donation usage functionality will be added later">
-
-                                        Use Donation
-
-                                    </button>
-
+                                <td class="text-right action-btns" id="action-cell-{{ match.id }}">
+                                    {% if match.is_used %}
+                                        <button class="btn-secondary btn-sm" type="button" disabled style="background-color: #64748b; color: white;">
+                                            Used
+                                        </button>
+                                    {% else %}
+                                        <form action="{% url 'mark_donation_used' match.id %}" method="POST" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button class="btn-success btn-sm" type="submit" onclick="return confirm('Are you sure you want to mark this donation as used?');">
+                                                Use Donation
+                                            </button>
+                                        </form>
+                                    {% endif %}
                                 </td>
 
                             </tr>
@@ -246,8 +236,7 @@
 
                             <tr>
 
-                                <td colspan="5"
-                                    style="text-align: center; padding: 25px;">
+                                <td colspan="5" style="text-align: center; padding: 25px;">
 
                                     <strong>No confirmed donations found.</strong>
 
@@ -306,7 +295,7 @@
 
 
         // Close dropdown and modal
-        window.onclick = function(event) {
+        window.onclick = function (event) {
 
             if (!event.target.matches('.hamburger-btn')) {
 
@@ -375,4 +364,5 @@
     </script>
 
 </body>
+
 </html>

@@ -6,6 +6,9 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.db import IntegrityError
 from django.db.models import Count
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
 
 from appointments.models import Appointments
 from core.models import StaffProfiles
@@ -13,7 +16,53 @@ from core.models import StaffProfiles
 from .models import EmergencyRequests, RequestMatches
 from .matching import run_emergency_matching
 
+#Heer Patel#
+@login_required
+@require_POST
+def mark_donation_used_view(request, match_id):
+    # Ensure only hospital staff can trigger this action
+    if request.session.get("role") != "HOSPITAL_STAFF":
+        messages.error(request, "Unauthorized access.")
+        return redirect("login")
+    
+    try:
+        # Look up the responding donor match record
+        match_record = RequestMatches.objects.select_related('donor', 'request').get(id=match_id)
+        donor_profile = match_record.donor
+        
+        # Prevent double-counting if already used
+        if getattr(match_record, 'is_used', False):
+            messages.warning(request, "This donation has already been marked as used.")
+            return redirect(request.META.get('HTTP_REFERER', 'staff_audit_log'))
 
+        # Use an atomic database transaction to update the match status and log a completed appointment
+        with transaction.atomic():
+            match_record.is_used = True
+            match_record.save()
+
+            # Create a completed appointment record so the donor's dashboard 
+            # dynamically increments its total donations and lives saved count
+            Appointments.objects.create(
+                donor=donor_profile,
+                facility=match_record.request.facility,
+                donation_type=match_record.request.component_type,
+                appointment_source='EMERGENCY',
+                scheduled_at=timezone.now(),
+                status='COMPLETED',
+                notes=f"Emergency donation fulfilled for request #{match_record.request.id}"
+            )
+
+        messages.success(request, "Donation marked as used successfully! Donor metrics updated.")
+
+    except RequestMatches.DoesNotExist:
+        messages.error(request, "Donation match record not found.")
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+
+    # Redirect back to whichever staff page they submitted from
+    return redirect(request.META.get('HTTP_REFERER', 'staff_audit_log'))
+
+#Heer Patel#
 
 def staff_emergencies_view(request):
     if (
