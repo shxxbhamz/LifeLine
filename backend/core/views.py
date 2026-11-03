@@ -89,7 +89,35 @@ def donor_dashboard_view(request):
     if request.session.get("user_id") is None or request.session.get("role") != "DONOR":
         return redirect("login")
 
-    return render(request, "donor/index.html")
+    user_id = request.session.get("user_id")
+    donor_profile = None
+    upcoming_appointment = None
+    days_left = None
+
+    try:
+        donor_profile = DonorProfiles.objects.get(user_id=user_id)
+        
+        # To the next upcoming appointment for this donor
+        now = timezone.now()
+        upcoming_appointment = Appointments.objects.filter(
+            donor=donor_profile, 
+            scheduled_at__gte=now
+        ).order_by('scheduled_at').first()
+        
+        # Calculate countdown of days left if appointment exists
+        if upcoming_appointment:
+            delta = upcoming_appointment.scheduled_at.date() - now.date()
+            days_left = delta.days
+
+    except DonorProfiles.DoesNotExist:
+        pass
+
+    context = {
+        'donor_profile': donor_profile,
+        'upcoming_appointment': upcoming_appointment,
+        'days_left': days_left,
+    }
+    return render(request, "donor/index.html", context)
 
 
 def staff_dashboard_view(request):
