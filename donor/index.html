@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
   <link rel="stylesheet" href="{% static 'donor/css/styles.css' %}">
   <link rel="stylesheet" href="{% static 'donor/css/home.css' %}">
 </head>
+
 <body>
 
   <!-- Header Section -->
@@ -15,7 +17,7 @@
     <div class="header-container">
       <div class="logo">
         <a href="{% url 'donor_dashboard' %}">
-            <img src="{% static 'donor/image/logo.png' %}" alt="LifeLine Logo" class="logo-img">
+          <img src="{% static 'donor/image/logo.png' %}" alt="LifeLine Logo" class="logo-img">
         </a>
       </div>
 
@@ -25,8 +27,9 @@
 
         <!-- Dropdown triggered directly by Profile Image click/hover -->
         <div class="dropdown" tabindex="0">
-          <img src="{% static 'donor/image/default-avatar.png' %}" alt="Donor Profile" class="donor-avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;">
-          
+          <img src="{% static 'donor/image/default-avatar.png' %}" alt="Donor Profile" class="donor-avatar"
+            style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;">
+
           <div class="dropdown-content">
             <a href="{% url 'donor_edit_profile' %}">Edit Profile</a>
             <a href="{% url 'logout' %}">Logout</a>
@@ -48,12 +51,12 @@
 
   <!-- Main Centralized Body Container -->
   <main class="home-container">
-    
+
     <!-- Upcoming Appointment Banner -->
     <section class="upcoming-appointment-card">
       <div class="appointment-header">
         <div class="header-left">
-          <h2>Upcoming Appointment</h2>
+          <h2>Upcoming Appointments</h2>
         </div>
 
         <!-- Dynamic Countdown Badge to show remaining days  -->
@@ -95,7 +98,7 @@
 
     <!-- 2. Bottom Section: Re-structured Parallel Layout -->
     <div class="home-grid">
-      
+
       <!-- Left Card: Hero Impact Widget -->
       <section class="home-card impact-card">
         <div class="card-title-bar">
@@ -106,7 +109,7 @@
           <!-- Lives Saved Box -->
           <div class="metric-box lives-saved">
             <div class="metric-info">
-              <span class="metric-value">15</span>
+              <span class="metric-value">{{ donor_profile.lives_saved|default:0 }}</span>
               <span class="metric-label">Lives Saved</span>
             </div>
           </div>
@@ -114,7 +117,7 @@
           <!-- Total Donations Box -->
           <div class="metric-box total-donations">
             <div class="metric-info">
-              <span class="metric-value">25</span>
+              <span class="metric-value">{{ donor_profile.total_donations|default:0 }}</span>
               <span class="metric-label">Total Donations</span>
             </div>
           </div>
@@ -123,11 +126,11 @@
         <!-- Progress to Next Tier -->
         <div class="tier-progress-wrapper">
           <div class="progress-labels">
-            <span>Progress to <strong>Life Saver Tier</strong></span>
-            <span>25 / 30</span>
+            <span>Progress to <strong>{{ tier_name }}</strong></span>
+            <span>{{ donor_profile.total_donations|default:0 }} / {{ next_goal }}</span>
           </div>
           <div class="progress-bar-bg">
-            <div class="progress-fill" style="width: 83.33%;"></div>
+          <div class="progress-fill" style="width: {{ progress_percent|default:0 }}%;"></div>
           </div>
         </div>
       </section>
@@ -139,7 +142,7 @@
         </div>
 
         <div class="trophy-grid">
-          
+
           <!-- Badge 1: Unlocked -->
           <div class="trophy-card unlocked">
             <img src="{% static 'donor/image/welcomedonor.png' %}" alt="badge" class="badge_achievement">
@@ -187,4 +190,5 @@
   </main>
 
 </body>
+
 </html>
