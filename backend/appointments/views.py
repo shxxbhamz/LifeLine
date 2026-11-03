@@ -332,24 +332,13 @@ def staff_confirm_appointment_view(request, appointment_id):
                 )
                 return redirect("staff_appointments")
 
-            # Get the matching inventory row and lock it.
-            inventory = (
-                BloodInventory.objects.select_for_update()
-                .filter(
-                    facility=appointment.facility,
-                    blood_type=appointment.donor.blood_type,
-                    component_type=appointment.donation_type,
-                )
-                .first()
+            # Safely get or automatically create the inventory row if missing
+            inventory, created = BloodInventory.objects.select_for_update().get_or_create(
+                facility=appointment.facility,
+                blood_type=appointment.donor.blood_type,
+                component_type=appointment.donation_type,
+                defaults={"units_available": 0}
             )
-
-            if inventory is None:
-                messages.error(
-                    request,
-                    "Inventory record not found for this blood type "
-                    "and component. Please check Inventory Management.",
-                )
-                return redirect("staff_appointments")
 
             now = timezone.now()
 
@@ -387,11 +376,10 @@ def staff_confirm_appointment_view(request, appointment_id):
                 created_at=now,
             )
 
-    except Exception:
+    except Exception as e:
         messages.error(
             request,
-            "Could not confirm the appointment or update inventory. "
-            "Please check the server logs.",
+            f"Could not confirm the appointment: {str(e)}",
         )
         return redirect("staff_appointments")
 
