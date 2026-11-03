@@ -49,23 +49,47 @@
   <!-- Main Centralized Body Container -->
   <main class="home-container">
     
-    <!-- 1. Top Big Rectangle: Upcoming Appointment Banner -->
+    <!-- Upcoming Appointment Banner -->
     <section class="upcoming-appointment-card">
       <div class="appointment-header">
         <div class="header-left">
           <h2>Upcoming Appointment</h2>
         </div>
-        <span class="countdown-badge">In 3 Days</span>
+
+        <!-- Dynamic Countdown Badge to show remaining days  -->
+        {% if upcoming_appointment %}
+        {% if days_left == 0 %}
+        <span class="countdown-badge" style="background: #fee2e2; color: #dc2626;">Today</span>
+        {% elif days_left == 1 %}
+        <span class="countdown-badge">In 1 Day</span>
+        {% elif days_left > 1 %}
+        <span class="countdown-badge">In {{ days_left }} Days</span>
+        {% else %}
+        <span class="countdown-badge">Soon</span>
+        {% endif %}
+        {% else %}
+        <span class="countdown-badge" style="background: #f1f5f9; color: #64748b;">No Active Booking</span>
+        {% endif %}
       </div>
+
       <div class="appointment-details">
+        {% if upcoming_appointment %}
         <div class="detail-item">
           <span class="detail-label">Location</span>
-          <span class="detail-value">City General Hospital Blood Bank</span>
+          <!-- Displays the actual facility name from the database without any default hardcoded fallback -->
+          <span class="detail-value">{{ upcoming_appointment.facility.name }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">Date</span>
-          <span class="detail-value">October 01, 2026</span>
+          <span class="detail-label">Date & Time</span>
+          <span class="detail-value">{{ upcoming_appointment.scheduled_at|date:"F d, Y - g:i A" }}</span>
         </div>
+        {% else %}
+        <div class="detail-item" style="grid-column: span 2; text-align: center; color: var(--text-muted, #64748b);">
+          <span class="detail-value">You have no upcoming appointments scheduled. <a
+              href="{% url 'donor_book_appointment' %}"
+              style="color: var(--primary-red, #dc2626); text-decoration: underline;">Book one now</a></span>
+        </div>
+        {% endif %}
       </div>
     </section>
 
