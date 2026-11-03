@@ -8,6 +8,17 @@
     <!-- Linking the centralized stylesheet -->
     <link rel="stylesheet" href="{% static 'organization/css/style.css' %}">
     
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <style>
+        #emergencyMap {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+        }
+    </style>
+
 </head>
 <body data-facility-type="hospital">
 
@@ -70,16 +81,26 @@
             <!-- Centerpiece: Live Map Radar Module -->
             <section class="dash-card map-card" id="dispatches-map">
                 <div class="card-header">
-                    <h3>Live Proximity Radar Map</h3>
-                    <span class="badge red-pulse">Live Broadcast Active</span>
+                    <h3>Emergency Donor Proximity Map</h3>
+                    <span class="badge red-pulse">Donor Response Status</span>
                 </div>
                 
-                <!-- Simulated Interactive Map Container -->
-                <div class="map-container" style="height: 300px; display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #475569; font-weight: bold; flex-direction: column; gap: 8px;">
-                    <span style="font-size: 2.5rem;"></span>
-                    <span>[ Interactive Map / Leaflet API Integration Zone ]</span>
-                    <small style="font-weight: normal; color: #64748b;">Showing live pins for responding donors within 10km radius</small>
+                <!-- Select which emergency to display -->
+                <div style="margin-bottom: 12px;">
+                    <label for="emergencySelector">Select Emergency:</label>
+                    <select id="emergencySelector">
+                        <option value="">Select an emergency request</option>
+                    </select>
                 </div>
+
+                <!-- Interactive emergency map -->
+                <div class="map-container">
+                    <div id="emergencyMap"></div>
+                </div>
+
+                <p id="emergencyMapMessage" style="margin-top: 10px;">
+                    Select an emergency request to view donor locations.
+                </p>
             </section>
 <div style="display: flex; gap: 20px; width: 100%;">
             <!-- Below Map: Active Emergency Donor Profiles & Details -->
@@ -267,5 +288,112 @@
         }
 
     </script>
+
+    <!-- Emergency data provided by Django -->
+    {{ emergency_map_data|json_script:"emergency-map-data" }}
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        const emergencies = JSON.parse(
+            document.getElementById("emergency-map-data").textContent
+        );
+
+        const selector = document.getElementById("emergencySelector");
+        const message = document.getElementById("emergencyMapMessage");
+
+        // Create the interactive map.
+        const emergencyMap = L.map("emergencyMap").setView(
+            [50.4452, -104.6189], 11
+        );
+
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(emergencyMap);
+
+        // Keep emergency-specific markers and circles in one layer.
+        const emergencyLayer = L.layerGroup().addTo(emergencyMap);
+
+        // Populate the dropdown from Django's emergency records.
+        emergencies.forEach(emergency => {
+            const option = document.createElement("option");
+            option.value = emergency.id;
+            option.textContent =
+                `Emergency #${emergency.id} — ${emergency.blood_type}`;
+            selector.appendChild(option);
+        });
+
+        // Display the selected emergency.
+        function displayEmergency(emergencyId) {
+            emergencyLayer.clearLayers();
+
+            const emergency = emergencies.find(
+                item => String(item.id) === String(emergencyId)
+            );
+
+            if (!emergency) {
+                message.textContent = emergencies.length
+                    ? "Select an emergency request to view donor locations."
+                    : "No emergency requests with mapped facility coordinates.";
+                return;
+            }
+
+            const center = [emergency.latitude, emergency.longitude];
+
+            // Blue marker: the hospital.
+            L.circleMarker(center, {
+                radius: 10,
+                color: "#2563eb",
+                fillColor: "#2563eb",
+                fillOpacity: 0.9
+            })
+            .bindPopup("Hospital / Blood Bank")
+            .addTo(emergencyLayer);
+
+            // Display the search radius configured for this emergency.
+            const radiusCircle = L.circle(center, {
+                radius: emergency.radius_km * 1000,
+                color: "#2563eb",
+                fillOpacity: 0.06
+            }).addTo(emergencyLayer);
+
+            // Yellow: notified and pending. Green: accepted.
+            emergency.donors.forEach(donor => {
+                const accepted = donor.status === "ACCEPTED";
+
+                L.circleMarker([donor.latitude, donor.longitude], {
+                    radius: 7,
+                    color: accepted ? "#16a34a" : "#eab308",
+                    fillColor: accepted ? "#16a34a" : "#eab308",
+                    fillOpacity: 0.9
+                })
+                .bindPopup(accepted ? "Accepted donor" : "Pending donor response")
+                .addTo(emergencyLayer);
+            });
+
+            emergencyMap.fitBounds(radiusCircle.getBounds(), {
+                padding: [20, 20]
+            });
+
+            message.textContent =
+                `${emergency.donors.length} mapped pending/accepted donor(s). ` +
+                `Search radius: ${emergency.radius_km} km.`;
+        }
+
+        selector.addEventListener("change", function () {
+            displayEmergency(this.value);
+        });
+
+        // Select the first emergency automatically, if one exists.
+        if (emergencies.length > 0) {
+            selector.value = emergencies[0].id;
+            displayEmergency(selector.value);
+        } else {
+            displayEmergency("");
+        }
+    </script>
+
 </body>
 </html>
