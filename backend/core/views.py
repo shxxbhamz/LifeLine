@@ -3,9 +3,7 @@ from django.contrib.auth.hashers import check_password, make_password
 from django.db import transaction
 from django.shortcuts import redirect, render
 from django.utils import timezone
-
-from django.contrib.auth.decorators import login_required
-
+from core.models import DonorProfiles
 from .models import DonorProfiles, Facilities, StaffProfiles, Users
 from appointments.models import Appointments
 from inventory.models import BloodInventory
@@ -86,16 +84,20 @@ def login_view(request):
     )
 
 #Heer Patel#
-@login_required
 def donor_dashboard_view(request):
-    if request.session.get("user_id") is None or request.session.get("role") != "DONOR":
+    # 1. Check custom session authentication
+    if (
+        request.session.get("user_id") is None
+        or request.session.get("role") != "DONOR"
+    ):
         return redirect("login")
 
     user_id = request.session.get("user_id")
+
     donor_profile = None
     upcoming_appointment = None
     days_left = None
-    
+
     total_donations = 0
     lives_saved = 0
     tier_name = "Welcome Tier"
@@ -104,45 +106,52 @@ def donor_dashboard_view(request):
 
     try:
         donor_profile = DonorProfiles.objects.get(user_id=user_id)
-        
-        # 1. Dynamically count total completed donations from the Appointments table
+
+        # 2. Count completed donations
         total_donations = Appointments.objects.filter(
-            donor=donor_profile, 
-            status__iexact='COMPLETED'
+            donor=donor_profile,
+            status__iexact="COMPLETED"
         ).count()
-        
-        # Lives saved can map directly to completed donations (or a multiplier like * 3)
+
         lives_saved = total_donations
 
-        # 2. Calculate dynamic tier progress based on total completed donations
+        # 3. Calculate donor tier and progress
         if total_donations == 0:
             tier_name = "Welcome Donor"
             next_goal = 1
             progress_percent = 0
+
         elif total_donations <= 30:
             tier_name = "Dedicated Donor Tier"
             next_goal = 30
             progress_percent = (total_donations / 30) * 100
+
         elif total_donations <= 60:
             tier_name = "Life Saver Tier"
             next_goal = 60
             progress_percent = (total_donations / 60) * 100
+
         elif total_donations <= 90:
             tier_name = "Hero Tier"
             next_goal = 90
             progress_percent = (total_donations / 90) * 100
+
         else:
             tier_name = "Elite Legend Tier"
             next_goal = total_donations + 10
             progress_percent = 100
 
-        # 3. Upcoming appointment logic
+        # 4. Find the next upcoming appointment
         now = timezone.now()
+
         upcoming_appointment = Appointments.objects.filter(
-            donor=donor_profile, 
+            donor=donor_profile,
             scheduled_at__gte=now
-        ).exclude(status__iexact='CANCELLED').order_by('scheduled_at').first()
-        
+        ).exclude(
+            status__iexact="CANCELLED"
+        ).order_by("scheduled_at").first()
+
+        # 5. Calculate days remaining
         if upcoming_appointment:
             delta = upcoming_appointment.scheduled_at.date() - now.date()
             days_left = delta.days
@@ -150,16 +159,18 @@ def donor_dashboard_view(request):
     except DonorProfiles.DoesNotExist:
         pass
 
+    # 6. Prepare dashboard context
     context = {
-        'donor_profile': donor_profile,
-        'upcoming_appointment': upcoming_appointment,
-        'days_left': days_left,
-        'total_donations': total_donations,
-        'lives_saved': lives_saved,
-        'tier_name': tier_name,
-        'next_goal': next_goal,
-        'progress_percent': round(progress_percent, 2),
+        "donor_profile": donor_profile,
+        "upcoming_appointment": upcoming_appointment,
+        "days_left": days_left,
+        "total_donations": total_donations,
+        "lives_saved": lives_saved,
+        "tier_name": tier_name,
+        "next_goal": next_goal,
+        "progress_percent": round(progress_percent, 2),
     }
+
     return render(request, "donor/index.html", context)
     #Heer Patel#
 
