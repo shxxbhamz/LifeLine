@@ -12,6 +12,9 @@ from core.utils import send_appointment_status_email
 from .models import Appointments, DonationRequests
 from emergencies.models import EmergencyRequests
 from django.db import transaction
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def staff_create_donation_request_view(request):
@@ -288,6 +291,7 @@ def staff_confirm_appointment_view(request, appointment_id):
         staff_profile = StaffProfiles.objects.select_related(
             "facility"
         ).get(user_id=user_id)
+
     except StaffProfiles.DoesNotExist:
         request.session.flush()
         return redirect("login")
@@ -302,7 +306,7 @@ def staff_confirm_appointment_view(request, appointment_id):
     try:
         with transaction.atomic():
 
-            # Lock the appointment to prevent duplicate confirmations.
+            # Find and lock the normal appointment.
             appointment = (
                 Appointments.objects.select_for_update()
                 .select_related(
@@ -332,17 +336,28 @@ def staff_confirm_appointment_view(request, appointment_id):
                 )
                 return redirect("staff_appointments")
 
-            # Safely get or automatically create the inventory row if missing
-            inventory, created = BloodInventory.objects.select_for_update().get_or_create(
-                facility=appointment.facility,
-                blood_type=appointment.donor.blood_type,
-                component_type=appointment.donation_type,
-                defaults={"units_available": 0}
+            # Find and lock the matching inventory record.
+            inventory = (
+                BloodInventory.objects.select_for_update()
+                .filter(
+                    facility=appointment.facility,
+                    blood_type=appointment.donor.blood_type,
+                    component_type=appointment.donation_type,
+                )
+                .first()
             )
+
+            if inventory is None:
+                messages.error(
+                    request,
+                    "Inventory record not found for this blood type "
+                    "and component.",
+                )
+                return redirect("staff_appointments")
 
             now = timezone.now()
 
-            # Confirm the appointment.
+            # Confirm appointment.
             appointment.status = "CONFIRMED"
             appointment.confirmed_by = staff_profile
             appointment.updated_at = now
@@ -355,7 +370,7 @@ def staff_confirm_appointment_view(request, appointment_id):
                 ]
             )
 
-            # Increase the matching inventory by one unit.
+            # Increase inventory by one unit.
             inventory.units_available += 1
             inventory.updated_at = now
 
@@ -366,32 +381,44 @@ def staff_confirm_appointment_view(request, appointment_id):
                 ]
             )
 
-            # Record the inventory transaction.
+            # Record inventory transaction.
             InventoryTransactions.objects.create(
                 inventory=inventory,
                 changed_by=staff_profile,
-                transaction_type="DONATION",
+                transaction_type="DONATION_RECEIVED",
                 units_change=1,
                 reason=f"Appointment #{appointment.id} confirmed",
                 created_at=now,
             )
 
-    except Exception as e:
+    except Exception:
+        logger.exception(
+            "CONFIRM APPOINTMENT FAILED: appointment_id=%s",
+            appointment_id,
+        )
+
         messages.error(
             request,
-            f"Could not confirm the appointment: {str(e)}",
+            "Could not confirm appointment or update inventory. "
+            "Please check server logs.",
         )
         return redirect("staff_appointments")
 
-    # Send the email after the database transaction succeeds.
-    send_appointment_status_email(
-        user_email=appointment.donor.user.email,
-        first_name=appointment.donor.user.first_name,
-        facility_name=staff_profile.facility.name,
-        scheduled_at=appointment.scheduled_at,
-        donation_type=appointment.donation_type,
-        status="CONFIRMED",
-    )
+    # Send confirmation email after the database transaction succeeds.
+    try:
+        send_appointment_status_email(
+            user_email=appointment.donor.user.email,
+            first_name=appointment.donor.user.first_name,
+            facility_name=staff_profile.facility.name,
+            scheduled_at=appointment.scheduled_at,
+            donation_type=appointment.donation_type,
+            status="CONFIRMED",
+        )
+    except Exception:
+        logger.exception(
+            "CONFIRMATION EMAIL FAILED: appointment_id=%s",
+            appointment_id,
+        )
 
     messages.success(
         request,
@@ -399,7 +426,6 @@ def staff_confirm_appointment_view(request, appointment_id):
     )
 
     return redirect("staff_appointments")
-
 def staff_cancel_appointment_view(request, appointment_id):
     # Only hospital staff can cancel appointments.
     if (
