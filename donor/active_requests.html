@@ -26,7 +26,8 @@
         <span class="donor-name">{{ request.session.user_name|default:"Donor" }}</span>
 
         <div class="dropdown" tabindex="0">
-          <img src="{% static 'donor/image/default-avatar.png' %}" alt="Donor Profile" class="donor-avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;">
+          <img src="{% static 'donor/image/default-avatar.png' %}" alt="Donor Profile" class="donor-avatar"
+            style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;">
           <div class="dropdown-content">
             <a href="{% url 'donor_edit_profile' %}">Edit Profile</a>
             <a href="{% url 'logout' %}">Logout</a>
@@ -60,28 +61,46 @@
       <div class="facility-grid">
 
         {% if emergency_requests %}
-          {% for req in emergency_requests %}
-          <div class="facility-card">
-            <div class="facility-header">
-              <h3>{{ req.facility.name }}</h3>
-            </div>
-            <div class="facility-body">
-              <p class="facility-address">{{ req.facility.street_address }}, {{ req.facility.city }}</p>
-              <p class="facility-hours"><strong>Urgency:</strong> {{ req.urgency|title }}</p>
-              <p class="facility-hours"><strong>Requested for:</strong> {{ req.blood_group }} {{ req.component_type }} Donors</p>
-              {% if req.description %}
-              <p class="facility-hours"><strong>Note:</strong> {{ req.description }}</p>
-              {% endif %}
-            </div>
-            <div class="facility-footer">
-              <button class="btn btn-book" data-request-id="{{ req.id }}">Schedule Donation</button>
-            </div>
+        {% for req in emergency_requests %}
+        <div class="facility-card">
+          <div class="facility-header">
+            <h3>{{ req.facility.name }}</h3>
           </div>
-          {% endfor %}
+
+          <div class="facility-body">
+            <p class="facility-address">
+              {{ req.facility.street_address }}, {{ req.facility.city }}
+            </p>
+
+            <p class="facility-hours">
+              <strong>Urgency:</strong> {{ req.urgency|title }}
+            </p>
+
+            <p class="facility-hours">
+              <strong>Requested for:</strong>
+              {{ req.required_blood_type }} {{ req.component_type }} Donors
+            </p>
+
+            {% if req.notes %}
+            <p class="facility-hours">
+              <strong>Note:</strong> {{ req.notes }}
+            </p>
+            {% endif %}
+          </div>
+
+          <div class="facility-footer">
+            <button class="btn btn-book" data-request-id="{{ req.id }}">
+              Schedule Donation
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+
         {% else %}
-          <div class="no-requests-message" style="grid-column: span 3; text-align: center; padding: 40px; color: var(--text-muted, #64748b);">
-            <p>No active emergency requests matching your blood type at this time.</p>
-          </div>
+        <div class="no-requests-message"
+          style="grid-column: span 3; text-align: center; padding: 40px; color: var(--text-muted, #64748b);">
+          <p>No active emergency requests matching your blood type at this time.</p>
+        </div>
         {% endif %}
 
       </div>
