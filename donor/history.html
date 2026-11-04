@@ -22,7 +22,7 @@
 
       <!-- User Profile & Dropdown Menu Container -->
       <div class="header-actions">
-        <span class="donor-name">Donor Name</span>
+        <span class="donor-name">{{ donor_name|default:"Donor Name" }}</span> 
 
         <!-- Dropdown triggered directly by Profile Image click/hover -->
         <div class="dropdown" tabindex="0">
