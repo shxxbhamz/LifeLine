@@ -213,7 +213,7 @@ def donor_dashboard_view(request):
     #Heer Patel#
 
 
-@login_required
+@login_required(login_url='login')
 def staff_dashboard_view(request):
     # 1. Check staff login
     user_id = request.session.get("user_id")
