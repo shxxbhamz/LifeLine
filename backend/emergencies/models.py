@@ -23,7 +23,10 @@ class EmergencyRequests(models.Model):
     units_required = models.IntegerField()
     urgency = models.CharField(max_length=20)
     radius_km = models.DecimalField(max_digits=6, decimal_places=2)
-    status = models.CharField(max_length=20)
+    urgency = models.CharField(
+    max_length=20,
+    db_column="urgency_level",
+)
     notes = models.TextField(blank=True, null=True)
     expires_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField()
