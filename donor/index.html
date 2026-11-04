@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LifeLine - Donor Portal</title>
   <link rel="stylesheet" href="{% static 'donor/css/styles.css' %}">
-  <link rel="stylesheet" href="{% static 'donor/css/styles.css' %}">
 </head>
 
 <body>
@@ -59,7 +58,7 @@
           <h2>Upcoming Appointments</h2>
         </div>
 
-        <!-- Dynamic Countdown Badge to show remaining days  -->
+        <!-- Dynamic Countdown Badge to show remaining days -->
         {% if upcoming_appointment %}
         {% if days_left == 0 %}
         <span class="countdown-badge" style="background: #fee2e2; color: #dc2626;">Today</span>
@@ -79,7 +78,6 @@
         {% if upcoming_appointment %}
         <div class="detail-item">
           <span class="detail-label">Location</span>
-          <!-- Displays the actual facility name from the database without any default hardcoded fallback -->
           <span class="detail-value">{{ upcoming_appointment.facility.name }}</span>
         </div>
         <div class="detail-item">
@@ -96,7 +94,7 @@
       </div>
     </section>
 
-    <!-- 2. Bottom Section: Re-structured Parallel Layout -->
+    <!-- Bottom Section: Re-structured Parallel Layout -->
     <div class="home-grid">
 
       <!-- Left Card: Hero Impact Widget -->
@@ -109,7 +107,7 @@
           <!-- Lives Saved Box -->
           <div class="metric-box lives-saved">
             <div class="metric-info">
-              <span class="metric-value">{{ donor_profile.lives_saved|default:0 }}</span>
+              <span class="metric-value">{{ lives_saved|default:0 }}</span>
               <span class="metric-label">Lives Saved</span>
             </div>
           </div>
@@ -117,7 +115,7 @@
           <!-- Total Donations Box -->
           <div class="metric-box total-donations">
             <div class="metric-info">
-              <span class="metric-value">{{ donor_profile.total_donations|default:0 }}</span>
+              <span class="metric-value">{{ total_donations|default:0 }}</span>
               <span class="metric-label">Total Donations</span>
             </div>
           </div>
@@ -127,7 +125,7 @@
         <div class="tier-progress-wrapper">
           <div class="progress-labels">
             <span>Progress to <strong>{{ tier_name }}</strong></span>
-            <span>{{ donor_profile.total_donations|default:0 }} / {{ next_goal }}</span>
+            <span>{{ total_donations|default:0 }} / {{ next_goal }}</span>
           </div>
           <div class="progress-bar-bg">
 
@@ -148,12 +146,10 @@
           <!-- Badge 1: Welcome Donor -->
           <div class="trophy-card {% if welcome_unlocked %}unlocked{% else %}locked{% endif %}">
             <img src="{% static 'donor/image/welcomedonor.png' %}" alt="Welcome Donor badge" class="badge_achievement">
-
             <div class="trophy-details">
               <h4>Welcome Donor</h4>
               <p>1st Donation Made</p>
             </div>
-
             {% if welcome_unlocked %}
             <span class="status-pill unlocked-pill">Active</span>
             {% else %}
@@ -161,60 +157,45 @@
             {% endif %}
           </div>
 
-
           <!-- Badge 2: Dedicated Donor -->
           <div class="trophy-card {% if dedicated_unlocked %}unlocked{% else %}locked{% endif %}">
             <img src="{% static 'donor/image/30.png' %}" alt="Dedicated Donor badge" class="badge_achievement">
-
             <div class="trophy-details">
               <h4>Dedicated Donor</h4>
               <p>30 Donations Tier</p>
             </div>
-
             {% if dedicated_unlocked %}
             <span class="status-pill unlocked-pill">Active</span>
             {% else %}
-            <span class="status-pill locked-pill">
-              {{ dedicated_remaining }} needed
-            </span>
+            <span class="status-pill locked-pill">{{ dedicated_remaining }} needed</span>
             {% endif %}
           </div>
-
 
           <!-- Badge 3: Life Saver -->
           <div class="trophy-card {% if life_saver_unlocked %}unlocked{% else %}locked{% endif %}">
             <img src="{% static 'donor/image/60.png' %}" alt="Life Saver badge" class="badge_achievement">
-
             <div class="trophy-details">
               <h4>Life Saver</h4>
               <p>60 Donations Tier</p>
             </div>
-
             {% if life_saver_unlocked %}
             <span class="status-pill unlocked-pill">Active</span>
             {% else %}
-            <span class="status-pill locked-pill">
-              {{ life_saver_remaining }} needed
-            </span>
+            <span class="status-pill locked-pill">{{ life_saver_remaining }} needed</span>
             {% endif %}
           </div>
-
 
           <!-- Badge 4: Hero Tier -->
           <div class="trophy-card {% if hero_unlocked %}unlocked{% else %}locked{% endif %}">
             <img src="{% static 'donor/image/90+.png' %}" alt="Hero Tier badge" class="badge_achievement">
-
             <div class="trophy-details">
               <h4>Hero Tier</h4>
               <p>90+ Donations Tier</p>
             </div>
-
             {% if hero_unlocked %}
             <span class="status-pill unlocked-pill">Active</span>
             {% else %}
-            <span class="status-pill locked-pill">
-              {{ hero_remaining }} needed
-            </span>
+            <span class="status-pill locked-pill">{{ hero_remaining }} needed</span>
             {% endif %}
           </div>
 
