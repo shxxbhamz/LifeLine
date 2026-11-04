@@ -1,3 +1,4 @@
+
 """
 Django settings for lifeline_backend project.
 
@@ -146,7 +147,7 @@ STATICFILES_DIRS = [
     ("donor/image", BASE_DIR.parent / "donor" / "image"),
     ("organization/css", BASE_DIR.parent / "organization" / "css"),
     ("organization/img", BASE_DIR.parent / "organization" / "img"),
-  *([BASE_DIR.parent / "static"] if (BASE_DIR.parent / "static").is_dir() else []),
+    *([BASE_DIR.parent / "static"] if (BASE_DIR.parent / "static").is_dir() else []),
 ]
 
 
@@ -162,3 +163,22 @@ LIFELINE_BASE_URL = os.getenv(
     "LIFELINE_BASE_URL",
     "https://lifeline-85fz.onrender.com",
 ).rstrip("/")
+
+# SESSION CONFIGURATION
+
+
+# Keep users logged in for 14 days
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 14
+
+# Do not log users out when they close the browser
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# Extend session expiry when users make requests
+SESSION_SAVE_EVERY_REQUEST = True
+
+# Security settings
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SECURE = not DEBUG
+
+CSRF_COOKIE_SECURE = not DEBUG
