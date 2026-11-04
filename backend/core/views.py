@@ -1,31 +1,36 @@
-import uuid
+
 import logging
-from django.http import HttpResponseServerError
+import uuid
+
 from django.contrib.auth.hashers import check_password, make_password
 from django.db import transaction
+from django.http import HttpResponseServerError
 from django.shortcuts import redirect, render
 from django.utils import timezone
-from core.models import DonorProfiles
-from .models import DonorProfiles, Facilities, StaffProfiles, Users
+
 from appointments.models import Appointments
-from inventory.models import BloodInventory
 from emergencies.models import EmergencyRequests
+from inventory.models import BloodInventory
+
 from .geocoding import geocode_address
-logger = logging.getLogger(__name__)
+from .models import DonorProfiles, Facilities, StaffProfiles, Users
 from .utils import send_welcome_email
+
+
+logger = logging.getLogger(__name__)
+
 
 def home_view(request):
     return render(request, "index.html")
 
+
 def login_view(request):
-    # A GET request only displays the login page.
     if request.method == "GET":
         return render(request, "login.html")
 
     username = request.POST.get("username", "").strip().lower()
     password = request.POST.get("password", "")
 
-    # Preserve the username after a failed login attempt.
     form_data = {
         "username": username,
     }
@@ -42,7 +47,6 @@ def login_view(request):
             },
         )
 
-    # Compare the submitted password with the securely stored password hash.
     if not check_password(password, user.password_hash):
         return render(
             request,
@@ -53,7 +57,6 @@ def login_view(request):
             },
         )
 
-    # Prevent suspended accounts from signing in.
     if user.account_status != "ACTIVE":
         return render(
             request,
@@ -64,11 +67,9 @@ def login_view(request):
             },
         )
 
-    # Store only the minimum information needed to identify the logged-in user.
     request.session["user_id"] = user.id
     request.session["role"] = user.role
 
-    # Send each account type to its own dashboard.
     if user.role == "DONOR":
         return redirect("donor_dashboard")
 
@@ -84,9 +85,9 @@ def login_view(request):
         },
     )
 
-#Heer Patel#
+
+# Heer patel#
 def donor_dashboard_view(request):
-    # 1. Check custom session authentication
     if (
         request.session.get("user_id") is None
         or request.session.get("role") != "DONOR"
@@ -106,7 +107,6 @@ def donor_dashboard_view(request):
     next_goal = 1
     progress_percent = 0
 
-    # Default achievement values
     welcome_unlocked = False
     dedicated_unlocked = False
     life_saver_unlocked = False
@@ -119,15 +119,13 @@ def donor_dashboard_view(request):
     try:
         donor_profile = DonorProfiles.objects.get(user_id=user_id)
 
-        # 2. Count ALL completed donations (including emergency fulfillments & regular appointments)
         total_donations = Appointments.objects.filter(
             donor_id=user_id,
-            status__iexact="COMPLETED"
+            status__iexact="COMPLETED",
         ).count()
 
         lives_saved = total_donations
 
-        # 3. Calculate donor tier and progress
         if total_donations == 0:
             tier_name = "Welcome Donor"
             next_goal = 1
@@ -153,28 +151,24 @@ def donor_dashboard_view(request):
             next_goal = total_donations + 10
             progress_percent = 100
 
-        # 4. Calculate achievement badge activation
         welcome_unlocked = total_donations >= 1
         dedicated_unlocked = total_donations >= 30
         life_saver_unlocked = total_donations >= 60
         hero_unlocked = total_donations >= 90
 
-        # 5. Calculate remaining donations for each badge
         dedicated_remaining = max(30 - total_donations, 0)
         life_saver_remaining = max(60 - total_donations, 0)
         hero_remaining = max(90 - total_donations, 0)
 
-        # 6. Find the next upcoming appointment
         now = timezone.now()
 
         upcoming_appointment = Appointments.objects.filter(
             donor=donor_profile,
-            scheduled_at__gte=now
+            scheduled_at__gte=now,
         ).exclude(
-            status__iexact="CANCELLED"
+            status__iexact="CANCELLED",
         ).order_by("scheduled_at").first()
 
-        # 7. Calculate days remaining
         if upcoming_appointment:
             delta = upcoming_appointment.scheduled_at.date() - now.date()
             days_left = delta.days
@@ -182,28 +176,19 @@ def donor_dashboard_view(request):
     except DonorProfiles.DoesNotExist:
         pass
 
-    # 8. Prepare dashboard context
     context = {
         "donor_profile": donor_profile,
         "upcoming_appointment": upcoming_appointment,
         "days_left": days_left,
-
-        # Donation statistics
         "total_donations": total_donations,
         "lives_saved": lives_saved,
-
-        # Donor tier and progress
         "tier_name": tier_name,
         "next_goal": next_goal,
         "progress_percent": round(progress_percent, 2),
-
-        # Achievement badge activation
         "welcome_unlocked": welcome_unlocked,
         "dedicated_unlocked": dedicated_unlocked,
         "life_saver_unlocked": life_saver_unlocked,
         "hero_unlocked": hero_unlocked,
-
-        # Remaining donations
         "dedicated_remaining": dedicated_remaining,
         "life_saver_remaining": life_saver_remaining,
         "hero_remaining": hero_remaining,
@@ -211,9 +196,11 @@ def donor_dashboard_view(request):
 
     return render(request, "donor/index.html", context)
 
-
-    def donor_active_requests_view(request):
-    if request.session.get("user_id") is None or request.session.get("role") != "DONOR":
+def donor_active_requests_view(request):
+    if (
+        request.session.get("user_id") is None
+        or request.session.get("role") != "DONOR"
+    ):
         return redirect("login")
 
     user_id = request.session.get("user_id")
@@ -223,32 +210,32 @@ def donor_dashboard_view(request):
         donor_profile = DonorProfiles.objects.get(user_id=user_id)
         donor_blood_type = donor_profile.blood_type
 
-        # Fetch active emergency requests matching the donor's blood type
-        # Adjust table/model names (EmergencyRequests, facility) to match your project structure
         emergency_requests = EmergencyRequests.objects.filter(
-            blood_group__iexact=donor_blood_type,
-            status__iexact='ACTIVE'  # or whatever field tracks active state
-        ).select_related('facility').order_by('-created_at')
+            required_blood_type__iexact=donor_blood_type,
+            status__iexact="ACTIVE",
+        ).select_related(
+            "facility",
+        ).order_by("-created_at")
 
     except DonorProfiles.DoesNotExist:
         pass
 
     context = {
-        'emergency_requests': emergency_requests,
+        "emergency_requests": emergency_requests,
     }
+
     return render(request, "donor/active_requests.html", context)
-    #Heer Patel#
+
+# Heer patel#
 
 
 def staff_dashboard_view(request):
-    # 1. Check custom staff login session
     user_id = request.session.get("user_id")
     user_role = request.session.get("role")
 
     if user_id is None or user_role != "HOSPITAL_STAFF":
         return redirect("login")
 
-    # 2. Default values
     facility_name = "Organization Staff Console"
     facility_type = "hospital"
     current_user = None
@@ -260,10 +247,8 @@ def staff_dashboard_view(request):
     map_facilities = []
 
     try:
-        # 3. Get logged-in user
         current_user = Users.objects.get(id=user_id)
 
-        # 4. Get staff profile and associated facility
         staff_profile = StaffProfiles.objects.select_related(
             "facility"
         ).get(user_id=user_id)
@@ -277,16 +262,14 @@ def staff_dashboard_view(request):
             if facility.facility_type:
                 facility_type = facility.facility_type.lower()
 
-            # 5. Get appointments for this facility
             scheduled_appointments = list(
                 Appointments.objects.filter(
-                    facility=facility
+                    facility=facility,
                 ).select_related("donor__user")
             )
 
-            # 6. Get blood inventory
             raw_inventory = BloodInventory.objects.filter(
-                facility=facility
+                facility=facility,
             )
 
             inventory_dict = {}
@@ -311,7 +294,6 @@ def staff_dashboard_view(request):
                 elif "plasma" in component:
                     inventory_dict[blood_type]["plasma"] += units
 
-                # Inventory threshold checks
                 if (
                     inv.critical_threshold is not None
                     and units <= inv.critical_threshold
@@ -327,14 +309,12 @@ def staff_dashboard_view(request):
 
             inventory_items = list(inventory_dict.values())
 
-            # 7. Get emergency requests for this facility
             emergency_history = list(
                 EmergencyRequests.objects.filter(
-                    facility=facility
+                    facility=facility,
                 ).order_by("-created_at")
             )
 
-            # 8. Get facilities with map coordinates
             facilities_with_locations = Facilities.objects.filter(
                 latitude__isnull=False,
                 longitude__isnull=False,
@@ -358,7 +338,7 @@ def staff_dashboard_view(request):
     except Users.DoesNotExist:
         logger.warning(
             "Staff dashboard: user ID %s does not exist",
-            user_id
+            user_id,
         )
         request.session.flush()
         return redirect("login")
@@ -366,7 +346,7 @@ def staff_dashboard_view(request):
     except StaffProfiles.DoesNotExist:
         logger.warning(
             "Staff dashboard: staff profile missing for user ID %s",
-            user_id
+            user_id,
         )
         request.session.flush()
         return redirect("login")
@@ -374,13 +354,12 @@ def staff_dashboard_view(request):
     except Exception:
         logger.exception(
             "STAFF DASHBOARD ERROR while loading database records. User ID: %s",
-            user_id
+            user_id,
         )
         return HttpResponseServerError(
             "Staff dashboard failed. Please check application logs."
         )
 
-    # 9. Prepare dashboard context
     context = {
         "facility_name": facility_name,
         "facility_type": facility_type,
@@ -393,36 +372,34 @@ def staff_dashboard_view(request):
         "current_facility_id": current_facility_id,
     }
 
-    # 10. Render dashboard with separate error logging
     try:
         return render(
             request,
             "organization/index.html",
-            context
+            context,
         )
 
     except Exception:
         logger.exception(
             "STAFF DASHBOARD TEMPLATE ERROR. User ID: %s",
-            user_id
+            user_id,
         )
         return HttpResponseServerError(
             "Staff dashboard template failed. Please check application logs."
         )
 
 
-def logout_view(request):
-    # Remove all authentication data stored in the current session.
-    request.session.flush()
 
+def logout_view(request):
+    request.session.flush()
     return redirect("login")
 
+
+
 def donor_signup_view(request):
-    # A GET request only displays the registration page.
     if request.method == "GET":
         return render(request, "donor_signup.html")
 
-    # Read the values submitted by the donor registration form.
     first_name = request.POST.get("firstName", "").strip()
     last_name = request.POST.get("lastName", "").strip()
     username = request.POST.get("username", "").strip().lower()
@@ -439,12 +416,10 @@ def donor_signup_view(request):
     confirm_password = request.POST.get("confirmPassword", "")
     terms_accepted = request.POST.get("terms")
 
-    # Preserve non-sensitive form values if validation fails.
-    # Passwords are intentionally excluded for security.
     form_data = {
         "firstName": first_name,
         "lastName": last_name,
-        "username": request.POST.get("username", "").strip().lower(),
+        "username": username,
         "email": email,
         "phone": phone,
         "dob": date_of_birth,
@@ -457,43 +432,51 @@ def donor_signup_view(request):
         "terms": bool(terms_accepted),
     }
 
-    # Donor usernames must follow the 'do' prefix convention used by the frontend.
     if username.startswith("do"):
         username = username[2:]
-    
-    username = f"do{username}"  # Results in 'dopheerpatel' automatically
 
-    # Check for duplicates using the final generated username
+    username = f"do{username}"
+
     if Users.objects.filter(username=username).exists():
         return render(
             request,
             "donor_signup.html",
-            {"error": f"The username '{username}' is already in use.", "form_data": form_data},
+            {
+                "error": f"The username '{username}' is already in use.",
+                "form_data": form_data,
+            },
         )
 
     if password != confirm_password:
         return render(
             request,
             "donor_signup.html",
-            {"error": "Passwords do not match.", "form_data": form_data},
+            {
+                "error": "Passwords do not match.",
+                "form_data": form_data,
+            },
         )
 
     if Users.objects.filter(email=email).exists():
         return render(
             request,
             "donor_signup.html",
-            {"error": "An account with that email already exists.", "form_data": form_data},
+            {
+                "error": "An account with that email already exists.",
+                "form_data": form_data,
+            },
         )
 
     if not terms_accepted:
         return render(
             request,
             "donor_signup.html",
-            {"error": "You must accept the terms and privacy policy.", "form_data": form_data},
+            {
+                "error": "You must accept the terms and privacy policy.",
+                "form_data": form_data,
+            },
         )
 
-    # Convert the donor's registered address into geographic coordinates.
-    # If geocoding fails, registration can still proceed without coordinates.
     coordinates = geocode_address(
         street_address,
         city,
@@ -507,8 +490,6 @@ def donor_signup_view(request):
 
     now = timezone.now()
 
-    # Create the user and donor profile as one database transaction.
-    # If creating either record fails, neither record is permanently saved.
     with transaction.atomic():
         user = Users.objects.create(
             username=username,
@@ -538,22 +519,22 @@ def donor_signup_view(request):
             longitude=longitude,
         )
 
-    # Automatically send the welcome email immediately after successful registration
     try:
-        send_welcome_email(user_email=email, username=first_name, role="Donor")
-    except Exception as e:
-        print(f"Failed to send welcome email to donor: {e}")
+        send_welcome_email(
+            user_email=email,
+            username=first_name,
+            role="Donor",
+        )
+    except Exception:
+        logger.exception("Failed to send welcome email to donor: %s", email)
 
-    # Registration succeeded, so send the donor to the login page.
     return redirect("login")
 
 
 def organization_signup_view(request):
-    # A GET request only displays the staff registration page.
     if request.method == "GET":
         return render(request, "organization_signup.html")
 
-    # Read values submitted by the staff registration form.
     first_name = request.POST.get("firstName", "").strip()
     last_name = request.POST.get("lastName", "").strip()
     username = request.POST.get("username", "").strip().lower()
@@ -575,11 +556,10 @@ def organization_signup_view(request):
     authorized_staff = request.POST.get("authorizedStaff")
     terms_accepted = request.POST.get("terms")
 
-    # Preserve non-sensitive information if validation fails.
     form_data = {
         "firstName": first_name,
         "lastName": last_name,
-        "username": request.POST.get("username", "").strip().lower(),
+        "username": username,
         "email": email,
         "organization": organization,
         "phone": phone,
@@ -593,18 +573,19 @@ def organization_signup_view(request):
         "terms": bool(terms_accepted),
     }
 
-    # Staff usernames must follow the ST prefix convention used by the frontend.
     if username.startswith("st"):
         username = username[2:]
-    
-    username = f"st{username}"  # Results in 'st...' automatically
 
-    # Check for duplicates using the final generated username
+    username = f"st{username}"
+
     if Users.objects.filter(username=username).exists():
         return render(
             request,
             "organization_signup.html",
-            {"error": f"The username '{username}' is already in use.", "form_data": form_data},
+            {
+                "error": f"The username '{username}' is already in use.",
+                "form_data": form_data,
+            },
         )
 
     if password != confirm_password:
@@ -647,8 +628,6 @@ def organization_signup_view(request):
             },
         )
 
-    # Convert the wording used in the HTML dropdown into the exact
-    # values allowed by the PostgreSQL database.
     facility_type_mapping = {
         "Hospital": "HOSPITAL",
         "Blood Bank": "BLOOD_BANK",
@@ -666,8 +645,6 @@ def organization_signup_view(request):
             },
         )
 
-    # Convert the organization's registered address into coordinates.
-    # If geocoding fails, registration can still proceed.
     coordinates = geocode_address(
         street_address,
         city,
@@ -681,8 +658,6 @@ def organization_signup_view(request):
 
     now = timezone.now()
 
-    # User, facility and staff profile creation are treated as one operation.
-    # If any step fails, the database transaction is rolled back.
     with transaction.atomic():
         user = Users.objects.create(
             username=username,
@@ -697,8 +672,6 @@ def organization_signup_view(request):
             updated_at=now,
         )
 
-        # If this facility is already registered, reuse it rather than
-        # creating duplicate facility records.
         facility, created = Facilities.objects.get_or_create(
             name=organization,
             postal_code=postal_code,
@@ -721,17 +694,23 @@ def organization_signup_view(request):
             authorization_declared_at=now,
         )
 
-    # Automatically send the welcome email based on facility type (Hospital vs Blood Bank)
     try:
-        send_welcome_email(user_email=email, username=first_name, role=facility_type)
-    except Exception as e:
-        print(f"Failed to send welcome email to staff: {e}")
+        send_welcome_email(
+            user_email=email,
+            username=first_name,
+            role=facility_type,
+        )
+    except Exception:
+        logger.exception("Failed to send welcome email to staff: %s", email)
 
     return redirect("login")
 
+
 def donor_edit_profile_view(request):
-    # Only logged-in donors can access this page.
-    if request.session.get("user_id") is None or request.session.get("role") != "DONOR":
+    if (
+        request.session.get("user_id") is None
+        or request.session.get("role") != "DONOR"
+    ):
         return redirect("login")
 
     user_id = request.session["user_id"]
@@ -739,6 +718,7 @@ def donor_edit_profile_view(request):
     try:
         user = Users.objects.get(id=user_id)
         donor_profile = DonorProfiles.objects.get(user_id=user_id)
+
     except (Users.DoesNotExist, DonorProfiles.DoesNotExist):
         request.session.flush()
         return redirect("login")
@@ -757,7 +737,6 @@ def donor_edit_profile_view(request):
         postal_code = request.POST.get("postalCode", "").strip()
         blood_type = request.POST.get("bloodGroup", "").strip()
 
-        # Donor usernames must continue to follow the 'do...' convention.
         if not username.startswith("do"):
             return render(
                 request,
@@ -770,9 +749,9 @@ def donor_edit_profile_view(request):
                 },
             )
 
-        # Allow the donor to keep their own username, but block one
-        # that already belongs to another account.
-        if Users.objects.exclude(id=user_id).filter(username=username).exists():
+        if Users.objects.exclude(id=user_id).filter(
+            username=username,
+        ).exists():
             return render(
                 request,
                 "donor/edit_dor_profile.html",
@@ -784,8 +763,9 @@ def donor_edit_profile_view(request):
                 },
             )
 
-        # The same rule applies to email addresses.
-        if Users.objects.exclude(id=user_id).filter(email=email).exists():
+        if Users.objects.exclude(id=user_id).filter(
+            email=email,
+        ).exists():
             return render(
                 request,
                 "donor/edit_dor_profile.html",
@@ -797,7 +777,6 @@ def donor_edit_profile_view(request):
                 },
             )
 
-        # Only geocode again if the donor's address has changed.
         address_changed = (
             donor_profile.street_address != address
             or donor_profile.city != city
@@ -807,7 +786,6 @@ def donor_edit_profile_view(request):
         )
 
         if address_changed:
-            # Convert the updated address into new coordinates.
             coordinates = geocode_address(
                 address,
                 city,
@@ -816,18 +794,19 @@ def donor_edit_profile_view(request):
                 country,
             )
 
-            # Clear old coordinates if the new address cannot be located.
-            donor_profile.latitude = coordinates[0] if coordinates else None
-            donor_profile.longitude = coordinates[1] if coordinates else None
+            donor_profile.latitude = (
+                coordinates[0] if coordinates else None
+            )
+            donor_profile.longitude = (
+                coordinates[1] if coordinates else None
+            )
 
-        # Update account information.
         user.first_name = first_name
         user.last_name = last_name
         user.username = username
         user.email = email
         user.updated_at = timezone.now()
 
-        # Update donor-specific profile information.
         donor_profile.phone = phone
         donor_profile.date_of_birth = dob
         donor_profile.street_address = address
@@ -837,7 +816,6 @@ def donor_edit_profile_view(request):
         donor_profile.postal_code = postal_code
         donor_profile.blood_type = blood_type
 
-        # Save both records as one database transaction.
         with transaction.atomic():
             user.save()
             donor_profile.save()
@@ -854,23 +832,24 @@ def donor_edit_profile_view(request):
     )
 
 def staff_edit_profile_view(request):
-    # Only logged-in staff can access this page.
-    if request.session.get("user_id") is None or request.session.get("role") != "HOSPITAL_STAFF":
+    if (
+        request.session.get("user_id") is None
+        or request.session.get("role") != "HOSPITAL_STAFF"
+    ):
         return redirect("login")
 
     user_id = request.session["user_id"]
 
-    # Load the staff account, staff profile and associated facility.
     try:
         user = Users.objects.get(id=user_id)
         staff_profile = StaffProfiles.objects.get(user_id=user_id)
         facility = staff_profile.facility
+
     except (Users.DoesNotExist, StaffProfiles.DoesNotExist):
         request.session.flush()
         return redirect("login")
 
     if request.method == "POST":
-        # Read the editable values submitted by the form.
         first_name = request.POST.get("firstName", "").strip()
         last_name = request.POST.get("lastName", "").strip()
         email = request.POST.get("email", "").strip().lower()
@@ -885,9 +864,9 @@ def staff_edit_profile_view(request):
         country = request.POST.get("country", "").strip()
         postal_code = request.POST.get("pincode", "").strip()
 
-        # Allow the staff member to keep their current email, but prevent
-        # an email address that already belongs to another account.
-        if Users.objects.exclude(id=user_id).filter(email=email).exists():
+        if Users.objects.exclude(id=user_id).filter(
+            email=email,
+        ).exists():
             return render(
                 request,
                 "organization/edit_org_profile.html",
@@ -900,8 +879,6 @@ def staff_edit_profile_view(request):
                 },
             )
 
-        # Convert the wording used by the frontend dropdown into the
-        # values stored in PostgreSQL.
         facility_type_mapping = {
             "Hospital": "HOSPITAL",
             "Blood Bank": "BLOOD_BANK",
@@ -922,9 +899,6 @@ def staff_edit_profile_view(request):
                 },
             )
 
-        # A facility is uniquely identified by its name and postal code.
-        # Prevent this facility from being changed into a duplicate of
-        # another facility that already exists.
         if Facilities.objects.exclude(id=facility.id).filter(
             name=organization,
             postal_code=postal_code,
@@ -941,7 +915,6 @@ def staff_edit_profile_view(request):
                 },
             )
 
-        # Check whether the facility's address has changed.
         address_changed = (
             facility.street_address != street_address
             or facility.city != city
@@ -951,7 +924,6 @@ def staff_edit_profile_view(request):
         )
 
         if address_changed:
-            # Convert the updated address into new coordinates.
             coordinates = geocode_address(
                 street_address,
                 city,
@@ -960,17 +932,18 @@ def staff_edit_profile_view(request):
                 country,
             )
 
-            # Replace old coordinates or clear them if geocoding fails.
-            facility.latitude = coordinates[0] if coordinates else None
-            facility.longitude = coordinates[1] if coordinates else None
+            facility.latitude = (
+                coordinates[0] if coordinates else None
+            )
+            facility.longitude = (
+                coordinates[1] if coordinates else None
+            )
 
-        # Update account information.
         user.first_name = first_name
         user.last_name = last_name
         user.email = email
         user.updated_at = timezone.now()
 
-        # Update the associated facility information.
         facility.name = organization
         facility.phone = phone
         facility.facility_type = database_facility_type
@@ -980,14 +953,12 @@ def staff_edit_profile_view(request):
         facility.country = country
         facility.postal_code = postal_code
 
-        # Save the account and facility changes as one database transaction.
         with transaction.atomic():
             user.save()
             facility.save()
 
         return redirect("staff_edit_profile")
 
-    # A GET request displays the staff member's existing information.
     return render(
         request,
         "organization/edit_org_profile.html",
