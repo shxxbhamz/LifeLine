@@ -1,4 +1,3 @@
-
 import logging
 import uuid
 
@@ -69,6 +68,7 @@ def login_view(request):
 
     request.session["user_id"] = user.id
     request.session["role"] = user.role
+    request.session.modified = True  # Ensure session is saved and persists
 
     if user.role == "DONOR":
         return redirect("donor_dashboard")
@@ -195,6 +195,7 @@ def donor_dashboard_view(request):
     }
 
     return render(request, "donor/index.html", context)
+
 
 def donor_active_requests_view(request):
     if (
@@ -389,11 +390,9 @@ def staff_dashboard_view(request):
         )
 
 
-
 def logout_view(request):
     request.session.flush()
     return redirect("login")
-
 
 
 def donor_signup_view(request):
@@ -830,6 +829,7 @@ def donor_edit_profile_view(request):
             "donor_profile": donor_profile,
         },
     )
+
 
 def staff_edit_profile_view(request):
     if (
