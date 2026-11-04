@@ -23,7 +23,9 @@
       <!-- User Profile & Hamburger Menu Container -->
       <div class="header-actions">
         <!-- Dynamically displays the logged-in user's name -->
-        <span class="donor-name">{{ request.session.user_name|default:"Donor" }}</span>
+        <span class="donor-name">
+          {{ donor_profile.first_name }} {{ donor_profile.last_name }}
+      </span>
 
         <div class="dropdown" tabindex="0">
           <img src="{% static 'donor/image/default-avatar.png' %}" alt="Donor Profile" class="donor-avatar"
@@ -119,39 +121,7 @@
         {% csrf_token %}
         <input type="hidden" id="modalRequestId" name="request_id" value="">
 
-        <!-- 1. Component Type Selection (Mandatory) -->
-        <div class="form-group">
-          <label class="form-label">Select Component Type (Choose Exactly One):</label>
-          <div class="radio-group">
-            <label class="radio-label">
-              <input type="radio" name="componentType" value="Blood" required> Blood
-            </label>
-            <label class="radio-label">
-              <input type="radio" name="componentType" value="Plasma" required> Plasma
-            </label>
-            <label class="radio-label">
-              <input type="radio" name="componentType" value="Platelets" required> Platelets
-            </label>
-          </div>
-        </div>
-
-        <!-- 2. Blood Group Dropdown (Mandatory) -->
-        <div class="form-group">
-          <label for="bloodGroup" class="form-label">Blood Group:</label>
-          <select id="bloodGroup" name="bloodGroup" class="form-input" required>
-            <option value="" disabled selected>Select blood group</option>
-            <option value="A+">A+</option>
-            <option value="A-">A-</option>
-            <option value="B+">B+</option>
-            <option value="B-">B-</option>
-            <option value="AB+">AB+</option>
-            <option value="AB-">AB-</option>
-            <option value="O+">O+</option>
-            <option value="O-">O-</option>
-          </select>
-        </div>
-
-        <!-- 3. Preferred Timing Field (Mandatory) -->
+        <!-- Preferred Timing Field (Mandatory) -->
         <div class="form-group">
           <label for="preferredTiming" class="form-label">Preferred Timing to Visit:</label>
           <input type="text" id="preferredTiming" name="preferredTiming" class="form-input"
