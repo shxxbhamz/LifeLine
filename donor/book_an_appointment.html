@@ -14,25 +14,29 @@
   <!-- Header Section -->
   <header class="main-header">
     <div class="header-container">
+
       <div class="logo">
         <a href="{% url 'donor_dashboard' %}">
           <img src="{% static 'donor/image/logo.png' %}" alt="LifeLine Logo" class="logo-img">
         </a>
       </div>
 
-      <!-- User Profile & Hamburger Menu Container -->
       <div class="header-actions">
-        <span class="donor-name">Donor Name</span>
+        <span class="donor-name">{{ donor_name|default:"Donor Name" }}</span>
 
-        <!-- Added tabindex="0" here -->
         <div class="dropdown" tabindex="0">
-          <img src="{% static 'donor/image/default-avatar.png' %}" alt="Donor Profile" class="donor-avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;">
+          <img src="{% static 'donor/image/default-avatar.png' %}"
+               alt="Donor Profile"
+               class="donor-avatar"
+               style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;">
+
           <div class="dropdown-content">
             <a href="{% url 'donor_edit_profile' %}">Edit Profile</a>
             <a href="{% url 'logout' %}">Logout</a>
           </div>
         </div>
       </div>
+
     </div>
   </header>
 
@@ -46,183 +50,273 @@
     </ul>
   </nav>
 
-  <!-- Main Content Area -->
+  <!-- Main Content -->
   <main class="content">
 
-    <!-- Book An Appointment Section -->
     <section id="book-appointment" class="section">
+
       <div class="section-header">
         <h1>Book An Appointment</h1>
-        <p class="section-subtitle">Select a nearby blood bank or hospital center to schedule your donation.</p>
+        <p class="section-subtitle">
+          Select a nearby blood bank or hospital center to schedule your donation.
+        </p>
       </div>
 
+      <!-- Django Messages -->
+      {% if messages %}
+        {% for message in messages %}
+          <div class="no-requests-message">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <!-- Dynamic Facility Cards -->
       <div class="facility-grid">
 
-        <!-- Facility Card 1 -->
-        <div class="facility-card">
-          <div class="facility-header">
-            <h3>City General Hospital Blood Bank</h3>
-          </div>
-          <div class="facility-body">
-            <p class="facility-address">123 Health Ave, Medical District, Suite 100</p>
-            <p class="facility-hours"><strong>Hours:</strong> Mon - Sat (8:00 AM - 6:00 PM)</p>
-          </div>
-          <div class="facility-footer">
-            <button class="btn btn-book">Book An Appointment</button>
-          </div>
-        </div>
+        {% for facility in nearby_facilities %}
 
-        <!-- Facility Card 2 -->
-        <div class="facility-card">
-          <div class="facility-header">
-            <h3>St. Jude Community Blood Center</h3>
-          </div>
-          <div class="facility-body">
-            <p class="facility-address">456 Red Cross Way, West Wing</p>
-            <p class="facility-hours"><strong>Hours:</strong> Mon - Sun (7:00 AM - 8:00 PM)</p>
-          </div>
-          <div class="facility-footer">
-            <button class="btn btn-book">Book An Appointment</button>
-          </div>
-        </div>
+          <div class="facility-card">
 
-        <!-- Facility Card 3 -->
-        <div class="facility-card">
-          <div class="facility-header">
-            <h3>Metro Health Regional Donation Hub</h3>
-          </div>
-          <div class="facility-body">
-            <p class="facility-address">789 LifeLine Blvd, Central City</p>
-            <p class="facility-hours"><strong>Hours:</strong> Mon - Fri (8:30 AM - 5:00 PM)</p>
-          </div>
-          <div class="facility-footer">
-            <button class="btn btn-book">Book An Appointment</button>
-          </div>
-        </div>
+            <div class="facility-header">
+              <h3>{{ facility.name }}</h3>
+            </div>
 
-        <!-- Facility Card 4 -->
-        <div class="facility-card">
-          <div class="facility-header">
-            <h3>Mercy Memorial Blood Clinic</h3>
-          </div>
-          <div class="facility-body">
-            <p class="facility-address">101 Care Lane, Eastside District</p>
-            <p class="facility-hours"><strong>Hours:</strong> Tue - Sat (9:00 AM - 6:00 PM)</p>
-          </div>
-          <div class="facility-footer">
-            <button class="btn btn-book">Book An Appointment</button>
-          </div>
-        </div>
+            <div class="facility-body">
 
-        <!-- Facility Card 5 -->
-        <div class="facility-card">
-          <div class="facility-header">
-            <h3>University Medical Center Drive</h3>
-          </div>
-          <div class="facility-body">
-            <p class="facility-address">202 Campus Road, Building B</p>
-            <p class="facility-hours"><strong>Hours:</strong> Mon - Sun (24/7 Emergency Service)</p>
-          </div>
-          <div class="facility-footer">
-            <button class="btn btn-book">Book An Appointment</button>
-          </div>
-        </div>
+              <p class="facility-address">
+                {{ facility.street_address }},
+                {{ facility.city }},
+                {{ facility.province }}
+                {{ facility.postal_code }}
+              </p>
 
+              <p class="facility-hours">
+                <strong>Facility Type:</strong>
+                {{ facility.facility_type|default:"Donation Centre" }}
+              </p>
+
+              <p class="facility-hours">
+                <strong>Distance:</strong>
+
+                {% if facility.distance_km != None %}
+                  {{ facility.distance_km|floatformat:2 }} km away
+                {% else %}
+                  Distance unavailable
+                {% endif %}
+              </p>
+
+              <p class="facility-hours">
+                <strong>Phone:</strong>
+                {{ facility.phone|default:"Not available" }}
+              </p>
+
+            </div>
+
+            <div class="facility-footer">
+
+              <button
+                type="button"
+                class="btn btn-book"
+                data-facility-id="{{ facility.id }}"
+                data-facility-name="{{ facility.name }}">
+
+                Book An Appointment
+
+              </button>
+
+            </div>
+
+          </div>
+
+        {% empty %}
+
+          <div class="no-requests-message">
+            <p>No hospitals or blood banks are currently available.</p>
+          </div>
+
+        {% endfor %}
 
       </div>
+
     </section>
 
   </main>
+
+  <!-- Appointment Booking Modal -->
   <dialog id="schedule-modal" class="modal">
+
     <div class="modal-content">
+
       <div class="modal-header">
         <h2>Confirm Appointment</h2>
+        <p id="selected-facility"></p>
       </div>
 
-      <form id="schedule-form" class="modal-form">
-        <!-- 1. Component Type Selection (Mandatory) -->
+      <!-- Actual Django POST Form -->
+      <form
+        id="schedule-form"
+        class="modal-form"
+        method="POST"
+        action="{% url 'donor_book_appointment' %}">
+
+        {% csrf_token %}
+
+        <!-- Selected Facility -->
+        <input type="hidden" name="facility_id" id="facility-id">
+
+        <!-- Blood Group -->
         <div class="form-group">
-          <label class="form-label">Select Component Type (Choose Exactly One):</label>
-          <div class="radio-group">
-            <label class="radio-label">
-              <input type="radio" name="componentType" value="Blood" required> Blood
-            </label>
-            <label class="radio-label">
-              <input type="radio" name="componentType" value="Plasma" required> Plasma
-            </label>
-            <label class="radio-label">
-              <input type="radio" name="componentType" value="Platelets" required> Platelets
-            </label>
-          </div>
+
+          <label for="bloodGroup" class="form-label">
+            Your Blood Group:
+          </label>
+
+          <input
+            type="text"
+            id="bloodGroup"
+            class="form-input"
+            value="{{ donor_blood_type }}"
+            readonly>
+
         </div>
 
-        <!-- 2. Blood Group Dropdown (Mandatory) -->
+        <!-- Donation Component -->
         <div class="form-group">
-          <label for="bloodGroup" class="form-label">Blood Group:</label>
-          <select id="bloodGroup" name="bloodGroup" class="form-input" required>
-            <option value="" disabled selected>Select blood group</option>
-            <option value="A+">A+</option>
-            <option value="A-">A-</option>
-            <option value="B+">B+</option>
-            <option value="B-">B-</option>
-            <option value="AB+">AB+</option>
-            <option value="AB-">AB-</option>
-            <option value="O+">O+</option>
-            <option value="O-">O-</option>
+
+          <label for="donationType" class="form-label">
+            Select Component Type:
+          </label>
+
+          <select
+            id="donationType"
+            name="donation_type"
+            class="form-input"
+            required>
+
+            <option value="" disabled selected>
+              Select donation component
+            </option>
+
+            <option value="WHOLE_BLOOD">Whole Blood</option>
+            <option value="RED_BLOOD_CELLS">Red Blood Cells</option>
+            <option value="PLASMA">Plasma</option>
+            <option value="PLATELETS">Platelets</option>
+
           </select>
+
         </div>
 
-        <!-- 3. Preferred Timing Field (Mandatory) -->
+        <!-- Appointment Date and Time -->
         <div class="form-group">
-          <label for="preferredTiming" class="form-label">Preferred Timing to Visit:</label>
-          <select id="preferredTiming" name="preferredTiming" class="form-input" required>
-            <option value="" disabled selected>Select preferred time slot</option>
-            <option value="Morning (10:00 AM - 12:00 PM)">10:00 AM - 12:00 PM</option>
-            <option value="Afternoon (12:00 PM - 2:00 PM)">12:00 PM - 2:00 PM</option>
-            <option value="Evening (2:00 PM - 4:00 PM)">2:00 PM - 4:00 PM</option>
-          </select>
+
+          <label for="scheduledAt" class="form-label">
+            Preferred Appointment Date and Time:
+          </label>
+
+          <input
+            type="datetime-local"
+            id="scheduledAt"
+            name="scheduled_at"
+            class="form-input"
+            required>
+
         </div>
 
         <!-- Actions -->
         <div class="modal-actions">
-          <button type="button" id="btn-cancel" class="btn btn-secondary">Cancel</button>
-          <button type="submit" class="btn btn-primary">Submit</button>
+
+          <button
+            type="button"
+            id="btn-cancel"
+            class="btn btn-secondary">
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-primary">
+            Submit Request
+          </button>
+
         </div>
+
       </form>
+
     </div>
+
   </dialog>
 
-  <!-- Interactive JavaScript Logic -->
+  <!-- Interactive JavaScript -->
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+
+    document.addEventListener('DOMContentLoaded', function () {
+
       const modal = document.getElementById('schedule-modal');
+
       const scheduleForm = document.getElementById('schedule-form');
+
       const cancelBtn = document.getElementById('btn-cancel');
+
       const scheduleBtns = document.querySelectorAll('.btn-book');
 
-      // Open modal when any "Schedule Donation" button is clicked
-      scheduleBtns.forEach((btn) => {
-        btn.addEventListener('click', () => {
+      const facilityIdInput = document.getElementById('facility-id');
+
+      const selectedFacility = document.getElementById('selected-facility');
+
+      const scheduledAtInput = document.getElementById('scheduledAt');
+
+      // Set minimum appointment date/time to current local time.
+      function setMinimumDateTime() {
+
+        const now = new Date();
+
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+
+        scheduledAtInput.min = now.toISOString().slice(0, 16);
+
+      }
+
+      setMinimumDateTime();
+
+      // Open booking modal for selected facility.
+      scheduleBtns.forEach(function (button) {
+
+        button.addEventListener('click', function () {
+
           scheduleForm.reset();
+
+          const facilityId = button.dataset.facilityId;
+
+          const facilityName = button.dataset.facilityName;
+
+          facilityIdInput.value = facilityId;
+
+          selectedFacility.textContent =
+            'Selected Facility: ' + facilityName;
+
+          setMinimumDateTime();
+
           modal.showModal();
+
         });
+
       });
 
-      // Close modal on Cancel click
-      cancelBtn.addEventListener('click', () => {
+      // Close modal.
+      cancelBtn.addEventListener('click', function () {
+
         modal.close();
+
       });
 
-      // Submit form validation
-      scheduleForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        if (scheduleForm.checkValidity()) {
-          alert('Donation appointment details submitted successfully!');
-          modal.close();
-        }
-      });
+      // Submit to Django.
+      // Do NOT preventDefault here.
+      // Django must receive the POST request.
+
     });
-  </script>
-</body>
 
+  </script>
+
+</body>
 </html>
