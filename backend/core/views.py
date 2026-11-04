@@ -1,4 +1,6 @@
 import uuid
+import logging
+from django.http import HttpResponseServerError
 from django.contrib.auth.hashers import check_password, make_password
 from django.db import transaction
 from django.shortcuts import redirect, render
@@ -9,7 +11,7 @@ from appointments.models import Appointments
 from inventory.models import BloodInventory
 from emergencies.models import EmergencyRequests
 from .geocoding import geocode_address
-
+logger = logging.getLogger(__name__)
 from .utils import send_welcome_email
 
 def home_view(request):
@@ -231,9 +233,10 @@ def staff_dashboard_view(request):
     map_facilities = []
 
     try:
-        # 3. Get logged-in user and staff profile
+        # 3. Get logged-in user
         current_user = Users.objects.get(id=user_id)
 
+        # 4. Get staff profile and associated facility
         staff_profile = StaffProfiles.objects.select_related(
             "facility"
         ).get(user_id=user_id)
@@ -247,14 +250,14 @@ def staff_dashboard_view(request):
             if facility.facility_type:
                 facility_type = facility.facility_type.lower()
 
-            # 4. Get appointments for this facility
+            # 5. Get appointments for this facility
             scheduled_appointments = list(
                 Appointments.objects.filter(
                     facility=facility
                 ).select_related("donor__user")
             )
 
-            # 5. Get inventory for this facility
+            # 6. Get blood inventory
             raw_inventory = BloodInventory.objects.filter(
                 facility=facility
             )
@@ -273,41 +276,38 @@ def staff_dashboard_view(request):
                     }
 
                 component = str(inv.component_type).lower()
+                units = inv.units_available or 0
 
                 if "whole" in component:
-                    inventory_dict[blood_type]["whole_blood"] += (
-                        inv.units_available or 0
-                    )
+                    inventory_dict[blood_type]["whole_blood"] += units
 
                 elif "plasma" in component:
-                    inventory_dict[blood_type]["plasma"] += (
-                        inv.units_available or 0
-                    )
+                    inventory_dict[blood_type]["plasma"] += units
 
-                # Check inventory thresholds
+                # Inventory threshold checks
                 if (
                     inv.critical_threshold is not None
-                    and inv.units_available <= inv.critical_threshold
+                    and units <= inv.critical_threshold
                 ):
                     inventory_dict[blood_type]["status"] = "Critical"
 
                 elif (
                     inv.low_threshold is not None
-                    and inv.units_available <= inv.low_threshold
+                    and units <= inv.low_threshold
                     and inventory_dict[blood_type]["status"] != "Critical"
                 ):
                     inventory_dict[blood_type]["status"] = "Low"
 
             inventory_items = list(inventory_dict.values())
 
-            # 6. Get emergency requests for this facility
+            # 7. Get emergency requests for this facility
             emergency_history = list(
                 EmergencyRequests.objects.filter(
                     facility=facility
                 ).order_by("-created_at")
             )
 
-            # 7. Get facilities with map coordinates
+            # 8. Get facilities with map coordinates
             facilities_with_locations = Facilities.objects.filter(
                 latitude__isnull=False,
                 longitude__isnull=False,
@@ -329,14 +329,31 @@ def staff_dashboard_view(request):
                 })
 
     except Users.DoesNotExist:
+        logger.warning(
+            "Staff dashboard: user ID %s does not exist",
+            user_id
+        )
         request.session.flush()
         return redirect("login")
 
     except StaffProfiles.DoesNotExist:
+        logger.warning(
+            "Staff dashboard: staff profile missing for user ID %s",
+            user_id
+        )
         request.session.flush()
         return redirect("login")
 
-    # 8. Prepare dashboard context
+    except Exception:
+        logger.exception(
+            "STAFF DASHBOARD ERROR while loading database records. User ID: %s",
+            user_id
+        )
+        return HttpResponseServerError(
+            "Staff dashboard failed. Please check application logs."
+        )
+
+    # 9. Prepare dashboard context
     context = {
         "facility_name": facility_name,
         "facility_type": facility_type,
@@ -349,12 +366,22 @@ def staff_dashboard_view(request):
         "current_facility_id": current_facility_id,
     }
 
-    # 9. Render staff dashboard
-    return render(
-        request,
-        "organization/index.html",
-        context
-    )
+    # 10. Render dashboard with separate error logging
+    try:
+        return render(
+            request,
+            "organization/index.html",
+            context
+        )
+
+    except Exception:
+        logger.exception(
+            "STAFF DASHBOARD TEMPLATE ERROR. User ID: %s",
+            user_id
+        )
+        return HttpResponseServerError(
+            "Staff dashboard template failed. Please check application logs."
+        )
 
 
 def logout_view(request):
