@@ -503,10 +503,7 @@ def run_emergency_matching(emergency_request):
 
         raise
 
-    if matched_rows:
-        emergency_request.status = "ACTIVE"
-    else:
-        emergency_request.status = "OPEN"
+    emergency_request.status = "ACTIVE"
 
     emergency_request.updated_at = timezone.now()
 
