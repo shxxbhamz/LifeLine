@@ -175,107 +175,141 @@ def donor_dashboard_view(request):
     #Heer Patel#
 
 
+
 def staff_dashboard_view(request):
-    # Only logged-in staff should be able to access the staff dashboard.
-    if request.session.get("user_id") is None or request.session.get("role") != "HOSPITAL_STAFF":
+    # 1. Check staff login
+    user_id = request.session.get("user_id")
+
+    if user_id is None or request.session.get("role") != "HOSPITAL_STAFF":
         return redirect("login")
 
-    user_id = request.session.get("user_id")
-    
+    # 2. Default values
     facility_name = "Organization Staff Console"
-    facility_type = "hospital"  # Default fallback
+    facility_type = "hospital"
     current_user = None
+    current_facility_id = None
+
     scheduled_appointments = []
     inventory_items = []
     emergency_history = []
     map_facilities = []
-    current_facility_id = None
-    
+
     try:
+        # 3. Get logged-in user and staff profile
         current_user = Users.objects.get(id=user_id)
-        staff_profile = StaffProfiles.objects.get(user_id=user_id)
-        if staff_profile.facility:
-            facility_name = staff_profile.facility.name
+        staff_profile = StaffProfiles.objects.select_related(
+            "facility"
+        ).get(user_id=user_id)
 
-            current_facility_id = staff_profile.facility.id
+        facility = staff_profile.facility
 
-            # Only include registered facilities with valid map coordinates.
+        if facility:
+            current_facility_id = facility.id
+            facility_name = facility.name
+
+            if facility.facility_type:
+                facility_type = facility.facility_type.lower()
+
+            # 4. Get appointments for this facility
+            scheduled_appointments = list(
+                Appointments.objects.filter(
+                    facility=facility
+                ).select_related("donor__user")
+            )
+
+            # 5. Get inventory for this facility
+            raw_inventory = BloodInventory.objects.filter(
+                facility=facility
+            )
+
+            inventory_dict = {}
+
+            for inv in raw_inventory:
+                blood_type = inv.blood_type
+
+                if blood_type not in inventory_dict:
+                    inventory_dict[blood_type] = {
+                        "blood_type": blood_type,
+                        "whole_blood": 0,
+                        "plasma": 0,
+                        "status": "Normal",
+                    }
+
+                component = str(inv.component_type).lower()
+
+                if "whole" in component:
+                    inventory_dict[blood_type]["whole_blood"] += (
+                        inv.units_available or 0
+                    )
+                elif "plasma" in component:
+                    inventory_dict[blood_type]["plasma"] += (
+                        inv.units_available or 0
+                    )
+
+                # Check inventory thresholds
+                if (
+                    inv.critical_threshold is not None
+                    and inv.units_available <= inv.critical_threshold
+                ):
+                    inventory_dict[blood_type]["status"] = "Critical"
+
+                elif (
+                    inv.low_threshold is not None
+                    and inv.units_available <= inv.low_threshold
+                    and inventory_dict[blood_type]["status"] != "Critical"
+                ):
+                    inventory_dict[blood_type]["status"] = "Low"
+
+            inventory_items = list(inventory_dict.values())
+
+            # 6. Get emergency requests for this facility
+            emergency_history = list(
+                EmergencyRequests.objects.filter(
+                    facility=facility
+                ).order_by("-created_at")
+            )
+
+            # 7. Get facilities with map coordinates
             facilities_with_locations = Facilities.objects.filter(
                 latitude__isnull=False,
                 longitude__isnull=False,
             )
 
-            for facility in facilities_with_locations:
+            for item in facilities_with_locations:
                 map_facilities.append({
-                    "id": facility.id,
-                    "name": facility.name,
-                    "type": facility.facility_type,
+                    "id": item.id,
+                    "name": item.name,
+                    "type": item.facility_type,
                     "address": (
-                        f"{facility.street_address}, {facility.city}, "
-                        f"{facility.province}, {facility.postal_code}"
+                        f"{item.street_address or ''}, "
+                        f"{item.city or ''}, "
+                        f"{item.province or ''}, "
+                        f"{item.postal_code or ''}"
                     ),
-                    "latitude": float(facility.latitude),
-                    "longitude": float(facility.longitude),
+                    "latitude": float(item.latitude),
+                    "longitude": float(item.longitude),
                 })
 
-            facility_type = staff_profile.facility.facility_type.lower()
-            
-            # Fetch scheduled appointments linked specifically to this facility
-            scheduled_appointments = Appointments.objects.filter(
-                facility=staff_profile.facility
-            ).select_related('donor__user')
+    except Users.DoesNotExist:
+        return redirect("login")
 
-            # Fetch blood inventory linked specifically to this facility
-            raw_inventory = BloodInventory.objects.filter(
-                facility=staff_profile.facility
-            )
-            
-            # Group raw inventory rows by blood type for template display
-            inventory_dict = {}
-            for inv in raw_inventory:
-                b_type = inv.blood_type
-                if b_type not in inventory_dict:
-                    inventory_dict[b_type] = {
-                        'blood_type': b_type, 
-                        'whole_blood': 0, 
-                        'plasma': 0, 
-                        'status': 'Normal'
-                    }
-                
-                comp = inv.component_type.lower()
-                if 'whole' in comp:
-                    inventory_dict[b_type]['whole_blood'] += inv.units_available
-                elif 'plasma' in comp:
-                    inventory_dict[b_type]['plasma'] += inv.units_available
-
-                # Determine status based on thresholds
-                if inv.units_available <= inv.critical_threshold:
-                    inventory_dict[b_type]['status'] = 'Critical'
-                elif inv.units_available <= inv.low_threshold and inventory_dict[b_type]['status'] != 'Critical':
-                    inventory_dict[b_type]['status'] = 'Low'
-
-            inventory_items = list(inventory_dict.values())
-            
-            # Fetch real emergency requests/history for this facility from the database
-            emergency_history = EmergencyRequests.objects.filter(
-                facility=staff_profile.facility
-            ).order_by('-created_at')
-            
-    except (Users.DoesNotExist, StaffProfiles.DoesNotExist, Facilities.DoesNotExist):
-        pass
+    except StaffProfiles.DoesNotExist:
+        return redirect("login")
 
     context = {
-        'facility_name': facility_name,
-        'facility_type': facility_type,
-        'logged_in_user': current_user,
-        'scheduled_appointments': scheduled_appointments,
-        'inventory_items': inventory_items,
-        'emergency_history': emergency_history,  # Pass all emergency history to template
-        'emergency_form_token': uuid.uuid4().hex,
-        'map_facilities': map_facilities,
-        'current_facility_id': current_facility_id,
+        "facility_name": facility_name,
+        "facility_type": facility_type,
+        "logged_in_user": current_user,
+        "scheduled_appointments": scheduled_appointments,
+        "inventory_items": inventory_items,
+        "emergency_history": emergency_history,
+        "emergency_form_token": uuid.uuid4().hex,
+        "map_facilities": map_facilities,
+        "current_facility_id": current_facility_id,
     }
+
     return render(request, "organization/index.html", context)
+
 
 def logout_view(request):
     # Remove all authentication data stored in the current session.
