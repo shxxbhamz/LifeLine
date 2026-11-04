@@ -119,12 +119,10 @@ def donor_dashboard_view(request):
     try:
         donor_profile = DonorProfiles.objects.get(user_id=user_id)
 
-        # 2. Count only completed REGULAR donations
-        # Emergency and cancelled appointments are excluded
+        # 2. Count ALL completed donations (including emergency fulfillments & regular appointments)
         total_donations = Appointments.objects.filter(
             donor_id=user_id,
-            status__iexact="COMPLETED",
-            appointment_source="REGULAR"
+            status__iexact="COMPLETED"
         ).count()
 
         lives_saved = total_donations
@@ -215,7 +213,7 @@ def donor_dashboard_view(request):
     #Heer Patel#
 
 
-
+@login_required
 def staff_dashboard_view(request):
     # 1. Check staff login
     user_id = request.session.get("user_id")
