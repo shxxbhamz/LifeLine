@@ -22,7 +22,7 @@
 
       <!-- User Profile & Hamburger Menu Container -->
       <div class="header-actions">
-        <span class="donor-name">{{ donor_name|default:"Donor Name" }}</span> 
+        <span class="donor-name">{{ donor_name|default:"Donor Name" }}</span>
 
         <!-- Dropdown triggered directly by Profile Image click/hover -->
         <div class="dropdown" tabindex="0">
@@ -75,22 +75,64 @@
       </div>
 
       <div class="appointment-details">
-        {% if upcoming_appointment %}
+
+        {% if upcoming_appointments %}
+
+        {% for appointment in upcoming_appointments %}
+
         <div class="detail-item">
-          <span class="detail-label">Location</span>
-          <span class="detail-value">{{ upcoming_appointment.facility.name }}</span>
+          <span class="detail-label">
+            Appointment {{ forloop.counter }} - Location
+          </span>
+
+          <span class="detail-value">
+            {{ appointment.facility.name }}
+          </span>
         </div>
+
         <div class="detail-item">
           <span class="detail-label">Date & Time</span>
-          <span class="detail-value">{{ upcoming_appointment.scheduled_at|date:"F d, Y - g:i A" }}</span>
+
+          <span class="detail-value">
+            {{ appointment.scheduled_at|date:"F d, Y - g:i A" }}
+          </span>
         </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Donation Type</span>
+
+          <span class="detail-value">
+            {{ appointment.donation_type|cut:"_"|title }}
+          </span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Status</span>
+
+          <span class="detail-value">
+            {{ appointment.status|title }}
+          </span>
+        </div>
+
+        {% endfor %}
+
         {% else %}
+
         <div class="detail-item" style="grid-column: span 2; text-align: center; color: var(--text-muted, #64748b);">
-          <span class="detail-value">You have no upcoming appointments scheduled. <a
-              href="{% url 'donor_book_appointment' %}"
-              style="color: var(--primary-red, #dc2626); text-decoration: underline;">Book one now</a></span>
+
+          <span class="detail-value">
+            You have no upcoming appointments scheduled.
+
+            <a href="{% url 'donor_book_appointment' %}"
+              style="color: var(--primary-red, #dc2626); text-decoration: underline;">
+              Book one now
+            </a>
+          </span>
+
         </div>
+
         {% endif %}
+
       </div>
     </section>
 

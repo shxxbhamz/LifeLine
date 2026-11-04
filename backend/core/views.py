@@ -98,6 +98,7 @@ def donor_dashboard_view(request):
 
     donor_profile = None
     upcoming_appointment = None
+    upcoming_appointments = []
     days_left = None
 
     total_donations = 0
@@ -117,15 +118,19 @@ def donor_dashboard_view(request):
     hero_remaining = 90
 
     try:
-        donor_profile = DonorProfiles.objects.select_related("user").get(user_id=user_id)
+        donor_profile = DonorProfiles.objects.select_related(
+            "user"
+        ).get(user_id=user_id)
 
+        # Count completed donations.
         total_donations = Appointments.objects.filter(
-            donor_id=user_id,
+            donor=donor_profile,
             status__iexact="COMPLETED",
         ).count()
 
         lives_saved = total_donations
 
+        # Calculate donor tier and progress.
         if total_donations == 0:
             tier_name = "Welcome Donor"
             next_goal = 1
@@ -151,50 +156,81 @@ def donor_dashboard_view(request):
             next_goal = total_donations + 10
             progress_percent = 100
 
+        # Achievement badges.
         welcome_unlocked = total_donations >= 1
         dedicated_unlocked = total_donations >= 30
         life_saver_unlocked = total_donations >= 60
         hero_unlocked = total_donations >= 90
 
+        # Remaining donations for each achievement.
         dedicated_remaining = max(30 - total_donations, 0)
         life_saver_remaining = max(60 - total_donations, 0)
         hero_remaining = max(90 - total_donations, 0)
 
+        # Get current date and time.
         now = timezone.now()
 
-        upcoming_appointment = Appointments.objects.filter(
+        # Retrieve ALL upcoming appointments for this donor.
+        # Nearest appointment appears first.
+        upcoming_appointments = Appointments.objects.filter(
             donor=donor_profile,
             scheduled_at__gte=now,
         ).exclude(
             status__iexact="CANCELLED",
-        ).order_by("scheduled_at").first()
+        ).select_related(
+            "facility"
+        ).order_by(
+            "scheduled_at"
+        )
 
+        # Get the nearest appointment for the countdown badge.
+        upcoming_appointment = upcoming_appointments.first()
+
+        # Calculate days remaining until the nearest appointment.
         if upcoming_appointment:
-            delta = upcoming_appointment.scheduled_at.date() - now.date()
+            delta = (
+                upcoming_appointment.scheduled_at.date() - now.date()
+            )
             days_left = delta.days
 
     except DonorProfiles.DoesNotExist:
         pass
 
+    # Send all dashboard information to the HTML template.
     context = {
         "donor_profile": donor_profile,
+
         "upcoming_appointment": upcoming_appointment,
+        "upcoming_appointments": upcoming_appointments,
         "days_left": days_left,
+
         "total_donations": total_donations,
         "lives_saved": lives_saved,
+
         "tier_name": tier_name,
         "next_goal": next_goal,
         "progress_percent": round(progress_percent, 2),
+
         "welcome_unlocked": welcome_unlocked,
         "dedicated_unlocked": dedicated_unlocked,
         "life_saver_unlocked": life_saver_unlocked,
         "hero_unlocked": hero_unlocked,
+
         "dedicated_remaining": dedicated_remaining,
         "life_saver_remaining": life_saver_remaining,
         "hero_remaining": hero_remaining,
+
+        "donor_name": (
+            donor_profile.user.first_name
+            if donor_profile else "Donor"
+        ),
     }
 
-    return render(request, "donor/index.html", context)
+    return render(
+        request,
+        "donor/index.html",
+        context,
+    ) 
 
 
 def donor_active_requests_view(request):

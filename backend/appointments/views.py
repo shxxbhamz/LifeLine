@@ -159,7 +159,9 @@ def donor_active_requests_view(request):
     user_id = request.session.get("user_id")
 
     try:
-        donor_profile = DonorProfiles.objects.get(user_id=user_id)
+        donor_profile = DonorProfiles.objects.select_related(
+            "user"
+        ).get(user_id=user_id)
 
         emergency_requests = EmergencyRequests.objects.filter(
             required_blood_type__iexact=donor_profile.blood_type,
@@ -170,6 +172,7 @@ def donor_active_requests_view(request):
 
         context = {
             "emergency_requests": emergency_requests,
+            "donor_name": donor_profile.user.first_name or "Donor",
         }
 
         return render(
@@ -182,7 +185,10 @@ def donor_active_requests_view(request):
         return render(
             request,
             "donor/active_requests.html",
-            {"emergency_requests": []},
+            {
+                "emergency_requests": [],
+                "donor_name": "Donor",
+            },
         )
 
 
