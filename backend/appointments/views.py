@@ -9,7 +9,10 @@ from django.utils import timezone
 
 from core.models import StaffProfiles
 from inventory.models import BloodInventory, InventoryTransactions
-from core.utils import send_appointment_status_email
+from core.utils import (
+    send_appointment_status_email,
+    send_donor_booking_email,
+)
 from .models import Appointments, DonationRequests
 from core.models import DonorProfiles, Facilities
 from emergencies.models import EmergencyRequests
@@ -200,8 +203,40 @@ def donor_book_appointment_view(request):
         ).get(user_id=user_id)
 
     except DonorProfiles.DoesNotExist:
-        messages.error(request, "Donor profile not found.")
         return redirect("donor_dashboard")
+
+    donor_email = donor_profile.user.email
+    donor_first_name = donor_profile.user.first_name or "Donor"
+
+    # Send booking-related updates through Brevo.
+    def send_booking_update(subject, message):
+        if not donor_email:
+            logger.error(
+                "DONOR BOOKING EMAIL MISSING: user_id=%s",
+                user_id,
+            )
+            return False
+
+        try:
+            return send_donor_booking_email(
+                user_email=donor_email,
+                first_name=donor_first_name,
+                facility_name="LifeLine",
+                scheduled_at=None,
+                donation_type=None,
+            ) if False else _send_custom_booking_email(
+                donor_email,
+                donor_first_name,
+                subject,
+                message,
+            )
+
+        except Exception:
+            logger.exception(
+                "DONOR BOOKING EMAIL FAILED: user_id=%s",
+                user_id,
+            )
+            return False
 
     # Calculate distance between donor and facility.
     def calculate_distance(lat1, lon1, lat2, lon2):
@@ -229,11 +264,10 @@ def donor_book_appointment_view(request):
 
         return earth_radius * c
 
-    # Load actual facilities from Neon.
+    # Load the same facilities for every donor.
     facilities = list(Facilities.objects.all())
 
     for facility in facilities:
-
         facility.distance_km = None
 
         if (
@@ -249,7 +283,6 @@ def donor_book_appointment_view(request):
                 facility.longitude,
             )
 
-    # Facilities with known distances appear first.
     facilities.sort(
         key=lambda facility: (
             facility.distance_km is None,
@@ -259,7 +292,7 @@ def donor_book_appointment_view(request):
         )
     )
 
-    # Process donor booking.
+    # Process appointment booking.
     if request.method == "POST":
 
         facility_id = request.POST.get("facility_id")
@@ -274,49 +307,70 @@ def donor_book_appointment_view(request):
         }
 
         if donation_type not in valid_donation_types:
-            messages.error(
-                request,
-                "Please select a valid donation type."
+            send_booking_update(
+                "LifeLine - Appointment Booking Update",
+                "Your selected donation component was invalid. "
+                "Please return to LifeLine and try again.",
             )
             return redirect("donor_book_appointment")
 
+        # Validate facility.
         try:
             facility = Facilities.objects.get(id=facility_id)
+
         except (Facilities.DoesNotExist, ValueError, TypeError):
-            messages.error(
-                request,
-                "Please select a valid facility."
+            send_booking_update(
+                "LifeLine - Appointment Booking Update",
+                "The selected facility could not be found. "
+                "Please return to LifeLine and try again.",
             )
             return redirect("donor_book_appointment")
 
-        scheduled_at = parse_datetime(scheduled_at_raw)
+        # Validate date and time.
+        scheduled_at = parse_datetime(scheduled_at_raw or "")
 
         if scheduled_at is None:
-            messages.error(
-                request,
-                "Please select a valid appointment date and time."
+            send_booking_update(
+                "LifeLine - Appointment Booking Update",
+                "Your appointment date or time was invalid. "
+                "Please select a valid date and time.",
             )
             return redirect("donor_book_appointment")
 
         if timezone.is_naive(scheduled_at):
             scheduled_at = timezone.make_aware(
                 scheduled_at,
-                timezone.get_current_timezone()
+                timezone.get_current_timezone(),
             )
 
         if scheduled_at <= timezone.now():
-            messages.error(
-                request,
-                "Please select a future appointment date and time."
+            send_booking_update(
+                "LifeLine - Appointment Booking Update",
+                "Your selected appointment date and time must be "
+                "in the future. Please choose another time.",
             )
             return redirect("donor_book_appointment")
 
+        # Check for an existing appointment at the same date and time.
+        if Appointments.objects.filter(
+            donor=donor_profile,
+            scheduled_at=scheduled_at,
+        ).exists():
+
+            send_booking_update(
+                "LifeLine - Appointment Already Exists",
+                "You already have an appointment booked for this "
+                "date and time. Please choose another time.",
+            )
+            return redirect("donor_book_appointment")
+
+        # Save appointment in Neon.
         now = timezone.now()
 
         try:
             with transaction.atomic():
 
-                Appointments.objects.create(
+                appointment = Appointments.objects.create(
                     donor=donor_profile,
                     facility=facility,
                     donation_type=donation_type,
@@ -328,9 +382,10 @@ def donor_book_appointment_view(request):
                 )
 
         except IntegrityError:
-            messages.error(
-                request,
-                "You already have an appointment at this date and time."
+            send_booking_update(
+                "LifeLine - Appointment Already Exists",
+                "An appointment already exists for your selected "
+                "date and time. Please choose another time.",
             )
             return redirect("donor_book_appointment")
 
@@ -340,20 +395,25 @@ def donor_book_appointment_view(request):
                 user_id,
             )
 
-            messages.error(
-                request,
-                "Unable to book your appointment. Please try again."
+            send_booking_update(
+                "LifeLine - Appointment Booking Update",
+                "We could not complete your appointment booking "
+                "because of a technical problem. Please try again later.",
             )
             return redirect("donor_book_appointment")
 
-        messages.success(
-            request,
-            "Your appointment request has been submitted. "
-            "It is waiting for hospital staff confirmation."
+        # Send successful booking email.
+        send_donor_booking_email(
+            user_email=donor_email,
+            first_name=donor_first_name,
+            facility_name=facility.name,
+            scheduled_at=appointment.scheduled_at,
+            donation_type=donation_type,
         )
 
         return redirect("donor_book_appointment")
 
+    # Display the booking page.
     context = {
         "nearby_facilities": facilities,
         "donor_name": donor_profile.user.first_name,
@@ -363,7 +423,7 @@ def donor_book_appointment_view(request):
     return render(
         request,
         "donor/book_an_appointment.html",
-        context
+        context,
     )
 #Heer Patel#
 
