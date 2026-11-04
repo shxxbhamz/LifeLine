@@ -10,6 +10,7 @@ from core.models import StaffProfiles
 from inventory.models import BloodInventory, InventoryTransactions
 from core.utils import send_appointment_status_email
 from .models import Appointments, DonationRequests
+from core.models import DonorProfiles
 from emergencies.models import EmergencyRequests
 from django.db import transaction
 import logging
@@ -152,38 +153,32 @@ def donor_active_requests_view(request):
 
     user_id = request.session.get("user_id")
 
-    emergency_matches = (
-        RequestMatches.objects
-        .filter(
-            donor_id=user_id,
-            request__status="ACTIVE",
-            response_status="PENDING",
-            notification_status__in=[
-                "SENT",
-                "VIEWED",
-            ],
-        )
-        .select_related(
-            "request",
-            "request__facility",
-            "donor",
-            "donor__user",
-        )
-        .order_by(
-            "-match_score",
-            "-matched_at",
-        )
-    )
+    try:
+        donor_profile = DonorProfiles.objects.get(user_id=user_id)
 
-    context = {
-        "emergency_matches": emergency_matches,
-    }
+        emergency_requests = EmergencyRequests.objects.filter(
+            required_blood_type__iexact=donor_profile.blood_type,
+            status__iexact="ACTIVE",
+        ).select_related(
+            "facility"
+        ).order_by("-created_at")
 
-    return render(
-        request,
-        "donor/active_requests.html",
-        context,
-    )
+        context = {
+            "emergency_requests": emergency_requests,
+        }
+
+        return render(
+            request,
+            "donor/active_requests.html",
+            context,
+        )
+
+    except DonorProfiles.DoesNotExist:
+        return render(
+            request,
+            "donor/active_requests.html",
+            {"emergency_requests": []},
+        )
 
 
 def donor_book_appointment_view(request):
