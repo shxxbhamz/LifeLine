@@ -1,4 +1,5 @@
 import uuid
+import math
 
 from django.contrib import messages
 from django.shortcuts import redirect, render
@@ -10,9 +11,10 @@ from core.models import StaffProfiles
 from inventory.models import BloodInventory, InventoryTransactions
 from core.utils import send_appointment_status_email
 from .models import Appointments, DonationRequests
-from core.models import DonorProfiles
+from core.models import DonorProfiles, Facilities
 from emergencies.models import EmergencyRequests
-from django.db import transaction
+from django.db import transaction, IntegrityError
+from django.utils.dateparse import parse_datetime
 import logging
 
 logger = logging.getLogger(__name__)
@@ -181,14 +183,189 @@ def donor_active_requests_view(request):
         )
 
 
+#Heer Patel#
 def donor_book_appointment_view(request):
-    # Only logged-in donors can access the booking page.
-    if request.session.get("user_id") is None or request.session.get("role") != "DONOR":
+    # Only logged-in donors can access this page.
+    if (
+        request.session.get("user_id") is None
+        or request.session.get("role") != "DONOR"
+    ):
         return redirect("login")
 
-    # Display the existing appointment booking page.
-    return render(request, "donor/book_an_appointment.html")
+    user_id = request.session.get("user_id")
 
+    try:
+        donor_profile = DonorProfiles.objects.select_related(
+            "user"
+        ).get(user_id=user_id)
+
+    except DonorProfiles.DoesNotExist:
+        messages.error(request, "Donor profile not found.")
+        return redirect("donor_dashboard")
+
+    # Calculate distance between donor and facility.
+    def calculate_distance(lat1, lon1, lat2, lon2):
+        earth_radius = 6371
+
+        lat1 = math.radians(float(lat1))
+        lon1 = math.radians(float(lon1))
+        lat2 = math.radians(float(lat2))
+        lon2 = math.radians(float(lon2))
+
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+
+        a = (
+            math.sin(dlat / 2) ** 2
+            + math.cos(lat1)
+            * math.cos(lat2)
+            * math.sin(dlon / 2) ** 2
+        )
+
+        c = 2 * math.atan2(
+            math.sqrt(a),
+            math.sqrt(1 - a)
+        )
+
+        return earth_radius * c
+
+    # Load actual facilities from Neon.
+    facilities = list(Facilities.objects.all())
+
+    for facility in facilities:
+
+        facility.distance_km = None
+
+        if (
+            donor_profile.latitude is not None
+            and donor_profile.longitude is not None
+            and facility.latitude is not None
+            and facility.longitude is not None
+        ):
+            facility.distance_km = calculate_distance(
+                donor_profile.latitude,
+                donor_profile.longitude,
+                facility.latitude,
+                facility.longitude,
+            )
+
+    # Facilities with known distances appear first.
+    facilities.sort(
+        key=lambda facility: (
+            facility.distance_km is None,
+            facility.distance_km
+            if facility.distance_km is not None
+            else float("inf"),
+        )
+    )
+
+    # Process donor booking.
+    if request.method == "POST":
+
+        facility_id = request.POST.get("facility_id")
+        donation_type = request.POST.get("donation_type")
+        scheduled_at_raw = request.POST.get("scheduled_at")
+
+        valid_donation_types = {
+            "WHOLE_BLOOD",
+            "RED_BLOOD_CELLS",
+            "PLASMA",
+            "PLATELETS",
+        }
+
+        if donation_type not in valid_donation_types:
+            messages.error(
+                request,
+                "Please select a valid donation type."
+            )
+            return redirect("donor_book_appointment")
+
+        try:
+            facility = Facilities.objects.get(id=facility_id)
+        except (Facilities.DoesNotExist, ValueError, TypeError):
+            messages.error(
+                request,
+                "Please select a valid facility."
+            )
+            return redirect("donor_book_appointment")
+
+        scheduled_at = parse_datetime(scheduled_at_raw)
+
+        if scheduled_at is None:
+            messages.error(
+                request,
+                "Please select a valid appointment date and time."
+            )
+            return redirect("donor_book_appointment")
+
+        if timezone.is_naive(scheduled_at):
+            scheduled_at = timezone.make_aware(
+                scheduled_at,
+                timezone.get_current_timezone()
+            )
+
+        if scheduled_at <= timezone.now():
+            messages.error(
+                request,
+                "Please select a future appointment date and time."
+            )
+            return redirect("donor_book_appointment")
+
+        now = timezone.now()
+
+        try:
+            with transaction.atomic():
+
+                Appointments.objects.create(
+                    donor=donor_profile,
+                    facility=facility,
+                    donation_type=donation_type,
+                    appointment_source="REGULAR",
+                    scheduled_at=scheduled_at,
+                    status="PENDING",
+                    created_at=now,
+                    updated_at=now,
+                )
+
+        except IntegrityError:
+            messages.error(
+                request,
+                "You already have an appointment at this date and time."
+            )
+            return redirect("donor_book_appointment")
+
+        except Exception:
+            logger.exception(
+                "DONOR APPOINTMENT BOOKING FAILED: user_id=%s",
+                user_id,
+            )
+
+            messages.error(
+                request,
+                "Unable to book your appointment. Please try again."
+            )
+            return redirect("donor_book_appointment")
+
+        messages.success(
+            request,
+            "Your appointment request has been submitted. "
+            "It is waiting for hospital staff confirmation."
+        )
+
+        return redirect("donor_book_appointment")
+
+    context = {
+        "nearby_facilities": facilities,
+        "donor_name": donor_profile.user.first_name,
+        "donor_blood_type": donor_profile.blood_type,
+    }
+
+    return render(
+        request,
+        "donor/book_an_appointment.html",
+        context
+    )
+#Heer Patel#
 
 def donor_history_view(request):
     # Only logged-in donors can access their donation history.
