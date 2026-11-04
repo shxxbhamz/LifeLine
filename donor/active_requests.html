@@ -22,7 +22,8 @@
 
       <!-- User Profile & Hamburger Menu Container -->
       <div class="header-actions">
-        <span class="donor-name">Donor Name</span>
+        <!-- Dynamically displays the logged-in user's name -->
+        <span class="donor-name">{{ request.session.user_name|default:"Donor" }}</span>
 
         <div class="dropdown" tabindex="0">
           <img src="{% static 'donor/image/default-avatar.png' %}" alt="Donor Profile" class="donor-avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;">
@@ -52,54 +53,36 @@
     <section id="active-requests" class="section">
       <div class="section-header">
         <h1>Active Blood Requests</h1>
-        <p class="section-subtitle">View ongoing donation requests from hospitals and blood banks, and schedule an appointment.</p>
+        <p class="section-subtitle">View ongoing emergency donation requests matching your blood type.</p>
       </div>
 
       <!-- Request Cards Container -->
       <div class="facility-grid">
 
-        <!-- TYPE 1: Blood Bank Inventory Request -->
-        <div class="facility-card">
-          <div class="facility-header">
-            <h3>St. Jude Community Blood Center</h3>
+        {% if emergency_requests %}
+          {% for req in emergency_requests %}
+          <div class="facility-card">
+            <div class="facility-header">
+              <h3>{{ req.facility.name }}</h3>
+            </div>
+            <div class="facility-body">
+              <p class="facility-address">{{ req.facility.street_address }}, {{ req.facility.city }}</p>
+              <p class="facility-hours"><strong>Urgency:</strong> {{ req.urgency|title }}</p>
+              <p class="facility-hours"><strong>Requested for:</strong> {{ req.blood_group }} {{ req.component_type }} Donors</p>
+              {% if req.description %}
+              <p class="facility-hours"><strong>Note:</strong> {{ req.description }}</p>
+              {% endif %}
+            </div>
+            <div class="facility-footer">
+              <button class="btn btn-book" data-request-id="{{ req.id }}">Schedule Donation</button>
+            </div>
           </div>
-          <div class="facility-body">
-            <p class="facility-address">122 Victoria Ave, Regina, Sk</p>
-            <p class="facility-hours"><strong>Hours:</strong> Mon - Sun (10:00 AM - 4:00 PM)</p>
-            <p class="facility-hours"><strong>Requested for:</strong> A+ Blood Donors</p>
+          {% endfor %}
+        {% else %}
+          <div class="no-requests-message" style="grid-column: span 3; text-align: center; padding: 40px; color: var(--text-muted, #64748b);">
+            <p>No active emergency requests matching your blood type at this time.</p>
           </div>
-          <div class="facility-footer">
-            <button class="btn btn-book">Schedule Donation</button>
-          </div>
-        </div>
-
-        <div class="facility-card">
-          <div class="facility-header">
-            <h3>Metro Health Regional Hospital</h3>
-          </div>
-          <div class="facility-body">
-            <p class="facility-address">231 Clg Ave, Regina, Sk</p>
-            <p class="facility-hours"><strong>Hours:</strong> Mon - Sun (10:00 AM - 4:00 PM)</p>
-            <p class="facility-hours"><strong>Requested for:</strong> A+ Plasma Donors</p>
-          </div>
-          <div class="facility-footer">
-            <button class="btn btn-book">Schedule Donation</button>
-          </div>
-        </div>
-
-        <div class="facility-card">
-          <div class="facility-header">
-            <h3>University Medical Center Donation Hub</h3>
-          </div>
-          <div class="facility-body">
-            <p class="facility-address">3542 Harbour Landing Dr, Regina, Sk</p>
-            <p class="facility-hours"><strong>Hours:</strong> Mon - Sun (10:00 AM - 4:00 PM)</p>
-            <p class="facility-hours"><strong>Requested for:</strong> A+ platelets Donors</p>
-          </div>
-          <div class="facility-footer">
-            <button class="btn btn-book">Schedule Donation</button>
-          </div>
-        </div>
+        {% endif %}
 
       </div>
     </section>
@@ -113,7 +96,10 @@
         <h2>Confirm Donation Appointment</h2>
       </div>
 
-      <form id="schedule-form" class="modal-form">
+      <form id="schedule-form" class="modal-form" method="POST" action="{% url 'donor_book_appointment' %}">
+        {% csrf_token %}
+        <input type="hidden" id="modalRequestId" name="request_id" value="">
+
         <!-- 1. Component Type Selection (Mandatory) -->
         <div class="form-group">
           <label class="form-label">Select Component Type (Choose Exactly One):</label>
@@ -170,26 +156,16 @@
       const cancelBtn = document.getElementById('btn-cancel');
       const scheduleBtns = document.querySelectorAll('.btn-book');
 
-      // Open modal when any "Schedule Donation" button is clicked
       scheduleBtns.forEach((btn) => {
         btn.addEventListener('click', () => {
           scheduleForm.reset();
+          document.getElementById('modalRequestId').value = btn.getAttribute('data-request-id');
           modal.showModal();
         });
       });
 
-      // Close modal on Cancel click
       cancelBtn.addEventListener('click', () => {
         modal.close();
-      });
-
-      // Submit form validation
-      scheduleForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        if (scheduleForm.checkValidity()) {
-          alert('Donation appointment details submitted successfully!');
-          modal.close();
-        }
       });
     });
   </script>

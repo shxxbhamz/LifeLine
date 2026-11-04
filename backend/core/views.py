@@ -210,6 +210,33 @@ def donor_dashboard_view(request):
     }
 
     return render(request, "donor/index.html", context)
+
+
+    def donor_active_requests_view(request):
+    if request.session.get("user_id") is None or request.session.get("role") != "DONOR":
+        return redirect("login")
+
+    user_id = request.session.get("user_id")
+    emergency_requests = []
+
+    try:
+        donor_profile = DonorProfiles.objects.get(user_id=user_id)
+        donor_blood_type = donor_profile.blood_type
+
+        # Fetch active emergency requests matching the donor's blood type
+        # Adjust table/model names (EmergencyRequests, facility) to match your project structure
+        emergency_requests = EmergencyRequests.objects.filter(
+            blood_group__iexact=donor_blood_type,
+            status__iexact='ACTIVE'  # or whatever field tracks active state
+        ).select_related('facility').order_by('-created_at')
+
+    except DonorProfiles.DoesNotExist:
+        pass
+
+    context = {
+        'emergency_requests': emergency_requests,
+    }
+    return render(request, "donor/active_requests.html", context)
     #Heer Patel#
 
 
