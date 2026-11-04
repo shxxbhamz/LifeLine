@@ -221,3 +221,88 @@ LifeLine Team
     email_thread.start()
 
     return True
+
+#Heer Patel #
+def send_donor_booking_email(
+    user_email,
+    first_name,
+    facility_name,
+    scheduled_at,
+    donation_type,
+):
+    """Send an email when a donor submits an appointment request."""
+
+    if not user_email:
+        logger.error("Booking email skipped: recipient email is empty.")
+        return False
+
+    api_key = getattr(settings, "BREVO_API_KEY", None)
+    sender_email = getattr(settings, "BREVO_SENDER_EMAIL", None)
+    sender_name = getattr(
+        settings,
+        "BREVO_SENDER_NAME",
+        "LifeLine Emergency Team",
+    )
+
+    if not api_key or not sender_email:
+        logger.error("Brevo email configuration is missing.")
+        return False
+
+    donor_name = first_name or "Donor"
+
+    appointment_time = scheduled_at.strftime(
+        "%B %d, %Y at %I:%M %p"
+    )
+
+    donation_label = donation_type.replace(
+        "_", " "
+    ).title()
+
+    subject = "LifeLine - Appointment Request Received"
+
+    message = f"""Hello {donor_name},
+
+Thank you for booking an appointment at {facility_name}.
+
+Your appointment request has been successfully submitted.
+
+Appointment Details:
+Facility: {facility_name}
+Donation Component: {donation_label}
+Scheduled Time: {appointment_time}
+Status: Waiting for hospital staff confirmation.
+
+Please allow up to 1 business day for hospital staff to review and confirm your appointment.
+
+You will receive another email once your appointment has been confirmed.
+
+Thank you for supporting LifeLine and helping save lives.
+
+Best regards,
+LifeLine Emergency Team
+"""
+
+    payload = {
+        "sender": {
+            "name": sender_name,
+            "email": sender_email,
+        },
+        "to": [
+            {
+                "email": user_email,
+                "name": donor_name,
+            }
+        ],
+        "subject": subject,
+        "textContent": message,
+    }
+
+    email_thread = threading.Thread(
+        target=_send_email_async,
+        args=(payload, api_key),
+    )
+
+    email_thread.start()
+
+    return True
+#Heer Patel#    
