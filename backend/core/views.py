@@ -12,6 +12,7 @@ from .geocoding import geocode_address
 
 from .utils import send_welcome_email
 
+from django.contrib.auth.decorators import login_required
 
 def home_view(request):
     return render(request, "index.html")
@@ -100,17 +101,30 @@ def donor_dashboard_view(request):
 
     total_donations = 0
     lives_saved = 0
-    tier_name = "Welcome Tier"
+
+    tier_name = "Welcome Donor"
     next_goal = 1
     progress_percent = 0
+
+    # Default achievement values
+    welcome_unlocked = False
+    dedicated_unlocked = False
+    life_saver_unlocked = False
+    hero_unlocked = False
+
+    dedicated_remaining = 30
+    life_saver_remaining = 60
+    hero_remaining = 90
 
     try:
         donor_profile = DonorProfiles.objects.get(user_id=user_id)
 
-        # 2. Count completed donations
+        # 2. Count only completed REGULAR donations
+        # Emergency and cancelled appointments are excluded
         total_donations = Appointments.objects.filter(
-            donor=donor_profile,
-            status__iexact="COMPLETED"
+            donor_id=user_id,
+            status__iexact="COMPLETED",
+            appointment_source="REGULAR"
         ).count()
 
         lives_saved = total_donations
@@ -121,17 +135,17 @@ def donor_dashboard_view(request):
             next_goal = 1
             progress_percent = 0
 
-        elif total_donations <= 30:
+        elif total_donations < 30:
             tier_name = "Dedicated Donor Tier"
             next_goal = 30
             progress_percent = (total_donations / 30) * 100
 
-        elif total_donations <= 60:
+        elif total_donations < 60:
             tier_name = "Life Saver Tier"
             next_goal = 60
             progress_percent = (total_donations / 60) * 100
 
-        elif total_donations <= 90:
+        elif total_donations < 90:
             tier_name = "Hero Tier"
             next_goal = 90
             progress_percent = (total_donations / 90) * 100
@@ -141,7 +155,18 @@ def donor_dashboard_view(request):
             next_goal = total_donations + 10
             progress_percent = 100
 
-        # 4. Find the next upcoming appointment
+        # 4. Calculate achievement badge activation
+        welcome_unlocked = total_donations >= 1
+        dedicated_unlocked = total_donations >= 30
+        life_saver_unlocked = total_donations >= 60
+        hero_unlocked = total_donations >= 90
+
+        # 5. Calculate remaining donations for each badge
+        dedicated_remaining = max(30 - total_donations, 0)
+        life_saver_remaining = max(60 - total_donations, 0)
+        hero_remaining = max(90 - total_donations, 0)
+
+        # 6. Find the next upcoming appointment
         now = timezone.now()
 
         upcoming_appointment = Appointments.objects.filter(
@@ -151,7 +176,7 @@ def donor_dashboard_view(request):
             status__iexact="CANCELLED"
         ).order_by("scheduled_at").first()
 
-        # 5. Calculate days remaining
+        # 7. Calculate days remaining
         if upcoming_appointment:
             delta = upcoming_appointment.scheduled_at.date() - now.date()
             days_left = delta.days
@@ -159,16 +184,31 @@ def donor_dashboard_view(request):
     except DonorProfiles.DoesNotExist:
         pass
 
-    # 6. Prepare dashboard context
+    # 8. Prepare dashboard context
     context = {
         "donor_profile": donor_profile,
         "upcoming_appointment": upcoming_appointment,
         "days_left": days_left,
+
+        # Donation statistics
         "total_donations": total_donations,
         "lives_saved": lives_saved,
+
+        # Donor tier and progress
         "tier_name": tier_name,
         "next_goal": next_goal,
         "progress_percent": round(progress_percent, 2),
+
+        # Achievement badge activation
+        "welcome_unlocked": welcome_unlocked,
+        "dedicated_unlocked": dedicated_unlocked,
+        "life_saver_unlocked": life_saver_unlocked,
+        "hero_unlocked": hero_unlocked,
+
+        # Remaining donations
+        "dedicated_remaining": dedicated_remaining,
+        "life_saver_remaining": life_saver_remaining,
+        "hero_remaining": hero_remaining,
     }
 
     return render(request, "donor/index.html", context)

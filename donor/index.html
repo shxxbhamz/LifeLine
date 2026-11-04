@@ -130,10 +130,9 @@
             <span>{{ donor_profile.total_donations|default:0 }} / {{ next_goal }}</span>
           </div>
           <div class="progress-bar-bg">
-          
-            <div class="progress-fill"
-     style="--progress-width: {{ progress_percent|default:0 }}%;">
-</div>
+
+            <div class="progress-fill" style="--progress-width: {{ progress_percent|default:0 }}%;">
+            </div>
           </div>
         </div>
       </section>
@@ -146,44 +145,77 @@
 
         <div class="trophy-grid">
 
-          <!-- Badge 1: Unlocked -->
-          <div class="trophy-card unlocked">
-            <img src="{% static 'donor/image/welcomedonor.png' %}" alt="badge" class="badge_achievement">
+          <!-- Badge 1: Welcome Donor -->
+          <div class="trophy-card {% if welcome_unlocked %}unlocked{% else %}locked{% endif %}">
+            <img src="{% static 'donor/image/welcomedonor.png' %}" alt="Welcome Donor badge" class="badge_achievement">
+
             <div class="trophy-details">
               <h4>Welcome Donor</h4>
               <p>1st Donation Made</p>
             </div>
+
+            {% if welcome_unlocked %}
             <span class="status-pill unlocked-pill">Active</span>
+            {% else %}
+            <span class="status-pill locked-pill">1 needed</span>
+            {% endif %}
           </div>
 
-          <!-- Badge 2: Unlocked -->
-          <div class="trophy-card locked">
-            <img src="{% static 'donor/image/30.png' %}" alt="badge" class="badge_achievement">
+
+          <!-- Badge 2: Dedicated Donor -->
+          <div class="trophy-card {% if dedicated_unlocked %}unlocked{% else %}locked{% endif %}">
+            <img src="{% static 'donor/image/30.png' %}" alt="Dedicated Donor badge" class="badge_achievement">
+
             <div class="trophy-details">
               <h4>Dedicated Donor</h4>
               <p>30 Donations Tier</p>
             </div>
-            <span class="status-pill locked-pill">30 needed</span>
+
+            {% if dedicated_unlocked %}
+            <span class="status-pill unlocked-pill">Active</span>
+            {% else %}
+            <span class="status-pill locked-pill">
+              {{ dedicated_remaining }} needed
+            </span>
+            {% endif %}
           </div>
 
-          <!-- Badge 3: Locked -->
-          <div class="trophy-card locked">
-            <img src="{% static 'donor/image/60.png' %}" alt="badge" class="badge_achievement">
+
+          <!-- Badge 3: Life Saver -->
+          <div class="trophy-card {% if life_saver_unlocked %}unlocked{% else %}locked{% endif %}">
+            <img src="{% static 'donor/image/60.png' %}" alt="Life Saver badge" class="badge_achievement">
+
             <div class="trophy-details">
               <h4>Life Saver</h4>
               <p>60 Donations Tier</p>
             </div>
-            <span class="status-pill locked-pill">30 needed</span>
+
+            {% if life_saver_unlocked %}
+            <span class="status-pill unlocked-pill">Active</span>
+            {% else %}
+            <span class="status-pill locked-pill">
+              {{ life_saver_remaining }} needed
+            </span>
+            {% endif %}
           </div>
 
-          <!-- Badge 4: Locked -->
-          <div class="trophy-card locked">
-            <img src="{% static 'donor/image/90+.png' %}" alt="badge" class="badge_achievement">
+
+          <!-- Badge 4: Hero Tier -->
+          <div class="trophy-card {% if hero_unlocked %}unlocked{% else %}locked{% endif %}">
+            <img src="{% static 'donor/image/90+.png' %}" alt="Hero Tier badge" class="badge_achievement">
+
             <div class="trophy-details">
               <h4>Hero Tier</h4>
               <p>90+ Donations Tier</p>
             </div>
-            <span class="status-pill locked-pill">Locked</span>
+
+            {% if hero_unlocked %}
+            <span class="status-pill unlocked-pill">Active</span>
+            {% else %}
+            <span class="status-pill locked-pill">
+              {{ hero_remaining }} needed
+            </span>
+            {% endif %}
           </div>
 
         </div>
