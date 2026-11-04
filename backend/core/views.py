@@ -12,8 +12,6 @@ from .geocoding import geocode_address
 
 from .utils import send_welcome_email
 
-from django.contrib.auth.decorators import login_required
-
 def home_view(request):
     return render(request, "index.html")
 
@@ -213,12 +211,12 @@ def donor_dashboard_view(request):
     #Heer Patel#
 
 
-@login_required(login_url='login')
 def staff_dashboard_view(request):
-    # 1. Check staff login
+    # 1. Check custom staff login session
     user_id = request.session.get("user_id")
+    user_role = request.session.get("role")
 
-    if user_id is None or request.session.get("role") != "HOSPITAL_STAFF":
+    if user_id is None or user_role != "HOSPITAL_STAFF":
         return redirect("login")
 
     # 2. Default values
@@ -235,6 +233,7 @@ def staff_dashboard_view(request):
     try:
         # 3. Get logged-in user and staff profile
         current_user = Users.objects.get(id=user_id)
+
         staff_profile = StaffProfiles.objects.select_related(
             "facility"
         ).get(user_id=user_id)
@@ -279,6 +278,7 @@ def staff_dashboard_view(request):
                     inventory_dict[blood_type]["whole_blood"] += (
                         inv.units_available or 0
                     )
+
                 elif "plasma" in component:
                     inventory_dict[blood_type]["plasma"] += (
                         inv.units_available or 0
@@ -329,11 +329,14 @@ def staff_dashboard_view(request):
                 })
 
     except Users.DoesNotExist:
+        request.session.flush()
         return redirect("login")
 
     except StaffProfiles.DoesNotExist:
+        request.session.flush()
         return redirect("login")
 
+    # 8. Prepare dashboard context
     context = {
         "facility_name": facility_name,
         "facility_type": facility_type,
@@ -346,7 +349,12 @@ def staff_dashboard_view(request):
         "current_facility_id": current_facility_id,
     }
 
-    return render(request, "organization/index.html", context)
+    # 9. Render staff dashboard
+    return render(
+        request,
+        "organization/index.html",
+        context
+    )
 
 
 def logout_view(request):
