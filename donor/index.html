@@ -87,11 +87,18 @@
                 </h3>
     
                 <div class="appointment-info-row">
-                    <span class="detail-label">Location</span>
-                    <span class="detail-value">
-                        {{ appointment.facility.name }}
-                    </span>
-                </div>
+                  <span class="detail-label">Location</span>
+              
+                  <span class="detail-value">
+                      <strong>{{ appointment.facility.name }}</strong>
+                      <br>
+                      {{ appointment.facility.street_address }},
+                      {{ appointment.facility.city }},
+                      {{ appointment.facility.province }}
+                      {{ appointment.facility.postal_code }},
+                      Canada
+                  </span>
+              </div>
     
                 <div class="appointment-info-row">
                     <span class="detail-label">Date & Time</span>

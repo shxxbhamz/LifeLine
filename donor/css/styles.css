@@ -472,6 +472,20 @@ main .section {
   gap: 25px;
 }
 
+.appointment-info-row .detail-value {
+  text-align: right;
+  max-width: 70%;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .appointment-info-row .detail-value {
+      max-width: 100%;
+      text-align: left;
+  }
+}
+
 /* Upcoming Appointments Layout */
 .appointment-details {
   display: flex;
