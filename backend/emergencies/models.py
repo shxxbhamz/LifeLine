@@ -3,7 +3,6 @@ from django.db import models
 
 from core.models import DonorProfiles, Facilities, StaffProfiles, Users
 
-
 class EmergencyRequests(models.Model):
     id = models.BigAutoField(primary_key=True)
 
@@ -21,12 +20,15 @@ class EmergencyRequests(models.Model):
     required_blood_type = models.CharField(max_length=3)
     component_type = models.CharField(max_length=30)
     units_required = models.IntegerField()
-    urgency = models.CharField(max_length=20)
     radius_km = models.DecimalField(max_digits=6, decimal_places=2)
+
     urgency = models.CharField(
-    max_length=20,
-    db_column="urgency_level",
-)
+        max_length=20,
+        db_column="urgency_level",
+    )
+
+    status = models.CharField(max_length=20)
+
     notes = models.TextField(blank=True, null=True)
     expires_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField()
@@ -43,7 +45,6 @@ class EmergencyRequests(models.Model):
     class Meta:
         managed = False
         db_table = "emergency_requests"
-
 
 class RequestMatches(models.Model):
     id = models.BigAutoField(primary_key=True)

@@ -205,27 +205,36 @@ def donor_active_requests_view(request):
         return redirect("login")
 
     user_id = request.session.get("user_id")
-    emergency_requests = []
 
     try:
         donor_profile = DonorProfiles.objects.get(user_id=user_id)
-        donor_blood_type = donor_profile.blood_type
 
         emergency_requests = EmergencyRequests.objects.filter(
-            required_blood_type__iexact=donor_blood_type,
+            required_blood_type__iexact=donor_profile.blood_type,
             status__iexact="ACTIVE",
         ).select_related(
-            "facility",
+            "facility"
         ).order_by("-created_at")
 
+        context = {
+            "emergency_requests": emergency_requests,
+        }
+
+        return render(request, "donor/active_requests.html", context)
+
     except DonorProfiles.DoesNotExist:
-        pass
+        return render(
+            request,
+            "donor/active_requests.html",
+            {"emergency_requests": []},
+        )
 
-    context = {
-        "emergency_requests": emergency_requests,
-    }
-
-    return render(request, "donor/active_requests.html", context)
+    except Exception:
+        logger.exception(
+            "Error loading donor active requests. User ID: %s",
+            user_id,
+        )
+        raise
 
 # Heer patel#
 
