@@ -117,7 +117,7 @@ def donor_dashboard_view(request):
     hero_remaining = 90
 
     try:
-        donor_profile = DonorProfiles.objects.get(user_id=user_id)
+        donor_profile = DonorProfiles.objects.select_related("user").get(user_id=user_id)
 
         total_donations = Appointments.objects.filter(
             donor_id=user_id,
