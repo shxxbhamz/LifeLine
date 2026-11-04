@@ -23,9 +23,7 @@
       <!-- User Profile & Hamburger Menu Container -->
       <div class="header-actions">
         <!-- Dynamically displays the logged-in user's name -->
-        <span class="donor-name">
-          {{ donor_profile.user.first_name }} {{ donor_profile.user.last_name }}
-      </span>
+        <span class="donor-name">{{ donor_name|default:"Donor Name" }}</span> 
 
         <div class="dropdown" tabindex="0">
           <img src="{% static 'donor/image/default-avatar.png' %}" alt="Donor Profile" class="donor-avatar"
