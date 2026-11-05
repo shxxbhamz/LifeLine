@@ -434,12 +434,44 @@ def donor_book_appointment_view(request):
 #Heer Patel#
 
 def donor_history_view(request):
-    # Only logged-in donors can access their donation history.
-    if request.session.get("user_id") is None or request.session.get("role") != "DONOR":
+
+    # Check donor login
+    if (
+        request.session.get("user_id") is None
+        or request.session.get("role") != "DONOR"
+    ):
         return redirect("login")
 
-    # Display the donor's existing history page.
-    return render(request, "donor/history.html")
+    user_id = request.session.get("user_id")
+
+    # Get the logged-in donor's profile
+    donor_profile = DonorProfiles.objects.get(user_id=user_id)
+
+    # Get ALL appointments belonging to this donor
+    appointments = Appointments.objects.filter(
+        donor=donor_profile
+    ).select_related(
+        "facility"
+    ).order_by(
+        "-scheduled_at"
+    )
+
+    donor_name = (
+        donor_profile.user.first_name
+        if donor_profile.user.first_name
+        else "Donor"
+    )
+
+    context = {
+        "appointments": appointments,
+        "donor_name": donor_name,
+    }
+
+    return render(
+        request,
+        "donor/history.html",
+        context
+    )
 
 
 def staff_appointments_view(request):
