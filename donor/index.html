@@ -70,18 +70,19 @@
           <h3 class="appointment-entry-title">
             Appointment {{ forloop.counter }}
             <!-- Dynamic Countdown Badge to show remaining days -->
-        {% if upcoming_appointment %}
-        {% if days_left == 0 %}
-        <span class="countdown-badge" style="background: #fee2e2; color: #dc2626;">Today</span>
-        {% elif days_left == 1 %}
-        <span class="countdown-badge">In 1 Day</span>
-        {% elif days_left > 1 %}
-        <span class="countdown-badge">In {{ days_left }} Days</span>
+        <!-- Countdown for this specific appointment -->
+        {% if appointment.days_until == 0 %}
+            <span class="countdown-badge">
+                Today
+            </span>
+        {% elif appointment.days_until == 1 %}
+            <span class="countdown-badge">
+                In 1 Day
+            </span>
         {% else %}
-        <span class="countdown-badge">Soon</span>
-        {% endif %}
-        {% else %}
-        <span class="countdown-badge" style="background: #f1f5f9; color: #64748b;">No Active Booking</span>
+            <span class="countdown-badge">
+                In {{ appointment.days_until }} Days
+            </span>
         {% endif %}
         
           </h3>

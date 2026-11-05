@@ -1009,6 +1009,30 @@ main .section {
 .avatar-label:hover .change-photo-link {
   color: var(--teal-dark, #2B7A78);
 }
+
+.appointment-entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+}
+
+.appointment-entry-title {
+  margin: 0;
+}
+
+.countdown-badge {
+  margin-left: auto;
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 /* Heer Patel */
 
 

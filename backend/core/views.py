@@ -170,33 +170,33 @@ def donor_dashboard_view(request):
         # Get current date and time.
         now = timezone.now()
 
-        # Retrieve ALL upcoming appointments for this donor.
-        # Nearest appointment appears first.
+        # Retrieve appointments scheduled for today or a future date.
+        # Only pending and confirmed appointments are displayed.
         upcoming_appointments = Appointments.objects.filter(
             donor=donor_profile,
-            scheduled_at__gte=now,
-        ).exclude(
-            status__iexact="CANCELLED",
+            scheduled_at__date__gte=now.date(),
+            status__in=["PENDING", "CONFIRMED"],
         ).select_related(
             "facility"
         ).order_by(
             "scheduled_at"
         )
 
-        # Get the nearest appointment for the countdown badge.
+        # Calculate countdown separately for every appointment.
+        for appointment in upcoming_appointments:
+            delta = appointment.scheduled_at.date() - now.date()
+            appointment.days_until = delta.days
+
+        # Get the nearest appointment.
         upcoming_appointment = upcoming_appointments.first()
 
-        # Calculate days remaining until the nearest appointment.
         if upcoming_appointment:
-            delta = (
-                upcoming_appointment.scheduled_at.date() - now.date()
-            )
-            days_left = delta.days
+            days_left = upcoming_appointment.days_until
 
     except DonorProfiles.DoesNotExist:
         pass
 
-    # Send all dashboard information to the HTML template.
+    # Send dashboard information to the HTML template.
     context = {
         "donor_profile": donor_profile,
 
@@ -230,7 +230,7 @@ def donor_dashboard_view(request):
         request,
         "donor/index.html",
         context,
-    ) 
+    )
 
 
 def donor_active_requests_view(request):
