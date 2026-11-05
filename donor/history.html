@@ -3,104 +3,189 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LifeLine - Donation History</title>
-  <link rel="stylesheet" href="{% static 'donor/css/styles.css' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeLine - Appointment History</title>
+    <link rel="stylesheet" href="{% static 'donor/css/styles.css' %}">
 </head>
 
 <body id="history-page">
 
-  <!-- Shared Header Section -->
-  <header class="main-header">
-    <div class="header-container">
-      <div class="logo">
-        <a href="{% url 'donor_dashboard' %}">
-          <img src="{% static 'donor/image/logo.png' %}" alt="LifeLine Logo" class="logo-img">
-        </a>
-      </div>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-container">
 
-      <!-- User Profile & Dropdown Menu Container -->
-      <div class="header-actions">
-        <span class="donor-name">{{ donor_name|default:"Donor Name" }}</span> 
+            <div class="logo">
+                <a href="{% url 'donor_dashboard' %}">
+                    <img src="{% static 'donor/image/logo.png' %}"
+                         alt="LifeLine Logo"
+                         class="logo-img">
+                </a>
+            </div>
 
-        <!-- Dropdown triggered directly by Profile Image click/hover -->
-        <div class="dropdown" tabindex="0">
-          <img src="{% static 'donor/image/default-avatar.png' %}" alt="Donor Profile" class="donor-avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;">
-          
-          <div class="dropdown-content">
-            <a href="{% url 'donor_edit_profile' %}">Edit Profile</a>
-            <a href="{% url 'logout' %}">Logout</a>
-          </div>
+            <div class="header-actions">
+                <span class="donor-name">
+                    {{ donor_name|default:"Donor Name" }}
+                </span>
+
+                <div class="dropdown" tabindex="0">
+                    <img src="{% static 'donor/image/default-avatar.png' %}"
+                         alt="Donor Profile"
+                         class="donor-avatar"
+                         style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;">
+
+                    <div class="dropdown-content">
+                        <a href="{% url 'donor_edit_profile' %}">Edit Profile</a>
+                        <a href="{% url 'logout' %}">Logout</a>
+                    </div>
+                </div>
+            </div>
+
         </div>
-      </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- Navigation Bar -->
-  <nav class="main-nav">
-    <ul class="nav-links">
-      <li><a href="{% url 'donor_dashboard' %}" class="nav-item">Home</a></li>
-      <li><a href="{% url 'donor_active_requests' %}" class="nav-item">Active Requests</a></li>
-      <li><a href="{% url 'donor_book_appointment' %}" class="nav-item">Book An Appointment</a></li>
-      <li><a href="{% url 'donor_history' %}" class="nav-item active">History</a></li>
-    </ul>
-  </nav>
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <ul class="nav-links">
+            <li>
+                <a href="{% url 'donor_dashboard' %}" class="nav-item">
+                    Home
+                </a>
+            </li>
 
-  <!-- Main Content Area -->
-  <main class="content">
+            <li>
+                <a href="{% url 'donor_active_requests' %}" class="nav-item">
+                    Active Requests
+                </a>
+            </li>
 
-    <!-- History Section -->
-    <section id="history" class="section">
-      <div class="section-header">
-        <h1>Donation History</h1>
-        <p class="section-subtitle">A record of your past blood donations and ongoing contributions.</p>
-      </div>
+            <li>
+                <a href="{% url 'donor_book_appointment' %}" class="nav-item">
+                    Book An Appointment
+                </a>
+            </li>
 
-      <!-- History Cards Container -->
-      <div class="facility-grid">
+            <li>
+                <a href="{% url 'donor_history' %}" class="nav-item active">
+                    History
+                </a>
+            </li>
+        </ul>
+    </nav>
 
-        <!-- History Card 1 -->
-        <div class="facility-card">
-          <div class="facility-header">
-            <h3>Whole Blood Donation</h3>
-            <span class="distance-badge">Completed</span>
-          </div>
-          <div class="facility-body">
-            <p class="facility-address">City General Hospital Blood Bank</p>
-            <p class="facility-hours"><strong>Date & Time:</strong> August 12, 2026 at 10:30 AM</p>
-          </div>
-        </div>
+    <!-- Main Content -->
+    <main class="content">
 
-        <!-- History Card 2 -->
-        <div class="facility-card">
-          <div class="facility-header">
-            <h3>Platelet Donation</h3>
-            <span class="distance-badge">Completed</span>
-          </div>
-          <div class="facility-body">
-            <p class="facility-address">St. Jude Community Blood Center</p>
-            <p class="facility-hours"><strong>Date & Time:</strong> May 04, 2026 at 2:15 PM</p>
-          </div>
-        </div>
+        <section id="history" class="section">
 
-        <!-- History Card 3 -->
-        <div class="facility-card">
-          <div class="facility-header">
-            <h3>Whole Blood Donation</h3>
-            <span class="distance-badge">Completed</span>
-          </div>
-          <div class="facility-body">
-            <p class="facility-address">Metro Health Regional Donation Hub</p>
-            <p class="facility-hours"><strong>Date & Time:</strong> January 15, 2026 at 9:00 AM</p>
-          </div>
-        </div>
+            <div class="section-header">
+                <h1>Appointment History</h1>
+                <p class="section-subtitle">
+                    View all your appointments and donation records.
+                </p>
+            </div>
 
-      </div>
-    </section>
+            <!-- Appointment Count -->
+            <div class="history-summary">
+                <h3>
+                    Total Appointments:
+                    <span>{{ appointments|length }}</span>
+                </h3>
+            </div>
 
-  </main>
+            <!-- Appointment Cards -->
+            <div class="facility-grid">
+
+                {% if appointments %}
+
+                    {% for appointment in appointments %}
+
+                        <div class="facility-card">
+
+                            <div class="facility-header">
+
+                                <h3>
+                                    {{ appointment.get_donation_type_display|default:appointment.donation_type }}
+                                </h3>
+
+                                <span class="distance-badge">
+                                    {{ appointment.status }}
+                                </span>
+
+                            </div>
+
+                            <div class="facility-body">
+
+                                <p class="facility-address">
+                                    <strong>Facility:</strong>
+                                    {{ appointment.facility.name }}
+                                </p>
+
+                                <p class="facility-hours">
+                                    <strong>Address:</strong><br>
+
+                                    {{ appointment.facility.street_address|default:"Address not available" }}
+
+                                    {% if appointment.facility.city %}
+                                        , {{ appointment.facility.city }}
+                                    {% endif %}
+
+                                    {% if appointment.facility.province %}
+                                        , {{ appointment.facility.province }}
+                                    {% endif %}
+
+                                    {% if appointment.facility.postal_code %}
+                                        {{ appointment.facility.postal_code }}
+                                    {% endif %}
+                                </p>
+
+                                <p class="facility-hours">
+                                    <strong>Date:</strong>
+                                    {{ appointment.scheduled_at|date:"F d, Y" }}
+                                </p>
+
+                                <p class="facility-hours">
+                                    <strong>Time:</strong>
+                                    {{ appointment.scheduled_at|date:"h:i A" }}
+                                </p>
+
+                                <p class="facility-hours">
+                                    <strong>Appointment ID:</strong>
+                                    #{{ appointment.id }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="facility-card">
+                        <div class="facility-body">
+                            <h3>No Appointments Found</h3>
+
+                            <p>
+                                You have not booked any appointments yet.
+                                Your appointment records will appear here
+                                once you make a booking.
+                            </p>
+
+                            <a href="{% url 'donor_book_appointment' %}"
+                               class="btn">
+                                Book An Appointment
+                            </a>
+                        </div>
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </main>
 
 </body>
-
 </html>
