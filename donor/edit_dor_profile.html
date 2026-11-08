@@ -1,4 +1,4 @@
-```html
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -194,10 +194,6 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    // ----------------------------------
-    // Hamburger Menu
-    // ----------------------------------
-
     const hamburgerBtn = document.querySelector('.hamburger-btn');
     const dropdownContent = document.querySelector('.dropdown-content');
 
@@ -218,18 +214,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ----------------------------------
-    // Popup Elements
-    // ----------------------------------
 
     const modal = document.getElementById('customModal');
     const modalMessage = document.getElementById('modalMessage');
     const modalContact = document.getElementById('modalContact');
     const modalCloseBtn = document.getElementById('modalCloseBtn');
-
-    // ----------------------------------
-    // Show Popup
-    // ----------------------------------
 
     function showModal(type, message, showContact = false) {
 
@@ -264,10 +253,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // ----------------------------------
-    // Close Popup
-    // ----------------------------------
-
     function closeModal() {
         if (modal) {
             modal.classList.remove('active');
@@ -296,10 +281,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // ----------------------------------
-    // Locked Fields
-    // ----------------------------------
-
     document.querySelectorAll('[data-locked-field]').forEach(function (field) {
 
         function explainLockedField() {
@@ -318,10 +299,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         field.addEventListener('focus', explainLockedField);
     });
-
-    // ----------------------------------
-    // Django Success / Error Messages
-    // ----------------------------------
 
     const djangoMessages = document.querySelectorAll(
         '#djangoMessages [data-type]'
