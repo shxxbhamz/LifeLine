@@ -20,7 +20,7 @@
 
       <!-- User Profile & Hamburger Menu Container -->
       <div class="header-actions">
-        <span class="donor-name">{{ donor_name|default:"Donor Name" }}</span> 
+
 
         <div class="dropdown">
           <button class="hamburger-btn" aria-label="Toggle Menu">
@@ -36,16 +36,6 @@
       </div>
     </div>
   </header>
-
-  <!-- Navigation Bar -->
-  <nav class="main-nav">
-    <ul class="nav-links">
-      <li><a href="{% url 'donor_dashboard' %}" class="nav-item">Home</a></li>
-      <li><a href="{% url 'donor_active_requests' %}" class="nav-item">Active Requests</a></li>
-      <li><a href="{% url 'donor_book_appointment' %}" class="nav-item">Book An Appointment</a></li>
-      <li><a href="{% url 'donor_history' %}" class="nav-item">History</a></li>
-    </ul>
-  </nav>
 
 
   <!-- Main Content Area -->
