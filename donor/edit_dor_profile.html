@@ -1,3 +1,4 @@
+```html
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -21,7 +22,7 @@
 
         <div class="header-actions">
             <div class="dropdown">
-                <button class="hamburger-btn" aria-label="Toggle Menu">
+                <button type="button" class="hamburger-btn" aria-label="Toggle Menu">
                     <span></span><span></span><span></span>
                 </button>
 
@@ -160,12 +161,10 @@
 
 <!-- Custom Popup -->
 <div class="custom-modal-overlay" id="customModal"
-     role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+     role="dialog" aria-modal="true" aria-labelledby="modalMessage">
 
     <div class="custom-modal">
-        
 
-        
         <p id="modalMessage"></p>
 
         <div id="modalContact"></div>
@@ -173,11 +172,13 @@
         <button type="button" class="modal-close-btn" id="modalCloseBtn">
             Okay
         </button>
+
     </div>
 </div>
 
-<!-- Django messages -->
+<!-- Django Messages -->
 <div id="djangoMessages" hidden>
+
     {% if error %}
         <div data-type="error">{{ error }}</div>
     {% endif %}
@@ -187,56 +188,67 @@
             {{ message }}
         </div>
     {% endfor %}
+
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    // Hamburger menu
+    // ----------------------------------
+    // Hamburger Menu
+    // ----------------------------------
+
     const hamburgerBtn = document.querySelector('.hamburger-btn');
     const dropdownContent = document.querySelector('.dropdown-content');
 
     if (hamburgerBtn && dropdownContent) {
+
         hamburgerBtn.addEventListener('click', function (event) {
-            dropdownContent.classList.toggle('show');
             event.stopPropagation();
+            dropdownContent.classList.toggle('show');
         });
 
         document.addEventListener('click', function (event) {
-            if (!dropdownContent.contains(event.target) &&
-                !hamburgerBtn.contains(event.target)) {
+            if (
+                !dropdownContent.contains(event.target) &&
+                !hamburgerBtn.contains(event.target)
+            ) {
                 dropdownContent.classList.remove('show');
             }
         });
     }
 
-    // Popup elements
+    // ----------------------------------
+    // Popup Elements
+    // ----------------------------------
+
     const modal = document.getElementById('customModal');
-    
     const modalMessage = document.getElementById('modalMessage');
     const modalContact = document.getElementById('modalContact');
     const modalCloseBtn = document.getElementById('modalCloseBtn');
 
-    function showModal(type, title, message, showContact = false) {
-        modalIcon.className = 'modal-icon ' + type;
+    // ----------------------------------
+    // Show Popup
+    // ----------------------------------
 
-        if (type === 'success') {
-            modalIcon.textContent = '✓';
-        } else if (type === 'error') {
-            modalIcon.textContent = '✕';
-        } else {
-            modalIcon.textContent = '!';
+    function showModal(type, message, showContact = false) {
+
+        if (!modal || !modalMessage || !modalContact) {
+            console.error('Popup HTML elements are missing.');
+            return;
         }
 
-        modalTitle.textContent = title;
         modalMessage.textContent = message;
+
         modalContact.innerHTML = '';
 
         if (showContact) {
+
             const contactText = document.createElement('p');
             contactText.textContent = 'For assistance, please contact:';
 
             const emailLink = document.createElement('a');
+
             emailLink.href = 'mailto:emergency.lifelineservices999@gmail.com';
             emailLink.className = 'modal-email';
             emailLink.textContent = 'emergency.lifelineservices999@gmail.com';
@@ -246,66 +258,105 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         modal.classList.add('active');
-        modalCloseBtn.focus();
+
+        if (modalCloseBtn) {
+            modalCloseBtn.focus();
+        }
     }
+
+    // ----------------------------------
+    // Close Popup
+    // ----------------------------------
 
     function closeModal() {
-        modal.classList.remove('active');
+        if (modal) {
+            modal.classList.remove('active');
+        }
     }
 
-    modalCloseBtn.addEventListener('click', closeModal);
+    if (modalCloseBtn) {
+        modalCloseBtn.addEventListener('click', closeModal);
+    }
 
-    modal.addEventListener('click', function (event) {
-        if (event.target === modal) {
-            closeModal();
-        }
-    });
+    if (modal) {
+        modal.addEventListener('click', function (event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+    }
 
     document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape' && modal.classList.contains('active')) {
+        if (
+            event.key === 'Escape' &&
+            modal &&
+            modal.classList.contains('active')
+        ) {
             closeModal();
         }
     });
 
-    // Locked fields
+    // ----------------------------------
+    // Locked Fields
+    // ----------------------------------
+
     document.querySelectorAll('[data-locked-field]').forEach(function (field) {
+
         function explainLockedField() {
+
             const fieldName = field.dataset.lockedField;
 
             showModal(
                 'info',
-                'Field Cannot Be Changed',
-                fieldName + ' cannot be changed directly from your profile. Please contact our support team if you need to update this information.',
+                fieldName +
+                ' cannot be changed directly from your profile. Please contact our support team if you need to update this information.',
                 true
             );
         }
 
         field.addEventListener('click', explainLockedField);
+
         field.addEventListener('focus', explainLockedField);
     });
 
-    // Django success and error messages
+    // ----------------------------------
+    // Django Success / Error Messages
+    // ----------------------------------
+
     const djangoMessages = document.querySelectorAll(
         '#djangoMessages [data-type]'
     );
 
     if (djangoMessages.length > 0) {
+
         const message = djangoMessages[0];
-        const messageType = message.dataset.type;
+
+        const messageType = message.dataset.type.toLowerCase();
+
         const messageText = message.textContent.trim();
 
         if (messageText) {
-            if (messageType.includes('error')) {
-                showModal('error', 'Something Went Wrong', messageText);
+
+            if (
+                messageType.includes('error') ||
+                messageType.includes('danger')
+            ) {
+
+                showModal(
+                    'error',
+                    messageText
+                );
+
             } else {
+
                 showModal(
                     'success',
-                    'Profile Updated Successfully!',
                     messageText
                 );
             }
         }
     }
+
 });
 </script>
 
