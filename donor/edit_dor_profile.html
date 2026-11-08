@@ -1,193 +1,314 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LifeLine - Edit Profile</title>
-  <link rel="stylesheet" href="{% static 'donor/css/styles.css' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeLine - Edit Profile</title>
+    <link rel="stylesheet" href="{% static 'donor/css/styles.css' %}">
 </head>
 
 <body id="edit-profile-page">
 
-  <header class="main-header">
+<header class="main-header">
     <div class="header-container">
-      <div class="logo">
-        <a href="{% url 'donor_dashboard' %}">
-          <img src="{% static 'donor/image/logo.png' %}" alt="LifeLine Logo" class="logo-img">
-        </a>
-      </div>
-
-      <div class="header-actions">
-        <div class="dropdown">
-          <button class="hamburger-btn" aria-label="Toggle Menu">
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
-
-          <div class="dropdown-content">
-            <a href="{% url 'donor_dashboard' %}">Home</a>
-            <a href="{% url 'logout' %}">Logout</a>
-          </div>
+        <div class="logo">
+            <a href="{% url 'donor_dashboard' %}">
+                <img src="{% static 'donor/image/logo.png' %}"
+                     alt="LifeLine Logo" class="logo-img">
+            </a>
         </div>
-      </div>
-    </div>
-  </header>
 
-  <main class="content">
+        <div class="header-actions">
+            <div class="dropdown">
+                <button class="hamburger-btn" aria-label="Toggle Menu">
+                    <span></span><span></span><span></span>
+                </button>
+
+                <div class="dropdown-content">
+                    <a href="{% url 'donor_dashboard' %}">Home</a>
+                    <a href="{% url 'logout' %}">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="content">
     <section id="edit-profile-section" class="section">
 
-      <div class="section-header">
-        <h1>Edit Profile</h1>
-      </div>
-
-      {% if error %}
-      <div class="profile-error" id="profile-error">
-        {{ error }}
-      </div>
-      {% endif %}
-
-      {% if messages %}
-      {% for message in messages %}
-      <div class="profile-success">
-        {{ message }}
-      </div>
-      {% endfor %}
-      {% endif %}
-
-      <form method="POST" class="profile-form">
-        {% csrf_token %}
-
-        <!-- First Name and Last Name -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="firstName">First Name</label>
-            <input type="text" id="firstName" name="firstName" value="{{ form_data.firstName|default:user.first_name }}"
-              required>
-          </div>
-
-          <div class="form-group">
-            <label for="lastName">Last Name</label>
-            <input type="text" id="lastName" name="lastName" value="{{ form_data.lastName|default:user.last_name }}"
-              required>
-          </div>
+        <div class="section-header">
+            <h1>Edit Profile</h1>
         </div>
 
-        <!-- Username and Email -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" value="{{ user.username }}" readonly>
-          </div>
+        <form method="POST" class="profile-form">
+            {% csrf_token %}
 
-          <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" value="{{ form_data.email|default:user.email }}" required>
-          </div>
-        </div>
+            <!-- First Name and Last Name -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input type="text" id="firstName" name="firstName"
+                           value="{{ form_data.firstName|default:user.first_name }}" required>
+                </div>
 
-        <!-- Phone and DOB -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="phone">Phone Number</label>
-            <input type="tel" id="phone" name="phone" value="{{ form_data.phone|default:donor_profile.phone }}"
-              required>
-          </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input type="text" id="lastName" name="lastName"
+                           value="{{ form_data.lastName|default:user.last_name }}" required>
+                </div>
+            </div>
 
-          <div class="form-group">
-            <label for="dob">Date of Birth (DOB)</label>
-            <input type="date" id="dob" value="{{ donor_profile.date_of_birth|date:'Y-m-d' }}" readonly>
-          </div>
-        </div>
+            <!-- Username and Email -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username"
+                           value="{{ user.username }}" readonly
+                           data-locked-field="Username">
+                </div>
 
-        <!-- Full Address -->
-        <div class="form-group full-width">
-          <label for="address">Full Address</label>
-          <input type="text" id="address" name="address"
-            value="{{ form_data.address|default:donor_profile.street_address }}" required>
-        </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email"
+                           value="{{ form_data.email|default:user.email }}" required>
+                </div>
+            </div>
 
-        <!-- City and Province -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="city">City</label>
-            <input type="text" id="city" name="city" value="{{ form_data.city|default:donor_profile.city }}" required>
-          </div>
+            <!-- Phone and DOB -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone"
+                           value="{{ form_data.phone|default:donor_profile.phone }}" required>
+                </div>
 
-          <div class="form-group">
-            <label for="province">Province</label>
-            <input type="text" id="province" name="province"
-              value="{{ form_data.province|default:donor_profile.province }}" required>
-          </div>
-        </div>
+                <div class="form-group">
+                    <label for="dob">Date of Birth (DOB)</label>
+                    <input type="date" id="dob"
+                           value="{{ donor_profile.date_of_birth|date:'Y-m-d' }}"
+                           readonly data-locked-field="Date of Birth">
+                </div>
+            </div>
 
-        <!-- Country and Postal Code -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="country">Country</label>
-            <input type="text" id="country" name="country" value="{{ form_data.country|default:donor_profile.country }}"
-              required>
-          </div>
+            <!-- Full Address -->
+            <div class="form-group full-width">
+                <label for="address">Full Address</label>
+                <input type="text" id="address" name="address"
+                       value="{{ form_data.address|default:donor_profile.street_address }}" required>
+            </div>
 
-          <div class="form-group">
-            <label for="postalCode">Pincode / Postal Code</label>
-            <input type="text" id="postalCode" name="postalCode"
-              value="{{ form_data.postalCode|default:donor_profile.postal_code }}" required>
-          </div>
-        </div>
+            <!-- City and Province -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text" id="city" name="city"
+                           value="{{ form_data.city|default:donor_profile.city }}" required>
+                </div>
 
-        <!-- Blood Group - Read Only -->
-        <div class="form-group">
-          <label for="bloodGroup">Blood Group</label>
-          <input type="text" id="bloodGroup" value="{{ donor_profile.blood_type }}" readonly>
-        </div>
+                <div class="form-group">
+                    <label for="province">Province</label>
+                    <input type="text" id="province" name="province"
+                           value="{{ form_data.province|default:donor_profile.province }}" required>
+                </div>
+            </div>
 
-        <!-- Profile Picture -->
-        <div class="profile-upload-container">
-          <label for="profilePicture" class="avatar-label">
-            <img src="{% static 'donor/image/default-avatar.png' %}" alt="Current Profile" class="current-avatar">
+            <!-- Country and Postal Code -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="country">Country</label>
+                    <input type="text" id="country" name="country"
+                           value="{{ form_data.country|default:donor_profile.country }}" required>
+                </div>
 
-            <span class="change-photo-link">
-              Change Profile Picture
-            </span>
-          </label>
+                <div class="form-group">
+                    <label for="postalCode">Pincode / Postal Code</label>
+                    <input type="text" id="postalCode" name="postalCode"
+                           value="{{ form_data.postalCode|default:donor_profile.postal_code }}" required>
+                </div>
+            </div>
 
-          <input type="file" id="profilePicture" name="profilePicture" accept="image/*" hidden>
-        </div>
+            <!-- Blood Group -->
+            <div class="form-group">
+                <label for="bloodGroup">Blood Group</label>
+                <input type="text" id="bloodGroup"
+                       value="{{ donor_profile.blood_type }}"
+                       readonly data-locked-field="Blood Group">
+            </div>
 
-        <!-- Save Button -->
-        <div class="form-actions">
-          <button type="submit" class="btn btn-save">
-            Save Changes
-          </button>
-        </div>
+            <!-- Profile Picture -->
+            <div class="profile-upload-container">
+                <label for="profilePicture" class="avatar-label">
+                    <img src="{% static 'donor/image/default-avatar.png' %}"
+                         alt="Current Profile" class="current-avatar">
+                    <span class="change-photo-link">Change Profile Picture</span>
+                </label>
 
-      </form>
+                <input type="file" id="profilePicture"
+                       name="profilePicture" accept="image/*" hidden>
+            </div>
+
+            <!-- Save -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-save">
+                    Save Changes
+                </button>
+            </div>
+        </form>
     </section>
-  </main>
+</main>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const hamburgerBtn = document.querySelector('.hamburger-btn');
-      const dropdownContent = document.querySelector('.dropdown-content');
+<!-- Custom Popup -->
+<div class="custom-modal-overlay" id="customModal"
+     role="dialog" aria-modal="true" aria-labelledby="modalTitle">
 
-      if (hamburgerBtn && dropdownContent) {
-        hamburgerBtn.addEventListener('click', (event) => {
-          dropdownContent.classList.toggle('show');
-          event.stopPropagation();
+    <div class="custom-modal">
+        <div class="modal-icon info" id="modalIcon">!</div>
+
+        <h2 id="modalTitle">Notice</h2>
+        <p id="modalMessage"></p>
+
+        <div id="modalContact"></div>
+
+        <button type="button" class="modal-close-btn" id="modalCloseBtn">
+            Okay
+        </button>
+    </div>
+</div>
+
+<!-- Django messages -->
+<div id="djangoMessages" hidden>
+    {% if error %}
+        <div data-type="error">{{ error }}</div>
+    {% endif %}
+
+    {% for message in messages %}
+        <div data-type="{{ message.tags|default:'success' }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Hamburger menu
+    const hamburgerBtn = document.querySelector('.hamburger-btn');
+    const dropdownContent = document.querySelector('.dropdown-content');
+
+    if (hamburgerBtn && dropdownContent) {
+        hamburgerBtn.addEventListener('click', function (event) {
+            dropdownContent.classList.toggle('show');
+            event.stopPropagation();
         });
 
-        document.addEventListener('click', (event) => {
-          if (!dropdownContent.contains(event.target)) {
-            dropdownContent.classList.remove('show');
-          }
+        document.addEventListener('click', function (event) {
+            if (!dropdownContent.contains(event.target) &&
+                !hamburgerBtn.contains(event.target)) {
+                dropdownContent.classList.remove('show');
+            }
         });
-      }
+    }
+
+    // Popup elements
+    const modal = document.getElementById('customModal');
+    const modalIcon = document.getElementById('modalIcon');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalContact = document.getElementById('modalContact');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+    function showModal(type, title, message, showContact = false) {
+        modalIcon.className = 'modal-icon ' + type;
+
+        if (type === 'success') {
+            modalIcon.textContent = '✓';
+        } else if (type === 'error') {
+            modalIcon.textContent = '✕';
+        } else {
+            modalIcon.textContent = '!';
+        }
+
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        modalContact.innerHTML = '';
+
+        if (showContact) {
+            const contactText = document.createElement('p');
+            contactText.textContent = 'For assistance, please contact:';
+
+            const emailLink = document.createElement('a');
+            emailLink.href = 'mailto:emergency.lifelineservices999@gmail.com';
+            emailLink.className = 'modal-email';
+            emailLink.textContent = 'emergency.lifelineservices999@gmail.com';
+
+            modalContact.appendChild(contactText);
+            modalContact.appendChild(emailLink);
+        }
+
+        modal.classList.add('active');
+        modalCloseBtn.focus();
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+    }
+
+    modalCloseBtn.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', function (event) {
+        if (event.target === modal) {
+            closeModal();
+        }
     });
-  </script>
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    // Locked fields
+    document.querySelectorAll('[data-locked-field]').forEach(function (field) {
+        function explainLockedField() {
+            const fieldName = field.dataset.lockedField;
+
+            showModal(
+                'info',
+                'Field Cannot Be Changed',
+                fieldName + ' cannot be changed directly from your profile. Please contact our support team if you need to update this information.',
+                true
+            );
+        }
+
+        field.addEventListener('click', explainLockedField);
+        field.addEventListener('focus', explainLockedField);
+    });
+
+    // Django success and error messages
+    const djangoMessages = document.querySelectorAll(
+        '#djangoMessages [data-type]'
+    );
+
+    if (djangoMessages.length > 0) {
+        const message = djangoMessages[0];
+        const messageType = message.dataset.type;
+        const messageText = message.textContent.trim();
+
+        if (messageText) {
+            if (messageType.includes('error')) {
+                showModal('error', 'Something Went Wrong', messageText);
+            } else {
+                showModal(
+                    'success',
+                    'Profile Updated Successfully!',
+                    messageText
+                );
+            }
+        }
+    }
+});
+</script>
 
 </body>
-
 </html>

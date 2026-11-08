@@ -1787,3 +1787,147 @@ main .section {
   border-radius: inherit;
   transition: width 0.4s ease;
 }
+
+
+/* Rimjhim Bhatnagar
+   EDIT PROFILE - CUSTOM POPUP
+ */
+
+.custom-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    padding: 20px;
+}
+
+.custom-modal-overlay.active {
+    display: flex;
+}
+
+.custom-modal {
+    background: #ffffff;
+    width: 100%;
+    max-width: 420px;
+    padding: 35px 28px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    animation: popupAnimation 0.25s ease-out;
+}
+
+@keyframes popupAnimation {
+    from {
+        opacity: 0;
+        transform: translateY(15px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-icon {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    margin: 0 auto 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.modal-icon.success {
+    background: #e6f7ed;
+    color: #1d9b55;
+}
+
+.modal-icon.error {
+    background: #fdeaea;
+    color: #d93025;
+}
+
+.modal-icon.info {
+    background: #e8f1ff;
+    color: #2874c8;
+}
+
+.custom-modal h2 {
+    font-size: 23px;
+    margin-bottom: 12px;
+    color: #222222;
+}
+
+.custom-modal p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #666666;
+    margin-bottom: 20px;
+}
+
+.modal-email {
+    display: inline-block;
+    color: #c62828;
+    font-weight: 600;
+    text-decoration: none;
+    word-break: break-word;
+}
+
+.modal-email:hover {
+    text-decoration: underline;
+}
+
+.modal-close-btn {
+    background: #c62828;
+    color: #ffffff;
+    border: none;
+    padding: 11px 28px;
+    border-radius: 7px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.modal-close-btn:hover {
+    background: #a91f1f;
+}
+
+/* 
+   EDIT PROFILE - READ ONLY FIELDS
+ */
+
+#edit-profile-page input[readonly] {
+    cursor: pointer;
+    background-color: #f3f3f3;
+}
+
+#edit-profile-page input[readonly]:focus {
+    outline: 2px solid #c62828;
+}
+
+/* 
+   POPUP - MOBILE RESPONSIVENESS
+ */
+
+@media (max-width: 480px) {
+    .custom-modal {
+        padding: 28px 20px;
+        max-width: 100%;
+    }
+
+    .custom-modal h2 {
+        font-size: 20px;
+    }
+
+    .custom-modal p {
+        font-size: 14px;
+    }
+}
+/* Rimjhim Bhatnagar */
