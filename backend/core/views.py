@@ -14,7 +14,7 @@ from inventory.models import BloodInventory
 from .geocoding import geocode_address
 from .models import DonorProfiles, Facilities, StaffProfiles, Users
 from .utils import send_welcome_email
-
+from django.contrib import messages
 
 logger = logging.getLogger(__name__)
 
@@ -759,8 +759,9 @@ def organization_signup_view(request):
 
     return redirect("login")
 
-
+#Rimjhim Bhatnagar
 def donor_edit_profile_view(request):
+    # Check donor session
     if (
         request.session.get("user_id") is None
         or request.session.get("role") != "DONOR"
@@ -769,6 +770,7 @@ def donor_edit_profile_view(request):
 
     user_id = request.session["user_id"]
 
+    # Retrieve donor and profile information
     try:
         user = Users.objects.get(id=user_id)
         donor_profile = DonorProfiles.objects.get(user_id=user_id)
@@ -777,21 +779,34 @@ def donor_edit_profile_view(request):
         request.session.flush()
         return redirect("login")
 
+    # Handle profile updates
     if request.method == "POST":
+
+        # Editable user information
         first_name = request.POST.get("firstName", "").strip()
         last_name = request.POST.get("lastName", "").strip()
-        username = request.POST.get("username", "").strip().lower()
         email = request.POST.get("email", "").strip().lower()
+
+        # Editable donor information
         phone = request.POST.get("phone", "").strip()
-        dob = request.POST.get("dob", "").strip()
         address = request.POST.get("address", "").strip()
         city = request.POST.get("city", "").strip()
         province = request.POST.get("province", "").strip()
         country = request.POST.get("country", "").strip()
         postal_code = request.POST.get("postalCode", "").strip()
-        blood_type = request.POST.get("bloodGroup", "").strip()
 
-        if not username.startswith("do"):
+        # Required field validation
+        if not all([
+            first_name,
+            last_name,
+            email,
+            phone,
+            address,
+            city,
+            province,
+            country,
+            postal_code,
+        ]):
             return render(
                 request,
                 "donor/edit_dor_profile.html",
@@ -799,26 +814,13 @@ def donor_edit_profile_view(request):
                     "user": user,
                     "donor_profile": donor_profile,
                     "form_data": request.POST,
-                    "error": "Donor usernames must start with 'do'.",
+                    "error": "Please fill in all required fields.",
                 },
             )
 
+        # Check whether email is already used by another account
         if Users.objects.exclude(id=user_id).filter(
-            username=username,
-        ).exists():
-            return render(
-                request,
-                "donor/edit_dor_profile.html",
-                {
-                    "user": user,
-                    "donor_profile": donor_profile,
-                    "form_data": request.POST,
-                    "error": "That username is already in use.",
-                },
-            )
-
-        if Users.objects.exclude(id=user_id).filter(
-            email=email,
+            email=email
         ).exists():
             return render(
                 request,
@@ -831,6 +833,7 @@ def donor_edit_profile_view(request):
                 },
             )
 
+        # Check whether donor address has changed
         address_changed = (
             donor_profile.street_address != address
             or donor_profile.city != city
@@ -839,7 +842,9 @@ def donor_edit_profile_view(request):
             or donor_profile.country != country
         )
 
+        # Automatically retrieve new latitude and longitude
         if address_changed:
+
             coordinates = geocode_address(
                 address,
                 city,
@@ -848,34 +853,39 @@ def donor_edit_profile_view(request):
                 country,
             )
 
-            donor_profile.latitude = (
-                coordinates[0] if coordinates else None
-            )
-            donor_profile.longitude = (
-                coordinates[1] if coordinates else None
-            )
+            # Update coordinates only if geocoding succeeds
+            if coordinates:
+                donor_profile.latitude = coordinates[0]
+                donor_profile.longitude = coordinates[1]
 
+        # Update Users table
         user.first_name = first_name
         user.last_name = last_name
-        user.username = username
         user.email = email
         user.updated_at = timezone.now()
 
+        # Update DonorProfiles table
         donor_profile.phone = phone
-        donor_profile.date_of_birth = dob
         donor_profile.street_address = address
         donor_profile.city = city
         donor_profile.province = province
         donor_profile.country = country
         donor_profile.postal_code = postal_code
-        donor_profile.blood_type = blood_type
 
+        # Save both tables together
         with transaction.atomic():
             user.save()
             donor_profile.save()
 
+        # Success notification
+        messages.success(
+            request,
+            "Your profile has been updated successfully."
+        )
+
         return redirect("donor_edit_profile")
 
+    # Display current donor information
     return render(
         request,
         "donor/edit_dor_profile.html",
@@ -884,6 +894,7 @@ def donor_edit_profile_view(request):
             "donor_profile": donor_profile,
         },
     )
+#Rimjhim Bhatnagar
 
 
 def staff_edit_profile_view(request):
