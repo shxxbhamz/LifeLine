@@ -12,6 +12,7 @@ from inventory.models import BloodInventory, InventoryTransactions
 from core.utils import (
     send_appointment_status_email,
     send_donor_booking_email,
+    _send_custom_booking_email,
 )
 from .models import Appointments, DonationRequests
 from core.models import DonorProfiles, Facilities
@@ -782,4 +783,3 @@ def staff_cancel_appointment_view(request, appointment_id):
     )
 
     return redirect("staff_appointments")
-
