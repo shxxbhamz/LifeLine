@@ -12,7 +12,6 @@ from inventory.models import BloodInventory, InventoryTransactions
 from core.utils import (
     send_appointment_status_email,
     send_donor_booking_email,
-    _send_custom_booking_email,
 )
 from .models import Appointments, DonationRequests
 from core.models import DonorProfiles, Facilities
@@ -225,18 +224,13 @@ def donor_book_appointment_view(request):
             return False
 
         try:
-            return send_donor_booking_email(
-                user_email=donor_email,
-                first_name=donor_first_name,
-                facility_name="LifeLine",
-                scheduled_at=None,
-                donation_type=None,
-            ) if False else _send_custom_booking_email(
-                donor_email,
-                donor_first_name,
-                subject,
-                message,
-            )
+         return send_donor_booking_email(
+             user_email=donor_email,
+             first_name=donor_first_name,
+             facility_name="LifeLine",
+             scheduled_at=None,
+             donation_type=None,
+)
 
         except Exception:
             logger.exception(
