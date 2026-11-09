@@ -14,6 +14,7 @@ from appointments.models import Appointments, Donations
 from core.models import StaffProfiles
 from core.utils import send_donation_thank_you_email
 from inventory.models import BloodInventory, InventoryTransactions
+from core.utils import send_donation_thank_you_email
 
 from .models import EmergencyRequests, RequestMatches
 from .matching import run_emergency_matching
@@ -165,6 +166,7 @@ def staff_emergencies_view(request):
     )
 
 
+
 @require_POST
 def record_appointment_donation_view(request, appointment_id):
 
@@ -190,7 +192,11 @@ def record_appointment_donation_view(request, appointment_id):
 
         with transaction.atomic():
 
-            appointment = Appointments.objects.select_for_update().get(
+            appointment = Appointments.objects.select_for_update().select_related(
+                "donor",
+                "donor__user",
+                "facility",
+            ).get(
                 id=appointment_id,
                 facility=staff_profile.facility,
                 status="CONFIRMED",
@@ -209,10 +215,22 @@ def record_appointment_donation_view(request, appointment_id):
             )
 
         if created:
+
+            # Send congratulatory email to the donor.
+            donor_user = appointment.donor.user
+
+            send_donation_thank_you_email(
+                user_email=donor_user.email,
+                first_name=donor_user.first_name,
+                facility_name=appointment.facility.name,
+                donation_type=appointment.donation_type,
+            )
+
             messages.success(
                 request,
                 "Donation successfully marked as donated!"
             )
+
         else:
             messages.info(
                 request,
@@ -224,7 +242,10 @@ def record_appointment_donation_view(request, appointment_id):
         return redirect("login")
 
     except Appointments.DoesNotExist:
-        messages.error(request, "Appointment not found or unavailable.")
+        messages.error(
+            request,
+            "Appointment not found or unavailable."
+        )
 
     except Exception as error:
         messages.error(
