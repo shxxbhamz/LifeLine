@@ -1,4 +1,5 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -16,7 +17,9 @@
     <!-- Top Navigation Bar -->
     <header>
         <a href="{% url 'staff_dashboard' %}" class="logo-link">
-            <img src="{% static 'organization/img/lifeline-logo.png' %}" alt="LifeLine Logo" class="brand-logo">
+            <img src="{% static 'organization/img/lifeline-logo.png' %}"
+                 alt="LifeLine Logo"
+                 class="brand-logo">
         </a>
 
         <div class="nav-right">
@@ -27,7 +30,9 @@
 
             <div class="dropdown">
 
-                <button class="hamburger-btn" onclick="toggleDropdown()" aria-label="Menu">
+                <button class="hamburger-btn"
+                        onclick="toggleDropdown()"
+                        aria-label="Menu">
                     &#9776;
                 </button>
 
@@ -109,7 +114,7 @@
                     <h3>Responding Donor Requests</h3>
 
                     <span class="badge-count">
-                        {{ confirmed_appointments|length }} Confirmed Donations
+                        {{ confirmed_appointments|length }} Donations
                     </span>
 
                 </div>
@@ -155,8 +160,9 @@
 
                                     <div class="donor-profile-cell">
 
-                                        <img src="{% static 'organization/img/default-avatar.png' %}" alt="Donor Avatar"
-                                            class="donor-avatar">
+                                        <img src="{% static 'organization/img/default-avatar.png' %}"
+                                             alt="Donor Avatar"
+                                             class="donor-avatar">
 
                                         <div>
 
@@ -204,7 +210,8 @@
                                 <!-- Appointment Status -->
                                 <td>
 
-                                    <span class="badge green" id="status-{{ appointment.id }}">
+                                    <span class="badge green"
+                                          id="status-{{ appointment.id }}">
 
                                         {{ appointment.status }}
 
@@ -214,39 +221,58 @@
 
 
                                 <!-- Action Button -->
-                                <!-- Action Button -->
                                 <td class="text-right action-btns">
 
                                     {% if appointment.request_match %}
 
-                                    {% if appointment.request_match.is_used %}
+                                        {% if appointment.request_match.is_used %}
 
-                                    <button class="btn-secondary btn-sm" type="button" disabled
-                                        style="background-color: #64748b; color: white;">
-                                        Used
-                                    </button>
+                                            <button class="btn-secondary btn-sm"
+                                                    type="button"
+                                                    disabled
+                                                    style="background-color: #64748b; color: white;">
+                                                Used
+                                            </button>
+
+                                        {% else %}
+
+                                            <form action="{% url 'mark_donation_used' appointment.request_match.id %}"
+                                                  method="POST"
+                                                  style="display: inline;">
+
+                                                {% csrf_token %}
+
+                                                <button class="btn-success btn-sm"
+                                                        type="submit"
+                                                        onclick="return confirm('Are you sure you want to mark this emergency donation as used?');">
+                                                    Use Donation
+                                                </button>
+
+                                            </form>
+
+                                        {% endif %}
 
                                     {% else %}
 
-                                    <form action="{% url 'mark_donation_used' appointment.request_match.id %}"
-                                        method="POST" style="display: inline;">
+                                        {% if appointment.status == "CONFIRMED" %}
 
-                                        {% csrf_token %}
+                                            <button class="btn-secondary btn-sm"
+                                                    type="button"
+                                                    disabled
+                                                    style="background-color: #d97706; color: white;">
+                                                Pending
+                                            </button>
 
-                                        <button class="btn-success btn-sm" type="submit"
-                                            onclick="return confirm('Are you sure you want to mark this donation as used?');">
-                                            Use Donation
-                                        </button>
+                                        {% elif appointment.status == "COMPLETED" %}
 
-                                    </form>
+                                            <button class="btn-secondary btn-sm"
+                                                    type="button"
+                                                    disabled
+                                                    style="background-color: #16a34a; color: white;">
+                                                Donated
+                                            </button>
 
-                                    {% endif %}
-
-                                    {% else %}
-
-                                    <button class="btn-secondary btn-sm" type="button" disabled>
-                                        Not Applicable
-                                    </button>
+                                        {% endif %}
 
                                     {% endif %}
 
@@ -261,7 +287,7 @@
 
                                 <td colspan="5" style="text-align: center; padding: 25px;">
 
-                                    <strong>No confirmed donations found.</strong>
+                                    <strong>No donations found.</strong>
 
                                     <br>
 
@@ -383,9 +409,7 @@
 
         }
 
-
     </script>
 
 </body>
-
 </html>
