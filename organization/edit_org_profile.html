@@ -8,17 +8,15 @@
 
     <title>LifeLine - Edit Organization Profile</title>
 
-    <!-- Original centralized stylesheet -->
+    <!-- Original stylesheet -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
     <style>
-        /* Locked fields */
         .locked-field {
             background-color: #f1f1f1;
             cursor: pointer;
         }
 
-        /* Custom popup */
         .custom-popup-overlay {
             display: none;
             position: fixed;
@@ -79,20 +77,15 @@
 
         <nav>
             <ul>
-                <li>
-                    <a href="{% url 'home' %}#about">About Us</a>
-                </li>
-
-                <li>
-                    <a href="{% url 'home' %}">Home</a>
-                </li>
+                <li><a href="{% url 'home' %}#about">About Us</a></li>
+                <li><a href="{% url 'home' %}">Home</a></li>
             </ul>
         </nav>
 
     </header>
 
 
-    <!-- MAIN CONTENT AREA -->
+    <!-- MAIN CONTENT -->
     <main>
 
         <div class="auth-container">
@@ -107,9 +100,33 @@
 
                 <div class="form-grid">
 
+                    
+
+                    <!-- FIRST NAME -->
+                    <div class="form-group">
+                        <label for="firstName">First Name:</label>
+
+                        <input type="text"
+                               id="firstName"
+                               name="firstName"
+                               value="{{ form_data.firstName|default:user.first_name }}"
+                               required>
+                    </div>
+
+
+                    <!-- LAST NAME -->
+                    <div class="form-group">
+                        <label for="lastName">Last Name:</label>
+
+                        <input type="text"
+                               id="lastName"
+                               name="lastName"
+                               value="{{ form_data.lastName|default:user.last_name }}"
+                               required>
+                    </div>
+                    
                     <!-- EMPLOYEE ID - LOCKED -->
                     <div class="form-group">
-
                         <label for="username">Employee ID:</label>
 
                         <input type="text"
@@ -118,13 +135,11 @@
                                class="locked-field"
                                readonly
                                onclick="showLockedPopup()">
-
                     </div>
 
 
                     <!-- WORK EMAIL - LOCKED -->
                     <div class="form-group">
-
                         <label for="email">Work Email Address:</label>
 
                         <input type="email"
@@ -133,13 +148,11 @@
                                class="locked-field"
                                readonly
                                onclick="showLockedPopup()">
-
                     </div>
 
 
                     <!-- ORGANIZATION NAME - LOCKED -->
                     <div class="form-group full-width">
-
                         <label for="organization">Organization Name:</label>
 
                         <input type="text"
@@ -148,41 +161,12 @@
                                class="locked-field"
                                readonly
                                onclick="showLockedPopup()">
-
                     </div>
 
 
-                    <!-- FIRST NAME -->
+
+                    <!-- PHONE NUMBER -->
                     <div class="form-group">
-
-                        <label for="firstName">First Name:</label>
-
-                        <input type="text"
-                               id="firstName"
-                               name="firstName"
-                               value="{{ form_data.firstName|default:user.first_name }}"
-                               required>
-
-                    </div>
-
-
-                    <!-- LAST NAME -->
-                    <div class="form-group">
-
-                        <label for="lastName">Last Name:</label>
-
-                        <input type="text"
-                               id="lastName"
-                               name="lastName"
-                               value="{{ form_data.lastName|default:user.last_name }}"
-                               required>
-
-                    </div>
-
-
-                    <!-- ORGANIZATION PHONE NUMBER -->
-                    <div class="form-group">
-
                         <label for="phone">Organization Phone Number:</label>
 
                         <input type="tel"
@@ -190,18 +174,14 @@
                                name="phone"
                                value="{{ form_data.phone|default:facility.phone }}"
                                required>
-
                     </div>
 
 
                     <!-- FACILITY TYPE -->
                     <div class="form-group">
-
                         <label for="facilityType">Facility Type:</label>
 
-                        <select id="facilityType"
-                                name="facilityType"
-                                required>
+                        <select id="facilityType" name="facilityType" required>
 
                             <option value="" disabled
                                 {% if not form_data.facilityType and not facility.facility_type %}selected{% endif %}>
@@ -219,13 +199,11 @@
                             </option>
 
                         </select>
-
                     </div>
 
 
                     <!-- FULL ADDRESS -->
                     <div class="form-group full-width">
-
                         <label for="fullAddress">Full Address:</label>
 
                         <input type="text"
@@ -233,13 +211,11 @@
                                name="fullAddress"
                                value="{{ form_data.fullAddress|default:facility.street_address }}"
                                required>
-
                     </div>
 
 
                     <!-- CITY -->
                     <div class="form-group">
-
                         <label for="city">City:</label>
 
                         <input type="text"
@@ -247,13 +223,11 @@
                                name="city"
                                value="{{ form_data.city|default:facility.city }}"
                                required>
-
                     </div>
 
 
                     <!-- PROVINCE -->
                     <div class="form-group">
-
                         <label for="province">Province:</label>
 
                         <input type="text"
@@ -261,13 +235,11 @@
                                name="province"
                                value="{{ form_data.province|default:facility.province }}"
                                required>
-
                     </div>
 
 
                     <!-- COUNTRY -->
                     <div class="form-group">
-
                         <label for="country">Country:</label>
 
                         <input type="text"
@@ -275,13 +247,11 @@
                                name="country"
                                value="{{ form_data.country|default:facility.country }}"
                                required>
-
                     </div>
 
 
                     <!-- POSTAL CODE -->
                     <div class="form-group">
-
                         <label for="pincode">Pincode / Postal Code:</label>
 
                         <input type="text"
@@ -289,7 +259,6 @@
                                name="pincode"
                                value="{{ form_data.pincode|default:facility.postal_code }}"
                                required>
-
                     </div>
 
                 </div>
@@ -297,19 +266,15 @@
 
                 <!-- SAVE BUTTON -->
                 <div>
-
                     <button type="submit" class="btn-submit">
                         Save Changes
                     </button>
-
                 </div>
 
 
-                <!-- FOOTER LINK -->
+                <!-- HOME LINK -->
                 <div class="auth-footer">
-
                     <a href="{% url 'home' %}">Back to Home</a>
-
                 </div>
 
             </form>
@@ -321,16 +286,34 @@
 
     <!-- FOOTER -->
     <footer>
-
         <p>
             © 2026 LifeLine. Emergency Rapid-Response Blood Dispatch System.
             All rights reserved.
         </p>
-
     </footer>
 
 
-    <!-- CUSTOM TEXT-ONLY POPUP -->
+    <!-- SUCCESS MESSAGE -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message-data"
+                 data-message="{{ message }}"
+                 data-type="{{ message.tags }}">
+            </div>
+        {% endfor %}
+    {% endif %}
+
+
+    <!-- ERROR MESSAGE -->
+    {% if error %}
+        <div class="message-data"
+             data-message="{{ error }}"
+             data-type="error">
+        </div>
+    {% endif %}
+
+
+    <!-- CUSTOM POPUP -->
     <div class="custom-popup-overlay" id="customPopupOverlay">
 
         <div class="custom-popup" id="customPopup">
@@ -346,75 +329,51 @@
     </div>
 
 
-    <!-- JAVASCRIPT -->
+    <!-- SIMPLE JAVASCRIPT -->
     <script>
 
-        // Show custom popup
         function showPopup(message, type) {
 
-            const overlay = document.getElementById("customPopupOverlay");
-            const popup = document.getElementById("customPopup");
-            const popupMessage = document.getElementById("popupMessage");
+            document.getElementById("popupMessage").textContent = message;
 
-            popupMessage.textContent = message;
+            document.getElementById("customPopup").className =
+                "custom-popup popup-" + type;
 
-            popup.className = "custom-popup popup-" + type;
-
-            overlay.style.display = "flex";
+            document.getElementById("customPopupOverlay").style.display = "flex";
         }
 
 
-        // Close popup
         function closePopup() {
 
             document.getElementById("customPopupOverlay").style.display = "none";
-
         }
 
 
-        // Locked fields popup
         function showLockedPopup() {
 
             showPopup(
                 "This information cannot be changed here. Please contact LifeLine Support at emergency.lifelineservices999@gmail.com for assistance.",
                 "info"
             );
-
         }
 
 
-        // Django messages
-        const djangoMessages = [
+        // Read notification messages from HTML
+        const notifications = document.querySelectorAll(".message-data");
 
-            {% for message in messages %}
+        if (notifications.length > 0) {
 
-                {
-                    text: "{{ message|escapejs }}",
-                    type: "{% if 'success' in message.tags %}success{% else %}error{% endif %}"
-                },
+            const notification = notifications[0];
 
-            {% endfor %}
+            const message = notification.getAttribute("data-message");
+            const type = notification.getAttribute("data-type");
 
-        ];
-
-
-        // Display Django notifications
-        djangoMessages.forEach(function(message) {
-
-            showPopup(message.text, message.type);
-
-        });
-
-
-        // Display additional view error, if provided
-        {% if error %}
-
-            showPopup(
-                "{{ error|escapejs }}",
-                "error"
-            );
-
-        {% endif %}
+            if (type.includes("success")) {
+                showPopup(message, "success");
+            } else {
+                showPopup(message, "error");
+            }
+        }
 
     </script>
 
