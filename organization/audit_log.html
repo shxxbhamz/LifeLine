@@ -225,6 +225,8 @@
 
                                     {% if appointment.request_match %}
 
+                                        <!-- Emergency Donation -->
+
                                         {% if appointment.request_match.is_used %}
 
                                             <button class="btn-secondary btn-sm"
@@ -252,16 +254,30 @@
 
                                         {% endif %}
 
+
                                     {% else %}
+
+                                        <!-- Regular Donation -->
 
                                         {% if appointment.status == "CONFIRMED" %}
 
-                                            <button class="btn-secondary btn-sm"
-                                                    type="button"
-                                                    disabled
-                                                    style="background-color: #d97706; color: white;">
-                                                Pending
-                                            </button>
+                                            <form action="{% url 'record_appointment_donation' appointment.id %}"
+                                                  method="POST"
+                                                  style="display: inline;">
+
+                                                {% csrf_token %}
+
+                                                <button class="btn-secondary btn-sm"
+                                                        type="submit"
+                                                        style="background-color: #d97706; color: white;"
+                                                        onclick="return confirm('Confirm that this donor has completed their donation?');">
+
+                                                    Pending
+
+                                                </button>
+
+                                            </form>
+
 
                                         {% elif appointment.status == "COMPLETED" %}
 
@@ -269,7 +285,9 @@
                                                     type="button"
                                                     disabled
                                                     style="background-color: #16a34a; color: white;">
+
                                                 Donated
+
                                             </button>
 
                                         {% endif %}
