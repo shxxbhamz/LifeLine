@@ -7,7 +7,7 @@ from django.http import HttpResponseServerError
 from django.shortcuts import redirect, render
 from django.utils import timezone
 
-from appointments.models import Appointments
+from appointments.models import Appointments, Donations
 from emergencies.models import EmergencyRequests
 from inventory.models import BloodInventory
 
@@ -87,6 +87,7 @@ def login_view(request):
 
 
 # Heer patel#
+
 def donor_dashboard_view(request):
     if (
         request.session.get("user_id") is None
@@ -122,10 +123,10 @@ def donor_dashboard_view(request):
             "user"
         ).get(user_id=user_id)
 
-        # Count completed donations.
-        total_donations = Appointments.objects.filter(
-            donor=donor_profile,
-            status__iexact="COMPLETED",
+        # Count actual donation records.
+        # Appointment status remains CONFIRMED.
+        total_donations = Donations.objects.filter(
+            appointment__donor=donor_profile
         ).count()
 
         lives_saved = total_donations
@@ -182,7 +183,7 @@ def donor_dashboard_view(request):
             "scheduled_at"
         )
 
-        # Calculate countdown separately for every appointment.
+        # Calculate countdown for every appointment.
         for appointment in upcoming_appointments:
             delta = appointment.scheduled_at.date() - now.date()
             appointment.days_until = delta.days
@@ -231,7 +232,6 @@ def donor_dashboard_view(request):
         "donor/index.html",
         context,
     )
-
 
 def donor_active_requests_view(request):
     if (
