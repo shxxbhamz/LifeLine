@@ -12,7 +12,7 @@ from django.db import transaction
 
 from appointments.models import Appointments
 from core.models import StaffProfiles
-
+from inventory.models import BloodInventory, InventoryTransactions
 from .models import EmergencyRequests, RequestMatches
 from .matching import run_emergency_matching
 
@@ -162,8 +162,111 @@ def staff_emergencies_view(request):
         context,
     )
 
+@require_POST
+def record_appointment_donation_view(request, appointment_id):
+
+    if (
+        request.session.get("user_id") is None
+        or request.session.get("role") != "HOSPITAL_STAFF"
+    ):
+        return redirect("login")
+
+    user_id = request.session.get("user_id")
+
+    try:
+        staff_profile = StaffProfiles.objects.select_related(
+            "facility"
+        ).get(user_id=user_id)
+
+        with transaction.atomic():
+
+            appointment = Appointments.objects.select_for_update().get(
+                id=appointment_id,
+                facility=staff_profile.facility,
+            )
+
+            if appointment.status != "CONFIRMED":
+                messages.warning(
+                    request,
+                    "This appointment cannot be recorded as a donation."
+                )
+                return redirect("staff_audit_log")
+
+            if Donations.objects.filter(appointment=appointment).exists():
+                messages.warning(
+                    request,
+                    "This donation has already been recorded."
+                )
+                return redirect("staff_audit_log")
+
+            donor = appointment.donor
+            component = appointment.donation_type
+            blood_type = donor.blood_type
+
+            inventory = BloodInventory.objects.select_for_update().get(
+                facility=appointment.facility,
+                blood_type=blood_type,
+                component_type=component,
+            )
+
+            now = timezone.now()
+
+            donation = Donations.objects.create(
+                appointment=appointment,
+                actual_component_type=component,
+                recorded_by=staff_profile,
+                completed_at=now,
+                quantity_units=1,
+                notes="Donation recorded by hospital staff.",
+            )
+
+            inventory.units_available += 1
+            inventory.updated_at = now
+            inventory.save(
+                update_fields=["units_available", "updated_at"]
+            )
+
+            InventoryTransactions.objects.create(
+                inventory=inventory,
+                changed_by=staff_profile,
+                transaction_type="DONATION",
+                units_change=1,
+                reason="Donation collected from confirmed appointment.",
+                donation=donation,
+                created_at=now,
+            )
+
+            appointment.status = "COMPLETED"
+            appointment.updated_at = now
+            appointment.save(
+                update_fields=["status", "updated_at"]
+            )
+
+        messages.success(
+            request,
+            "Donation recorded successfully! Inventory and donor records updated."
+        )
+
+    except StaffProfiles.DoesNotExist:
+        request.session.flush()
+        return redirect("login")
+
+    except Appointments.DoesNotExist:
+        messages.error(request, "Appointment not found.")
+
+    except BloodInventory.DoesNotExist:
+        messages.error(
+            request,
+            "Inventory record not found for this blood type and component. No donation was recorded."
+        )
+
+    except Exception as error:
+        messages.error(request, f"Unable to record donation: {error}")
+
+    return redirect("staff_audit_log")
+
 def staff_audit_log(request):
-    # Check staff session
+    # Only logged-in hospital staff can access the audit log.
     if (
         request.session.get("user_id") is None
         or request.session.get("role") != "HOSPITAL_STAFF"
@@ -181,15 +284,15 @@ def staff_audit_log(request):
         request.session.flush()
         return redirect("login")
 
-    # Start with an empty queryset
+    # Start with an empty queryset.
     confirmed_appointments = Appointments.objects.none()
 
-    # Show confirmed donations belonging to this facility
+    # Show confirmed and completed appointments for this facility.
     if staff_profile.facility:
         confirmed_appointments = (
             Appointments.objects.filter(
                 facility=staff_profile.facility,
-                status="CONFIRMED",
+                status__in=["CONFIRMED", "COMPLETED"],
             )
             .select_related(
                 "donor",
@@ -200,17 +303,28 @@ def staff_audit_log(request):
             .order_by("-scheduled_at")
         )
 
+    # Get appointment IDs that already have donation records.
+    recorded_donation_ids = set(
+        Donations.objects.filter(
+            appointment__facility=staff_profile.facility
+        ).values_list(
+            "appointment_id",
+            flat=True,
+        )
+    ) if staff_profile.facility else set()
+
     context = {
         "staff_profile": staff_profile,
         "confirmed_appointments": confirmed_appointments,
+        "recorded_donation_ids": recorded_donation_ids,
     }
 
-    
     return render(
         request,
         "organization/audit_log.html",
         context,
     )
+
 def staff_create_emergency_request_view(request):
     # Only authenticated hospital staff may create emergency requests.
     if (
