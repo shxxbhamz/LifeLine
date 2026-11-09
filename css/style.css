@@ -678,3 +678,155 @@ footer {
 .btn-delete-photo:hover {
     text-decoration: underline;
 }
+
+def staff_edit_profile_view(request):
+    if (
+        request.session.get("user_id") is None
+        or request.session.get("role") != "HOSPITAL_STAFF"
+    ):
+        return redirect("login")
+
+    user_id = request.session["user_id"]
+
+    try:
+        user = Users.objects.get(id=user_id)
+        staff_profile = StaffProfiles.objects.get(user_id=user_id)
+        facility = staff_profile.facility
+
+    except (Users.DoesNotExist, StaffProfiles.DoesNotExist):
+        request.session.flush()
+        return redirect("login")
+
+    if request.method == "POST":
+
+        # Editable staff information
+        first_name = request.POST.get("firstName", "").strip()
+        last_name = request.POST.get("lastName", "").strip()
+
+        # Editable organization information
+        phone = request.POST.get("phone", "").strip()
+        facility_type = request.POST.get("facilityType", "").strip()
+
+        street_address = request.POST.get("fullAddress", "").strip()
+        city = request.POST.get("city", "").strip()
+        province = request.POST.get("province", "").strip()
+        country = request.POST.get("country", "").strip()
+        postal_code = request.POST.get("pincode", "").strip()
+
+        # Validate required fields
+        required_fields = [
+            first_name,
+            last_name,
+            phone,
+            facility_type,
+            street_address,
+            city,
+            province,
+            country,
+            postal_code,
+        ]
+
+        if not all(required_fields):
+            messages.error(
+                request,
+                "Please fill in all required fields."
+            )
+
+            return render(
+                request,
+                "organization/edit_org_profile.html",
+                {
+                    "user": user,
+                    "staff_profile": staff_profile,
+                    "facility": facility,
+                    "form_data": request.POST,
+                },
+            )
+
+        # Match HTML select values with database values
+        facility_type_mapping = {
+            "HOSPITAL": "HOSPITAL",
+            "BLOOD_BANK": "BLOOD_BANK",
+        }
+
+        database_facility_type = facility_type_mapping.get(facility_type)
+
+        if database_facility_type is None:
+            messages.error(
+                request,
+                "Please select a valid facility type."
+            )
+
+            return render(
+                request,
+                "organization/edit_org_profile.html",
+                {
+                    "user": user,
+                    "staff_profile": staff_profile,
+                    "facility": facility,
+                    "form_data": request.POST,
+                },
+            )
+
+        # Check whether the address has changed
+        address_changed = (
+            facility.street_address != street_address
+            or facility.city != city
+            or facility.province != province
+            or facility.postal_code != postal_code
+            or facility.country != country
+        )
+
+        # Update coordinates when the address changes
+        if address_changed:
+            coordinates = geocode_address(
+                street_address,
+                city,
+                province,
+                postal_code,
+                country,
+            )
+
+            facility.latitude = (
+                coordinates[0] if coordinates else None
+            )
+
+            facility.longitude = (
+                coordinates[1] if coordinates else None
+            )
+
+        # Update only editable user fields
+        user.first_name = first_name
+        user.last_name = last_name
+        user.updated_at = timezone.now()
+
+        # Update only editable facility fields
+        facility.phone = phone
+        facility.facility_type = database_facility_type
+        facility.street_address = street_address
+        facility.city = city
+        facility.province = province
+        facility.country = country
+        facility.postal_code = postal_code
+
+        # Save changes together
+        with transaction.atomic():
+            user.save()
+            facility.save()
+
+        messages.success(
+            request,
+            "Your organization profile has been updated successfully!"
+        )
+
+        return redirect("staff_edit_profile")
+
+    return render(
+        request,
+        "organization/edit_org_profile.html",
+        {
+            "user": user,
+            "staff_profile": staff_profile,
+            "facility": facility,
+        },
+    )
