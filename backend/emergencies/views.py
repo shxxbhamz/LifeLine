@@ -164,6 +164,7 @@ def staff_emergencies_view(request):
         context,
     )
 
+
 @require_POST
 def record_appointment_donation_view(request, appointment_id):
 
@@ -180,95 +181,62 @@ def record_appointment_donation_view(request, appointment_id):
             "facility"
         ).get(user_id=user_id)
 
+        if not staff_profile.facility:
+            messages.error(
+                request,
+                "Your staff account is not connected to a facility."
+            )
+            return redirect("staff_audit_log")
+
         with transaction.atomic():
 
             appointment = Appointments.objects.select_for_update().get(
                 id=appointment_id,
                 facility=staff_profile.facility,
+                status="CONFIRMED",
             )
 
-            if appointment.status != "CONFIRMED":
-                messages.warning(
-                    request,
-                    "This appointment cannot be recorded as a donation."
-                )
-                return redirect("staff_audit_log")
-
-            if Donations.objects.filter(appointment=appointment).exists():
-                messages.warning(
-                    request,
-                    "This donation has already been recorded."
-                )
-                return redirect("staff_audit_log")
-
-            donor = appointment.donor
-            component = appointment.donation_type
-            blood_type = donor.blood_type
-
-            inventory = BloodInventory.objects.select_for_update().get(
-                facility=appointment.facility,
-                blood_type=blood_type,
-                component_type=component,
-            )
-
-            now = timezone.now()
-
-            donation = Donations.objects.create(
+            # Prevent duplicate donation records.
+            donation, created = Donations.objects.get_or_create(
                 appointment=appointment,
-                actual_component_type=component,
-                recorded_by=staff_profile,
-                completed_at=now,
-                quantity_units=1,
-                notes="Donation recorded by hospital staff.",
+                defaults={
+                    "actual_component_type": appointment.donation_type,
+                    "recorded_by": staff_profile,
+                    "completed_at": timezone.now(),
+                    "quantity_units": 1,
+                    "notes": "Donation marked as collected by hospital staff.",
+                },
             )
 
-            inventory.units_available += 1
-            inventory.updated_at = now
-            inventory.save(
-                update_fields=["units_available", "updated_at"]
+        if created:
+            messages.success(
+                request,
+                "Donation successfully marked as donated!"
             )
-
-            InventoryTransactions.objects.create(
-                inventory=inventory,
-                changed_by=staff_profile,
-                transaction_type="DONATION",
-                units_change=1,
-                reason="Donation collected from confirmed appointment.",
-                donation=donation,
-                created_at=now,
+        else:
+            messages.info(
+                request,
+                "This donation has already been recorded."
             )
-
-            appointment.status = "COMPLETED"
-            appointment.updated_at = now
-            appointment.save(
-                update_fields=["status", "updated_at"]
-            )
-
-        messages.success(
-            request,
-            "Donation recorded successfully! Inventory and donor records updated."
-        )
 
     except StaffProfiles.DoesNotExist:
         request.session.flush()
         return redirect("login")
 
     except Appointments.DoesNotExist:
-        messages.error(request, "Appointment not found.")
-
-    except BloodInventory.DoesNotExist:
-        messages.error(
-            request,
-            "Inventory record not found for this blood type and component. No donation was recorded."
-        )
+        messages.error(request, "Appointment not found or unavailable.")
 
     except Exception as error:
-        messages.error(request, f"Unable to record donation: {error}")
+        messages.error(
+            request,
+            f"Unable to record donation: {error}"
+        )
 
     return redirect("staff_audit_log")
 
+
 def staff_audit_log(request):
-    # Only logged-in hospital staff can access the audit log.
+
     if (
         request.session.get("user_id") is None
         or request.session.get("role") != "HOSPITAL_STAFF"
@@ -286,15 +254,15 @@ def staff_audit_log(request):
         request.session.flush()
         return redirect("login")
 
-    # Start with an empty queryset.
     confirmed_appointments = Appointments.objects.none()
+    donated_appointment_ids = set()
 
-    # Show confirmed and completed appointments for this facility.
     if staff_profile.facility:
+
         confirmed_appointments = (
             Appointments.objects.filter(
                 facility=staff_profile.facility,
-                status__in=["CONFIRMED", "COMPLETED"],
+                status="CONFIRMED",
             )
             .select_related(
                 "donor",
@@ -305,20 +273,19 @@ def staff_audit_log(request):
             .order_by("-scheduled_at")
         )
 
-    # Get appointment IDs that already have donation records.
-    recorded_donation_ids = set(
-        Donations.objects.filter(
-            appointment__facility=staff_profile.facility
-        ).values_list(
-            "appointment_id",
-            flat=True,
+        donated_appointment_ids = set(
+            Donations.objects.filter(
+                appointment__facility=staff_profile.facility
+            ).values_list(
+                "appointment_id",
+                flat=True,
+            )
         )
-    ) if staff_profile.facility else set()
 
     context = {
         "staff_profile": staff_profile,
         "confirmed_appointments": confirmed_appointments,
-        "recorded_donation_ids": recorded_donation_ids,
+        "donated_appointment_ids": donated_appointment_ids,
     }
 
     return render(
