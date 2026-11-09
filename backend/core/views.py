@@ -916,23 +916,40 @@ def staff_edit_profile_view(request):
         return redirect("login")
 
     if request.method == "POST":
+
+        # Editable staff information
         first_name = request.POST.get("firstName", "").strip()
         last_name = request.POST.get("lastName", "").strip()
-        email = request.POST.get("email", "").strip().lower()
 
-        organization = request.POST.get("organization", "").strip()
+        # Editable organization information
         phone = request.POST.get("phone", "").strip()
-        facility_type = request.POST.get("facilityType", "")
+        facility_type = request.POST.get("facilityType", "").strip()
 
         street_address = request.POST.get("fullAddress", "").strip()
         city = request.POST.get("city", "").strip()
-        province = request.POST.get("Province", "").strip()
+        province = request.POST.get("province", "").strip()
         country = request.POST.get("country", "").strip()
         postal_code = request.POST.get("pincode", "").strip()
 
-        if Users.objects.exclude(id=user_id).filter(
-            email=email,
-        ).exists():
+        # Validate required fields
+        required_fields = [
+            first_name,
+            last_name,
+            phone,
+            facility_type,
+            street_address,
+            city,
+            province,
+            country,
+            postal_code,
+        ]
+
+        if not all(required_fields):
+            messages.error(
+                request,
+                "Please fill in all required fields."
+            )
+
             return render(
                 request,
                 "organization/edit_org_profile.html",
@@ -941,18 +958,23 @@ def staff_edit_profile_view(request):
                     "staff_profile": staff_profile,
                     "facility": facility,
                     "form_data": request.POST,
-                    "error": "That email address is already in use.",
                 },
             )
 
+        # Match HTML select values with database values
         facility_type_mapping = {
-            "Hospital": "HOSPITAL",
-            "Blood Bank": "BLOOD_BANK",
+            "HOSPITAL": "HOSPITAL",
+            "BLOOD_BANK": "BLOOD_BANK",
         }
 
         database_facility_type = facility_type_mapping.get(facility_type)
 
         if database_facility_type is None:
+            messages.error(
+                request,
+                "Please select a valid facility type."
+            )
+
             return render(
                 request,
                 "organization/edit_org_profile.html",
@@ -961,26 +983,10 @@ def staff_edit_profile_view(request):
                     "staff_profile": staff_profile,
                     "facility": facility,
                     "form_data": request.POST,
-                    "error": "Please select a valid facility type.",
                 },
             )
 
-        if Facilities.objects.exclude(id=facility.id).filter(
-            name=organization,
-            postal_code=postal_code,
-        ).exists():
-            return render(
-                request,
-                "organization/edit_org_profile.html",
-                {
-                    "user": user,
-                    "staff_profile": staff_profile,
-                    "facility": facility,
-                    "form_data": request.POST,
-                    "error": "A facility with that name and postal code already exists.",
-                },
-            )
-
+        # Check whether the address has changed
         address_changed = (
             facility.street_address != street_address
             or facility.city != city
@@ -989,6 +995,7 @@ def staff_edit_profile_view(request):
             or facility.country != country
         )
 
+        # Update coordinates when the address changes
         if address_changed:
             coordinates = geocode_address(
                 street_address,
@@ -1001,16 +1008,17 @@ def staff_edit_profile_view(request):
             facility.latitude = (
                 coordinates[0] if coordinates else None
             )
+
             facility.longitude = (
                 coordinates[1] if coordinates else None
             )
 
+        # Update only editable user fields
         user.first_name = first_name
         user.last_name = last_name
-        user.email = email
         user.updated_at = timezone.now()
 
-        facility.name = organization
+        # Update only editable facility fields
         facility.phone = phone
         facility.facility_type = database_facility_type
         facility.street_address = street_address
@@ -1019,9 +1027,15 @@ def staff_edit_profile_view(request):
         facility.country = country
         facility.postal_code = postal_code
 
+        # Save changes together
         with transaction.atomic():
             user.save()
             facility.save()
+
+        messages.success(
+            request,
+            "Your organization profile has been updated successfully!"
+        )
 
         return redirect("staff_edit_profile")
 
