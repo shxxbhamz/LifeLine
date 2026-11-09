@@ -898,6 +898,7 @@ def donor_edit_profile_view(request):
 
 
 def staff_edit_profile_view(request):
+    # Check staff login session
     if (
         request.session.get("user_id") is None
         or request.session.get("role") != "HOSPITAL_STAFF"
@@ -906,6 +907,7 @@ def staff_edit_profile_view(request):
 
     user_id = request.session["user_id"]
 
+    # Get staff and facility information
     try:
         user = Users.objects.get(id=user_id)
         staff_profile = StaffProfiles.objects.get(user_id=user_id)
@@ -915,6 +917,7 @@ def staff_edit_profile_view(request):
         request.session.flush()
         return redirect("login")
 
+    # Handle profile update
     if request.method == "POST":
 
         # Editable staff information
@@ -930,6 +933,9 @@ def staff_edit_profile_view(request):
         province = request.POST.get("province", "").strip()
         country = request.POST.get("country", "").strip()
         postal_code = request.POST.get("pincode", "").strip()
+
+        # Preserve submitted values if validation fails
+        form_data = request.POST
 
         # Validate required fields
         required_fields = [
@@ -957,17 +963,19 @@ def staff_edit_profile_view(request):
                     "user": user,
                     "staff_profile": staff_profile,
                     "facility": facility,
-                    "form_data": request.POST,
+                    "form_data": form_data,
                 },
             )
 
-        # Match HTML select values with database values
+        # Validate facility type
         facility_type_mapping = {
             "HOSPITAL": "HOSPITAL",
             "BLOOD_BANK": "BLOOD_BANK",
         }
 
-        database_facility_type = facility_type_mapping.get(facility_type)
+        database_facility_type = facility_type_mapping.get(
+            facility_type
+        )
 
         if database_facility_type is None:
             messages.error(
@@ -982,7 +990,7 @@ def staff_edit_profile_view(request):
                     "user": user,
                     "staff_profile": staff_profile,
                     "facility": facility,
-                    "form_data": request.POST,
+                    "form_data": form_data,
                 },
             )
 
@@ -995,7 +1003,7 @@ def staff_edit_profile_view(request):
             or facility.country != country
         )
 
-        # Update coordinates when the address changes
+        # Update coordinates if the address changes
         if address_changed:
             coordinates = geocode_address(
                 street_address,
@@ -1005,20 +1013,19 @@ def staff_edit_profile_view(request):
                 country,
             )
 
-            facility.latitude = (
-                coordinates[0] if coordinates else None
-            )
+            if coordinates:
+                facility.latitude = coordinates[0]
+                facility.longitude = coordinates[1]
+            else:
+                facility.latitude = None
+                facility.longitude = None
 
-            facility.longitude = (
-                coordinates[1] if coordinates else None
-            )
-
-        # Update only editable user fields
+        # Update editable user information only
         user.first_name = first_name
         user.last_name = last_name
         user.updated_at = timezone.now()
 
-        # Update only editable facility fields
+        # Update editable facility information only
         facility.phone = phone
         facility.facility_type = database_facility_type
         facility.street_address = street_address
@@ -1027,11 +1034,30 @@ def staff_edit_profile_view(request):
         facility.country = country
         facility.postal_code = postal_code
 
-        # Save changes together
-        with transaction.atomic():
-            user.save()
-            facility.save()
+        # Save everything together
+        try:
+            with transaction.atomic():
+                user.save()
+                facility.save()
 
+        except Exception:
+            messages.error(
+                request,
+                "Something went wrong while updating your profile. Please try again."
+            )
+
+            return render(
+                request,
+                "organization/edit_org_profile.html",
+                {
+                    "user": user,
+                    "staff_profile": staff_profile,
+                    "facility": facility,
+                    "form_data": form_data,
+                },
+            )
+
+        # Show success notification
         messages.success(
             request,
             "Your organization profile has been updated successfully!"
@@ -1039,6 +1065,7 @@ def staff_edit_profile_view(request):
 
         return redirect("staff_edit_profile")
 
+    # Display profile page
     return render(
         request,
         "organization/edit_org_profile.html",
