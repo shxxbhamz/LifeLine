@@ -389,3 +389,80 @@ LifeLine Emergency Team
     email_thread.start()
 
     return True
+
+
+def send_donation_thank_you_email(
+    user_email,
+    first_name,
+    facility_name,
+    donation_type,
+):
+    """Send a life-saving congratulatory email after donation is recorded."""
+
+    if not user_email:
+        logger.error("Donation email skipped: recipient email is empty.")
+        return False
+
+    api_key = getattr(settings, "BREVO_API_KEY", None)
+    sender_email = getattr(settings, "BREVO_SENDER_EMAIL", None)
+    sender_name = getattr(
+        settings,
+        "BREVO_SENDER_NAME",
+        "LifeLine Emergency Team",
+    )
+
+    if not api_key or not sender_email:
+        logger.error("Brevo email configuration is missing.")
+        return False
+
+    donor_name = first_name or "Donor"
+
+    donation_label = (
+        donation_type.replace("_", " ").title()
+        if donation_type
+        else "Blood"
+    )
+
+    subject = "Congratulations! Your Donation Helped Save a Life | LifeLine"
+
+    message = f"""Hello {donor_name},
+
+Congratulations!
+
+We are delighted to let you know that your {donation_label} donation has been used to help save someone's life!
+
+Because of your generosity, a person in need received the life-saving support they needed. Your decision to donate has made a real difference and given someone another chance at life.
+
+You may never meet the person whose life you helped save, but your kindness will always matter.
+
+Thank you for being a hero. We are proud to have you as part of the LifeLine community.
+
+One donation. One life changed. Your kindness made it possible.
+
+Warm regards,
+LifeLine Emergency Team
+"""
+
+    payload = {
+        "sender": {
+            "name": sender_name,
+            "email": sender_email,
+        },
+        "to": [
+            {
+                "email": user_email,
+                "name": donor_name,
+            }
+        ],
+        "subject": subject,
+        "textContent": message,
+    }
+
+    email_thread = threading.Thread(
+        target=_send_email_async,
+        args=(payload, api_key),
+        daemon=True,
+    )
+    email_thread.start()
+
+    return True
