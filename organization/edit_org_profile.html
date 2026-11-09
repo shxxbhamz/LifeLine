@@ -1,333 +1,421 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Edit Organization Profile | LifeLine</title>
+    <title>LifeLine - Edit Organization Profile</title>
 
+    <!-- Original centralized stylesheet -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <style>
+        /* Locked fields */
+        .locked-field {
+            background-color: #f1f1f1;
+            cursor: pointer;
+        }
+
+        /* Custom popup */
+        .custom-popup-overlay {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .custom-popup {
+            background: white;
+            width: 100%;
+            max-width: 420px;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .custom-popup p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .custom-popup button {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .popup-success {
+            border-top: 5px solid #2e9d62;
+        }
+
+        .popup-error {
+            border-top: 5px solid #d9534f;
+        }
+
+        .popup-info {
+            border-top: 5px solid #2878a8;
+        }
+    </style>
 </head>
 
 <body>
 
-    <main class="edit-profile-container">
+    <!-- NAVIGATION BAR -->
+    <header>
 
-        <header class="edit-profile-header">
-            <h1>Edit Organization Profile</h1>
-            <p>Update your staff and organization information.</p>
-        </header>
+        <a href="{% url 'home' %}" class="logo-link">
+            <img src="{% static 'img/lifeline-logo.png' %}"
+                 alt="LifeLine Logo"
+                 class="brand-logo">
+        </a>
 
-        <form method="POST" action="{% url 'staff_edit_profile' %}">
-            {% csrf_token %}
+        <nav>
+            <ul>
+                <li>
+                    <a href="{% url 'home' %}#about">About Us</a>
+                </li>
 
-            <div class="edit-form-grid">
+                <li>
+                    <a href="{% url 'home' %}">Home</a>
+                </li>
+            </ul>
+        </nav>
 
-                <!-- First Name -->
-                <div class="edit-form-group">
-                    <label for="firstName">First Name</label>
-                    <input
-                        type="text"
-                        id="firstName"
-                        name="firstName"
-                        value="{{ user.first_name }}"
-                        required
-                    >
+    </header>
+
+
+    <!-- MAIN CONTENT AREA -->
+    <main>
+
+        <div class="auth-container">
+
+            <h2>Edit Organization Profile</h2>
+
+            <form action="{% url 'staff_edit_profile' %}"
+                  method="POST"
+                  class="auth-form">
+
+                {% csrf_token %}
+
+                <div class="form-grid">
+
+                    <!-- EMPLOYEE ID - LOCKED -->
+                    <div class="form-group">
+
+                        <label for="username">Employee ID:</label>
+
+                        <input type="text"
+                               id="username"
+                               value="{{ user.username }}"
+                               class="locked-field"
+                               readonly
+                               onclick="showLockedPopup()">
+
+                    </div>
+
+
+                    <!-- WORK EMAIL - LOCKED -->
+                    <div class="form-group">
+
+                        <label for="email">Work Email Address:</label>
+
+                        <input type="email"
+                               id="email"
+                               value="{{ user.email }}"
+                               class="locked-field"
+                               readonly
+                               onclick="showLockedPopup()">
+
+                    </div>
+
+
+                    <!-- ORGANIZATION NAME - LOCKED -->
+                    <div class="form-group full-width">
+
+                        <label for="organization">Organization Name:</label>
+
+                        <input type="text"
+                               id="organization"
+                               value="{{ facility.name }}"
+                               class="locked-field"
+                               readonly
+                               onclick="showLockedPopup()">
+
+                    </div>
+
+
+                    <!-- FIRST NAME -->
+                    <div class="form-group">
+
+                        <label for="firstName">First Name:</label>
+
+                        <input type="text"
+                               id="firstName"
+                               name="firstName"
+                               value="{{ form_data.firstName|default:user.first_name }}"
+                               required>
+
+                    </div>
+
+
+                    <!-- LAST NAME -->
+                    <div class="form-group">
+
+                        <label for="lastName">Last Name:</label>
+
+                        <input type="text"
+                               id="lastName"
+                               name="lastName"
+                               value="{{ form_data.lastName|default:user.last_name }}"
+                               required>
+
+                    </div>
+
+
+                    <!-- ORGANIZATION PHONE NUMBER -->
+                    <div class="form-group">
+
+                        <label for="phone">Organization Phone Number:</label>
+
+                        <input type="tel"
+                               id="phone"
+                               name="phone"
+                               value="{{ form_data.phone|default:facility.phone }}"
+                               required>
+
+                    </div>
+
+
+                    <!-- FACILITY TYPE -->
+                    <div class="form-group">
+
+                        <label for="facilityType">Facility Type:</label>
+
+                        <select id="facilityType"
+                                name="facilityType"
+                                required>
+
+                            <option value="" disabled
+                                {% if not form_data.facilityType and not facility.facility_type %}selected{% endif %}>
+                                Select facility type
+                            </option>
+
+                            <option value="HOSPITAL"
+                                {% if form_data.facilityType == "HOSPITAL" or not form_data.facilityType and facility.facility_type == "HOSPITAL" %}selected{% endif %}>
+                                Hospital
+                            </option>
+
+                            <option value="BLOOD_BANK"
+                                {% if form_data.facilityType == "BLOOD_BANK" or not form_data.facilityType and facility.facility_type == "BLOOD_BANK" %}selected{% endif %}>
+                                Blood Bank
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- FULL ADDRESS -->
+                    <div class="form-group full-width">
+
+                        <label for="fullAddress">Full Address:</label>
+
+                        <input type="text"
+                               id="fullAddress"
+                               name="fullAddress"
+                               value="{{ form_data.fullAddress|default:facility.street_address }}"
+                               required>
+
+                    </div>
+
+
+                    <!-- CITY -->
+                    <div class="form-group">
+
+                        <label for="city">City:</label>
+
+                        <input type="text"
+                               id="city"
+                               name="city"
+                               value="{{ form_data.city|default:facility.city }}"
+                               required>
+
+                    </div>
+
+
+                    <!-- PROVINCE -->
+                    <div class="form-group">
+
+                        <label for="province">Province:</label>
+
+                        <input type="text"
+                               id="province"
+                               name="province"
+                               value="{{ form_data.province|default:facility.province }}"
+                               required>
+
+                    </div>
+
+
+                    <!-- COUNTRY -->
+                    <div class="form-group">
+
+                        <label for="country">Country:</label>
+
+                        <input type="text"
+                               id="country"
+                               name="country"
+                               value="{{ form_data.country|default:facility.country }}"
+                               required>
+
+                    </div>
+
+
+                    <!-- POSTAL CODE -->
+                    <div class="form-group">
+
+                        <label for="pincode">Pincode / Postal Code:</label>
+
+                        <input type="text"
+                               id="pincode"
+                               name="pincode"
+                               value="{{ form_data.pincode|default:facility.postal_code }}"
+                               required>
+
+                    </div>
+
                 </div>
 
-                <!-- Last Name -->
-                <div class="edit-form-group">
-                    <label for="lastName">Last Name</label>
-                    <input
-                        type="text"
-                        id="lastName"
-                        name="lastName"
-                        value="{{ user.last_name }}"
-                        required
-                    >
+
+                <!-- SAVE BUTTON -->
+                <div>
+
+                    <button type="submit" class="btn-submit">
+                        Save Changes
+                    </button>
+
                 </div>
 
-                <!-- Employee ID / Username (LOCKED) -->
-                <div class="edit-form-group">
-                    <label for="username">Employee ID (Username)</label>
-                    <input
-                        type="text"
-                        id="username"
-                        value="{{ user.username }}"
-                        class="locked-field"
-                        readonly
-                        tabindex="0"
-                        data-locked-field="Employee ID (Username)"
-                    >
-                    <small>This field cannot be changed directly.</small>
+
+                <!-- FOOTER LINK -->
+                <div class="auth-footer">
+
+                    <a href="{% url 'home' %}">Back to Home</a>
+
                 </div>
 
-                <!-- Work Email (LOCKED) -->
-                <div class="edit-form-group">
-                    <label for="email">Work Email Address</label>
-                    <input
-                        type="email"
-                        id="email"
-                        value="{{ user.email }}"
-                        class="locked-field"
-                        readonly
-                        tabindex="0"
-                        data-locked-field="Work Email Address"
-                    >
-                    <small>This field cannot be changed directly.</small>
-                </div>
+            </form>
 
-                <!-- Organization Name (LOCKED) -->
-                <div class="edit-form-group">
-                    <label for="organization">Organization Name</label>
-                    <input
-                        type="text"
-                        id="organization"
-                        value="{{ facility.name }}"
-                        class="locked-field"
-                        readonly
-                        tabindex="0"
-                        data-locked-field="Organization Name"
-                    >
-                    <small>This field cannot be changed directly.</small>
-                </div>
+        </div>
 
-                <!-- Organization Phone -->
-                <div class="edit-form-group">
-                    <label for="phone">Organization Phone Number</label>
-                    <input
-                        type="tel"
-                        id="phone"
-                        name="phone"
-                        value="{{ facility.phone }}"
-                        required
-                    >
-                </div>
-
-                <!-- Facility Type -->
-                <div class="edit-form-group">
-                    <label for="facilityType">Facility Type</label>
-                    <select id="facilityType" name="facilityType" required>
-                        <option value="">Select Facility Type</option>
-
-                        <option value="HOSPITAL"
-                            {% if facility.facility_type == "HOSPITAL" %}selected{% endif %}>
-                            Hospital
-                        </option>
-
-                        <option value="BLOOD_BANK"
-                            {% if facility.facility_type == "BLOOD_BANK" %}selected{% endif %}>
-                            Blood Bank
-                        </option>
-                    </select>
-                </div>
-
-                <!-- Full Address -->
-                <div class="edit-form-group full-width">
-                    <label for="fullAddress">Full Address</label>
-                    <input
-                        type="text"
-                        id="fullAddress"
-                        name="fullAddress"
-                        value="{{ facility.street_address }}"
-                        required
-                    >
-                </div>
-
-                <!-- City -->
-                <div class="edit-form-group">
-                    <label for="city">City</label>
-                    <input
-                        type="text"
-                        id="city"
-                        name="city"
-                        value="{{ facility.city }}"
-                        required
-                    >
-                </div>
-
-                <!-- Province -->
-                <div class="edit-form-group">
-                    <label for="province">Province</label>
-                    <input
-                        type="text"
-                        id="province"
-                        name="province"
-                        value="{{ facility.province }}"
-                        required
-                    >
-                </div>
-
-                <!-- Country -->
-                <div class="edit-form-group">
-                    <label for="country">Country</label>
-                    <input
-                        type="text"
-                        id="country"
-                        name="country"
-                        value="{{ facility.country }}"
-                        required
-                    >
-                </div>
-
-                <!-- Postal Code -->
-                <div class="edit-form-group">
-                    <label for="pincode">Pincode / Postal Code</label>
-                    <input
-                        type="text"
-                        id="pincode"
-                        name="pincode"
-                        value="{{ facility.postal_code }}"
-                        required
-                    >
-                </div>
-
-            </div>
-
-            <div class="edit-form-actions">
-                <button type="submit" class="edit-save-button">
-                    Save Changes
-                </button>
-
-                <a href="{% url 'staff_dashboard' %}" class="edit-cancel-button">
-                    Cancel
-                </a>
-            </div>
-
-        </form>
     </main>
 
 
-    <!-- Custom Popup -->
-    <div class="custom-modal-overlay" id="customModal">
+    <!-- FOOTER -->
+    <footer>
 
-        <div class="custom-modal" role="dialog"
-             aria-modal="true" aria-labelledby="modalTitle">
+        <p>
+            © 2026 LifeLine. Emergency Rapid-Response Blood Dispatch System.
+            All rights reserved.
+        </p>
 
-            <div class="modal-icon" id="modalIcon">!</div>
+    </footer>
 
-            <h2 id="modalTitle">Notification</h2>
 
-            <p id="modalMessage"></p>
+    <!-- CUSTOM TEXT-ONLY POPUP -->
+    <div class="custom-popup-overlay" id="customPopupOverlay">
 
-            <div class="modal-contact" id="modalContact">
-                <p>Contact LifeLine support:</p>
+        <div class="custom-popup" id="customPopup">
 
-                <a href="mailto:emergency.lifelineservices999@gmail.com">
-                    emergency.lifelineservices999@gmail.com
-                </a>
-            </div>
+            <p id="popupMessage"></p>
 
-            <button type="button" class="modal-close-button" id="modalCloseBtn">
-                Okay
+            <button type="button" onclick="closePopup()">
+                OK
             </button>
 
         </div>
+
     </div>
 
 
-    <!-- Django Messages -->
-    <div id="djangoMessages" hidden>
-        {% for message in messages %}
-            <div
-                class="django-message"
-                data-message="{{ message|escape }}"
-                data-type="{{ message.tags }}"
-            ></div>
-        {% endfor %}
-    </div>
-
-
+    <!-- JAVASCRIPT -->
     <script>
-        const customModal = document.getElementById("customModal");
-        const modalTitle = document.getElementById("modalTitle");
-        const modalMessage = document.getElementById("modalMessage");
-        const modalContact = document.getElementById("modalContact");
-        const modalIcon = document.getElementById("modalIcon");
-        const modalCloseBtn = document.getElementById("modalCloseBtn");
 
-        function showModal(title, message, showContact = false, type = "info") {
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
-            modalContact.style.display = showContact ? "block" : "none";
+        // Show custom popup
+        function showPopup(message, type) {
 
-            if (type === "success") {
-                modalIcon.textContent = "✓";
-                modalIcon.className = "modal-icon success-icon";
-            } else if (type === "error") {
-                modalIcon.textContent = "!";
-                modalIcon.className = "modal-icon error-icon";
-            } else {
-                modalIcon.textContent = "!";
-                modalIcon.className = "modal-icon info-icon";
-            }
+            const overlay = document.getElementById("customPopupOverlay");
+            const popup = document.getElementById("customPopup");
+            const popupMessage = document.getElementById("popupMessage");
 
-            customModal.classList.add("active");
-            modalCloseBtn.focus();
+            popupMessage.textContent = message;
+
+            popup.className = "custom-popup popup-" + type;
+
+            overlay.style.display = "flex";
         }
 
-        function closeModal() {
-            customModal.classList.remove("active");
+
+        // Close popup
+        function closePopup() {
+
+            document.getElementById("customPopupOverlay").style.display = "none";
+
         }
 
-        modalCloseBtn.addEventListener("click", closeModal);
-
-        customModal.addEventListener("click", function(event) {
-            if (event.target === customModal) {
-                closeModal();
-            }
-        });
-
-        document.addEventListener("keydown", function(event) {
-            if (event.key === "Escape" && customModal.classList.contains("active")) {
-                closeModal();
-            }
-        });
 
         // Locked fields popup
-        document.querySelectorAll("[data-locked-field]").forEach(function(field) {
-            field.addEventListener("click", function() {
-                const fieldName = this.dataset.lockedField;
+        function showLockedPopup() {
 
-                showModal(
-                    "Field Cannot Be Changed",
-                    fieldName + " cannot be changed directly from your profile. Please contact LifeLine support to request an update.",
-                    true,
-                    "info"
-                );
-            });
+            showPopup(
+                "This information cannot be changed here. Please contact LifeLine Support at emergency.lifelineservices999@gmail.com for assistance.",
+                "info"
+            );
 
-            field.addEventListener("keydown", function(event) {
-                if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    this.click();
-                }
-            });
+        }
+
+
+        // Django messages
+        const djangoMessages = [
+
+            {% for message in messages %}
+
+                {
+                    text: "{{ message|escapejs }}",
+                    type: "{% if 'success' in message.tags %}success{% else %}error{% endif %}"
+                },
+
+            {% endfor %}
+
+        ];
+
+
+        // Display Django notifications
+        djangoMessages.forEach(function(message) {
+
+            showPopup(message.text, message.type);
+
         });
 
-        // Django success and error messages
-        document.querySelectorAll(".django-message").forEach(function(element) {
-            const message = element.dataset.message;
-            const messageType = element.dataset.type || "";
 
-            let title = "Notification";
-            let type = "info";
+        // Display additional view error, if provided
+        {% if error %}
 
-            if (messageType.includes("success")) {
-                title = "Success";
-                type = "success";
-            } else if (
-                messageType.includes("error") ||
-                messageType.includes("danger")
-            ) {
-                title = "Something Went Wrong";
-                type = "error";
-            }
+            showPopup(
+                "{{ error|escapejs }}",
+                "error"
+            );
 
-            showModal(title, message, false, type);
-        });
+        {% endif %}
+
     </script>
 
 </body>
