@@ -214,19 +214,42 @@
 
 
                                 <!-- Action Button -->
-                                <td class="text-right action-btns" id="action-cell-{{ match.id }}">
-                                    {% if match.is_used %}
-                                        <button class="btn-secondary btn-sm" type="button" disabled style="background-color: #64748b; color: white;">
-                                            Used
-                                        </button>
+                                <!-- Action Button -->
+                                <td class="text-right action-btns">
+
+                                    {% if appointment.request_match %}
+
+                                    {% if appointment.request_match.is_used %}
+
+                                    <button class="btn-secondary btn-sm" type="button" disabled
+                                        style="background-color: #64748b; color: white;">
+                                        Used
+                                    </button>
+
                                     {% else %}
-                                        <form action="{% url 'mark_donation_used' match.id %}" method="POST" style="display: inline;">
-                                            {% csrf_token %}
-                                            <button class="btn-success btn-sm" type="submit" onclick="return confirm('Are you sure you want to mark this donation as used?');">
-                                                Use Donation
-                                            </button>
-                                        </form>
+
+                                    <form action="{% url 'mark_donation_used' appointment.request_match.id %}"
+                                        method="POST" style="display: inline;">
+
+                                        {% csrf_token %}
+
+                                        <button class="btn-success btn-sm" type="submit"
+                                            onclick="return confirm('Are you sure you want to mark this donation as used?');">
+                                            Use Donation
+                                        </button>
+
+                                    </form>
+
                                     {% endif %}
+
+                                    {% else %}
+
+                                    <button class="btn-secondary btn-sm" type="button" disabled>
+                                        Not Applicable
+                                    </button>
+
+                                    {% endif %}
+
                                 </td>
 
                             </tr>

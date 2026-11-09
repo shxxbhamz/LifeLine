@@ -184,7 +184,7 @@ def staff_audit_log(request):
     # Start with an empty queryset
     confirmed_appointments = Appointments.objects.none()
 
-    # Only show donations belonging to this staff member's facility
+    # Show confirmed donations belonging to this facility
     if staff_profile.facility:
         confirmed_appointments = (
             Appointments.objects.filter(
@@ -195,6 +195,7 @@ def staff_audit_log(request):
                 "donor",
                 "donor__user",
                 "facility",
+                "request_match",
             )
             .order_by("-scheduled_at")
         )
@@ -204,12 +205,12 @@ def staff_audit_log(request):
         "confirmed_appointments": confirmed_appointments,
     }
 
+    
     return render(
         request,
         "organization/audit_log.html",
         context,
     )
-
 def staff_create_emergency_request_view(request):
     # Only authenticated hospital staff may create emergency requests.
     if (
