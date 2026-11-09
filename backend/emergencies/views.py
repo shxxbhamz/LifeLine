@@ -1,18 +1,20 @@
+
 import uuid
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.utils import timezone
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.db.models import Count
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
 
-from appointments.models import Appointments
+from appointments.models import Appointments, Donations
 from core.models import StaffProfiles
+from core.utils import send_donation_thank_you_email
 from inventory.models import BloodInventory, InventoryTransactions
+
 from .models import EmergencyRequests, RequestMatches
 from .matching import run_emergency_matching
 
