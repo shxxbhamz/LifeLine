@@ -42,7 +42,7 @@
             <h1>Edit Profile</h1>
         </div>
 
-        <form method="POST" class="profile-form">
+        <form method="POST" enctype="multipart/form-data" class="profile-form">
             {% csrf_token %}
 
             <!-- First Name and Last Name -->
@@ -140,8 +140,11 @@
             <!-- Profile Picture -->
             <div class="profile-upload-container">
                 <label for="profilePicture" class="avatar-label">
-                    <img src="{% static 'donor/image/default-avatar.png' %}"
-                         alt="Current Profile" class="current-avatar">
+                    <img
+    src="{% if profile_image_url %}{{ profile_image_url }}{% else %}{% static 'donor/image/default-avatar.png' %}{% endif %}"
+    alt="Current Profile"
+    class="current-avatar"
+>
                     <span class="change-photo-link">Change Profile Picture</span>
                 </label>
 

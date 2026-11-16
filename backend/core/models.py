@@ -81,6 +81,12 @@ class DonorProfiles(models.Model):
     emergency_available = models.BooleanField()
     country = models.CharField(max_length=80)
 
+    profile_image_key = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+
     class Meta:
         managed = False
         db_table = "donor_profiles"
