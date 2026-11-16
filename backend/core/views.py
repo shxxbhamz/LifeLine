@@ -15,7 +15,10 @@ from .geocoding import geocode_address
 from .models import DonorProfiles, Facilities, StaffProfiles, Users
 from .utils import send_welcome_email
 from django.contrib import messages
-
+from .storage import (
+    upload_donor_profile_image,
+    get_donor_profile_image_url,
+)
 logger = logging.getLogger(__name__)
 
 
@@ -760,8 +763,9 @@ def organization_signup_view(request):
     return redirect("login")
 
 #Rimjhim Bhatnagar
+
 def donor_edit_profile_view(request):
-    # Check donor session
+    # Check donor login session.
     if (
         request.session.get("user_id") is None
         or request.session.get("role") != "DONOR"
@@ -770,7 +774,7 @@ def donor_edit_profile_view(request):
 
     user_id = request.session["user_id"]
 
-    # Retrieve donor and profile information
+    # Retrieve donor and user records.
     try:
         user = Users.objects.get(id=user_id)
         donor_profile = DonorProfiles.objects.get(user_id=user_id)
@@ -779,15 +783,25 @@ def donor_edit_profile_view(request):
         request.session.flush()
         return redirect("login")
 
-    # Handle profile updates
+    # Generate the current profile picture URL.
+    try:
+        profile_image_url = get_donor_profile_image_url(
+            donor_profile.profile_image_key
+        )
+    except Exception:
+        logger.exception(
+            "Could not generate donor profile image URL for user ID %s",
+            user_id,
+        )
+        profile_image_url = None
+
     if request.method == "POST":
 
-        # Editable user information
+        # Read submitted form information.
         first_name = request.POST.get("firstName", "").strip()
         last_name = request.POST.get("lastName", "").strip()
         email = request.POST.get("email", "").strip().lower()
 
-        # Editable donor information
         phone = request.POST.get("phone", "").strip()
         address = request.POST.get("address", "").strip()
         city = request.POST.get("city", "").strip()
@@ -795,7 +809,24 @@ def donor_edit_profile_view(request):
         country = request.POST.get("country", "").strip()
         postal_code = request.POST.get("postalCode", "").strip()
 
-        # Required field validation
+        # Read uploaded profile picture.
+        uploaded_image = request.FILES.get("profilePicture")
+
+        # Reuse this context when displaying validation errors.
+        def render_profile_error(error_message):
+            return render(
+                request,
+                "donor/edit_dor_profile.html",
+                {
+                    "user": user,
+                    "donor_profile": donor_profile,
+                    "profile_image_url": profile_image_url,
+                    "form_data": request.POST,
+                    "error": error_message,
+                },
+            )
+
+        # Validate required fields.
         if not all([
             first_name,
             last_name,
@@ -807,33 +838,37 @@ def donor_edit_profile_view(request):
             country,
             postal_code,
         ]):
-            return render(
-                request,
-                "donor/edit_dor_profile.html",
-                {
-                    "user": user,
-                    "donor_profile": donor_profile,
-                    "form_data": request.POST,
-                    "error": "Please fill in all required fields.",
-                },
+            return render_profile_error(
+                "Please fill in all required fields."
             )
 
-        # Check whether email is already used by another account
+        # Check whether another user already uses this email.
         if Users.objects.exclude(id=user_id).filter(
             email=email
         ).exists():
-            return render(
-                request,
-                "donor/edit_dor_profile.html",
-                {
-                    "user": user,
-                    "donor_profile": donor_profile,
-                    "form_data": request.POST,
-                    "error": "That email address is already in use.",
-                },
+            return render_profile_error(
+                "That email address is already in use."
             )
 
-        # Check whether donor address has changed
+        # Validate the uploaded profile image.
+        if uploaded_image:
+            allowed_types = [
+                "image/jpeg",
+                "image/png",
+                "image/webp",
+            ]
+
+            if uploaded_image.content_type not in allowed_types:
+                return render_profile_error(
+                    "Please upload a JPG, PNG, or WEBP image."
+                )
+
+            if uploaded_image.size > 5 * 1024 * 1024:
+                return render_profile_error(
+                    "Your profile picture must be smaller than 5 MB."
+                )
+
+        # Check whether the donor's address has changed.
         address_changed = (
             donor_profile.street_address != address
             or donor_profile.city != city
@@ -842,9 +877,8 @@ def donor_edit_profile_view(request):
             or donor_profile.country != country
         )
 
-        # Automatically retrieve new latitude and longitude
+        # Update coordinates if the address changed.
         if address_changed:
-
             coordinates = geocode_address(
                 address,
                 city,
@@ -853,18 +887,44 @@ def donor_edit_profile_view(request):
                 country,
             )
 
-            # Update coordinates only if geocoding succeeds
             if coordinates:
                 donor_profile.latitude = coordinates[0]
                 donor_profile.longitude = coordinates[1]
 
-        # Update Users table
+        # Upload the new profile picture to Neon Object Storage.
+        if uploaded_image:
+            try:
+                image_key = upload_donor_profile_image(
+                    uploaded_image,
+                    user.username,
+                )
+
+                # Save the returned object key in the donor record.
+                donor_profile.profile_image_key = image_key
+
+                # Generate a URL for displaying the new image.
+                profile_image_url = get_donor_profile_image_url(
+                    image_key
+                )
+
+            except Exception:
+                logger.exception(
+                    "Profile image upload failed for user ID %s",
+                    user_id,
+                )
+
+                return render_profile_error(
+                    "Your profile picture could not be uploaded. "
+                    "Please check your storage configuration and try again."
+                )
+
+        # Update user information.
         user.first_name = first_name
         user.last_name = last_name
         user.email = email
         user.updated_at = timezone.now()
 
-        # Update DonorProfiles table
+        # Update donor information.
         donor_profile.phone = phone
         donor_profile.street_address = address
         donor_profile.city = city
@@ -872,12 +932,11 @@ def donor_edit_profile_view(request):
         donor_profile.country = country
         donor_profile.postal_code = postal_code
 
-        # Save both tables together
+        # Save both database records.
         with transaction.atomic():
             user.save()
             donor_profile.save()
 
-        # Success notification
         messages.success(
             request,
             "Your profile has been updated successfully."
@@ -885,15 +944,17 @@ def donor_edit_profile_view(request):
 
         return redirect("donor_edit_profile")
 
-    # Display current donor information
+    # Display the edit profile page.
     return render(
         request,
         "donor/edit_dor_profile.html",
         {
             "user": user,
             "donor_profile": donor_profile,
+            "profile_image_url": profile_image_url,
         },
     )
+
 #Rimjhim Bhatnagar
 
 
