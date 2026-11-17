@@ -1,14 +1,39 @@
 
+import logging
 import re
-import boto3
 
+import boto3
+from botocore.config import Config
 from django.conf import settings
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_neon_storage_client():
     """
-    Creates an S3-compatible connection to Neon Object Storage.
+    Create and return an S3-compatible client for Neon Object Storage.
     """
+
+    required_settings = {
+        "AWS_S3_ENDPOINT_URL": settings.AWS_S3_ENDPOINT_URL,
+        "AWS_ACCESS_KEY_ID": settings.AWS_ACCESS_KEY_ID,
+        "AWS_SECRET_ACCESS_KEY": settings.AWS_SECRET_ACCESS_KEY,
+        "AWS_S3_REGION_NAME": settings.AWS_S3_REGION_NAME,
+        "AWS_STORAGE_BUCKET_NAME": settings.AWS_STORAGE_BUCKET_NAME,
+    }
+
+    missing_settings = [
+        name
+        for name, value in required_settings.items()
+        if not value
+    ]
+
+    if missing_settings:
+        raise ValueError(
+            "Missing Neon storage settings: "
+            + ", ".join(missing_settings)
+        )
 
     return boto3.client(
         "s3",
@@ -16,55 +41,86 @@ def get_neon_storage_client():
         aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
         region_name=settings.AWS_S3_REGION_NAME,
+        config=Config(
+            signature_version="s3v4",
+            s3={
+                "addressing_style": "path",
+            },
+            request_checksum_calculation="when_required",
+            response_checksum_validation="when_required",
+        ),
     )
 
 
 def upload_donor_profile_image(uploaded_file, username):
     """
-    Uploads or replaces a donor profile image in Neon Object Storage.
-    Uses the same object key for each donor, so a new upload replaces
-    their previous profile image.
+    Upload a donor profile picture to Neon Object Storage.
+
+    Returns the object key to save in donor_profiles.profile_image_key.
     """
 
-    bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+    if not uploaded_file:
+        raise ValueError("No profile picture was provided.")
 
-    if not bucket_name:
-        raise ValueError("Neon storage bucket name is not configured.")
+    allowed_types = {
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+    }
 
-    if not uploaded_file.content_type or not uploaded_file.content_type.startswith("image/"):
-        raise ValueError("Please upload a valid image.")
+    if uploaded_file.content_type not in allowed_types:
+        raise ValueError(
+            "Unsupported image format. "
+            "Please upload a JPG, PNG, or WEBP image."
+        )
 
-    # Keep the username safe for use in an object key.
+    max_file_size = 5 * 1024 * 1024
+
+    if uploaded_file.size > max_file_size:
+        raise ValueError(
+            "Image must be smaller than 5 MB."
+        )
+
     safe_username = re.sub(
         r"[^a-zA-Z0-9_-]",
         "_",
-        username.strip()
+        username.strip(),
     )
 
     if not safe_username:
         raise ValueError("Invalid donor username.")
 
-    # Fixed key means uploading again replaces the previous image.
-    image_key = f"donor-profiles/{safe_username}/profile-image"
+    bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+
+    # Each donor has one profile picture.
+    # Uploading a replacement overwrites the existing object.
+    image_key = (
+        f"donor-profiles/{safe_username}/profile-image"
+    )
 
     client = get_neon_storage_client()
 
     uploaded_file.seek(0)
 
-    client.upload_fileobj(
-        uploaded_file,
-        bucket_name,
+    client.put_object(
+        Bucket=bucket_name,
+        Key=image_key,
+        Body=uploaded_file.read(),
+        ContentType=uploaded_file.content_type,
+    )
+
+    logger.info(
+        "Donor profile picture uploaded successfully. Key: %s",
         image_key,
-        ExtraArgs={
-            "ContentType": uploaded_file.content_type,
-        },
     )
 
     return image_key
 
+
 def get_donor_profile_image_url(image_key):
     """
-    Generate a temporary URL for a donor's profile image.
+    Generate a temporary secure URL for a private donor profile picture.
+    The URL expires after one hour.
     """
 
     if not image_key:
@@ -73,7 +129,7 @@ def get_donor_profile_image_url(image_key):
     client = get_neon_storage_client()
 
     return client.generate_presigned_url(
-        "get_object",
+        ClientMethod="get_object",
         Params={
             "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
             "Key": image_key,
