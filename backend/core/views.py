@@ -237,6 +237,7 @@ def donor_dashboard_view(request):
     )
 
 def donor_active_requests_view(request):
+    # Only logged-in donors can access the Active Requests page.
     if (
         request.session.get("user_id") is None
         or request.session.get("role") != "DONOR"
@@ -250,6 +251,21 @@ def donor_active_requests_view(request):
             "user"
         ).get(user_id=user_id)
 
+        # Get the donor's uploaded profile picture.
+        profile_image_url = None
+
+        if donor_profile.profile_image_key:
+            try:
+                profile_image_url = get_donor_profile_image_url(
+                    donor_profile.profile_image_key
+                )
+            except Exception:
+                logger.exception(
+                    "Could not generate donor profile image URL: user_id=%s",
+                    user_id,
+                )
+
+        # Keep the existing emergency request matching.
         emergency_requests = EmergencyRequests.objects.filter(
             required_blood_type__iexact=donor_profile.blood_type,
             status__iexact="ACTIVE",
@@ -259,7 +275,8 @@ def donor_active_requests_view(request):
 
         context = {
             "emergency_requests": emergency_requests,
-            "donor_profile": donor_profile,
+            "donor_name": donor_profile.user.first_name or "Donor",
+            "profile_image_url": profile_image_url,
         }
 
         return render(
@@ -274,16 +291,10 @@ def donor_active_requests_view(request):
             "donor/active_requests.html",
             {
                 "emergency_requests": [],
-                "donor_profile": None,
+                "donor_name": "Donor",
+                "profile_image_url": None,
             },
         )
-
-    except Exception:
-        logger.exception(
-            "Error loading donor active requests. User ID: %s",
-            user_id,
-        )
-        raise
 
 # Heer patel#
 
