@@ -254,16 +254,23 @@ def donor_active_requests_view(request):
         # Get the donor's uploaded profile picture.
         profile_image_url = None
 
-        if donor_profile.profile_image_key:
-            try:
-                profile_image_url = get_donor_profile_image_url(
-                    donor_profile.profile_image_key
-                )
-            except Exception:
-                logger.exception(
-                    "Could not generate donor profile image URL: user_id=%s",
-                    user_id,
-                )
+if donor_profile.profile_image_key:
+    try:
+        profile_image_url = get_donor_profile_image_url(
+            donor_profile.profile_image_key
+        )
+
+        logger.info(
+            "DONOR IMAGE URL GENERATED: user_id=%s, url_exists=%s",
+            user_id,
+            bool(profile_image_url),
+        )
+
+    except Exception:
+        logger.exception(
+            "Could not generate donor profile image URL: user_id=%s",
+            user_id,
+        )
 
         # Keep the existing emergency request matching.
         emergency_requests = EmergencyRequests.objects.filter(
