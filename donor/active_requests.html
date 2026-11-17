@@ -23,10 +23,12 @@
       <!-- User Profile & Hamburger Menu Container -->
       <div class="header-actions">
         <!-- Dynamically displays the logged-in user's name -->
-        <span class="donor-name">{{ donor_name|default:"Donor Name" }}</span> 
+        <span class="donor-name">{{ donor_name|default:"Donor Name" }}</span>
 
         <div class="dropdown" tabindex="0">
-          <img src="{% static 'donor/image/default-avatar.png' %}" alt="Donor Profile" class="donor-avatar"
+          <img
+            src="{% if profile_image_url %}{{ profile_image_url }}{% else %}{% static 'donor/image/default-avatar.png' %}{% endif %}"
+            alt="Donor Profile" class="donor-avatar"
             style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;">
           <div class="dropdown-content">
             <a href="{% url 'donor_edit_profile' %}">Edit Profile</a>
