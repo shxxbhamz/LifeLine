@@ -251,28 +251,28 @@ def donor_active_requests_view(request):
             "user"
         ).get(user_id=user_id)
 
-        # Get the donor's uploaded profile picture.
+        # Get the donor's uploaded profile picture from Neon.
         profile_image_url = None
 
-if donor_profile.profile_image_key:
-    try:
-        profile_image_url = get_donor_profile_image_url(
-            donor_profile.profile_image_key
-        )
+        if donor_profile.profile_image_key:
+            try:
+                profile_image_url = get_donor_profile_image_url(
+                    donor_profile.profile_image_key
+                )
 
-        logger.info(
-            "DONOR IMAGE URL GENERATED: user_id=%s, url_exists=%s",
-            user_id,
-            bool(profile_image_url),
-        )
+                logger.info(
+                    "DONOR IMAGE URL GENERATED: user_id=%s, url_exists=%s",
+                    user_id,
+                    bool(profile_image_url),
+                )
 
-    except Exception:
-        logger.exception(
-            "Could not generate donor profile image URL: user_id=%s",
-            user_id,
-        )
+            except Exception:
+                logger.exception(
+                    "Could not generate donor profile image URL: user_id=%s",
+                    user_id,
+                )
 
-        # Keep the existing emergency request matching.
+        # Get matching active emergency requests.
         emergency_requests = EmergencyRequests.objects.filter(
             required_blood_type__iexact=donor_profile.blood_type,
             status__iexact="ACTIVE",
