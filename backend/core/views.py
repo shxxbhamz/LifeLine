@@ -403,8 +403,22 @@ def staff_dashboard_view(request):
             emergency_history = list(
                 EmergencyRequests.objects.filter(
                     facility=facility,
-                ).order_by("-created_at")
+                ).select_related("donor__user").order_by("-created_at")
             )
+
+            for em in emergency_history:
+                em.avatar_url = None
+                donor = getattr(em, "donor", None)
+                if donor and getattr(donor, "profile_image_key", None):
+                    try:
+                        em.avatar_url = get_donor_profile_image_url(
+                            donor.profile_image_key
+                        )
+                    except Exception:
+                        logger.exception(
+                            "Could not generate donor avatar for emergency_id=%s",
+                            em.id,
+                        )
 
             facilities_with_locations = Facilities.objects.filter(
                 latitude__isnull=False,
