@@ -14,6 +14,7 @@ from core.utils import (
     send_donor_booking_email,
 )
 from .models import Appointments, DonationRequests
+from core.storage import get_safe_donor_avatar_url
 from core.models import DonorProfiles, Facilities
 from emergencies.models import EmergencyRequests
 from django.db import transaction, IntegrityError

@@ -101,6 +101,7 @@ def donor_dashboard_view(request):
     user_id = request.session.get("user_id")
 
     donor_profile = None
+    profile_image_url = None
     upcoming_appointment = None
     upcoming_appointments = []
     days_left = None
@@ -125,6 +126,18 @@ def donor_dashboard_view(request):
         donor_profile = DonorProfiles.objects.select_related(
             "user"
         ).get(user_id=user_id)
+
+        # Generate the temporary presigned URL for the donor's Neon profile picture
+        if donor_profile.profile_image_key:
+            try:
+                profile_image_url = get_donor_profile_image_url(
+                    donor_profile.profile_image_key
+                )
+            except Exception:
+                logger.exception(
+                    "Could not generate donor profile image URL: user_id=%s",
+                    user_id,
+                )
 
         # Count actual donation records.
         # Appointment status remains CONFIRMED.
@@ -203,6 +216,7 @@ def donor_dashboard_view(request):
     # Send dashboard information to the HTML template.
     context = {
         "donor_profile": donor_profile,
+        "profile_image_url": profile_image_url,
 
         "upcoming_appointment": upcoming_appointment,
         "upcoming_appointments": upcoming_appointments,

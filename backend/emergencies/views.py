@@ -3,6 +3,7 @@ import uuid
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
+from core.storage import get_safe_donor_avatar_url
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.db import IntegrityError, transaction
