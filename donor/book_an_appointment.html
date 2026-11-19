@@ -25,11 +25,21 @@
         <span class="donor-name">{{ donor_name|default:"Donor Name" }}</span>
 
         <div class="dropdown" tabindex="0">
-          <img src="{% static 'donor/image/default-avatar.png' %}"
-               alt="Donor Profile"
-               class="donor-avatar"
-               style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;">
-
+          {% if profile_image_url %}
+            <img
+              src="{{ profile_image_url }}"
+              alt="Donor Profile"
+              class="donor-avatar"
+              style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;"
+            >
+          {% else %}
+            <span
+              class="donor-avatar"
+              style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #ffffff; color: #0f766e; font-weight: bold; cursor: pointer;"
+            >
+              {{ donor_name|slice:":1"|upper|default:"D" }}
+            </span>
+          {% endif %}
           <div class="dropdown-content">
             <a href="{% url 'donor_edit_profile' %}">Edit Profile</a>
             <a href="{% url 'logout' %}">Logout</a>
