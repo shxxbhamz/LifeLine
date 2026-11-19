@@ -1,6 +1,7 @@
 import uuid
 import math
 
+from core.storage import get_donor_profile_image_url, get_safe_donor_avatar_url
 from django.contrib import messages
 from django.shortcuts import redirect, render
 
@@ -498,44 +499,64 @@ def staff_appointments_view(request):
         request.session.flush()
         return redirect("login")
 
-    scheduled_appointments = Appointments.objects.none()
+    scheduled_appointments = []
     emergency_requests = EmergencyRequests.objects.none()
-    responding_emergency_donors = Appointments.objects.none()
+    responding_emergency_donors = []
+
+    def attach_donor_avatar(appt):
+        appt.avatar_url = None
+        donor = getattr(appt, "donor", None)
+        image_key = getattr(donor, "profile_image_key", None) if donor else None
+        if image_key:
+            try:
+                appt.avatar_url = get_donor_profile_image_url(image_key)
+            except Exception:
+                logger.exception(
+                    "Could not generate donor avatar for appointment_id=%s",
+                    appt.id,
+                )
+        return appt
 
     if staff_profile.facility:
         facility = staff_profile.facility
 
         # Normal and restock-request appointments.
         # Emergency appointments are displayed separately below.
-        scheduled_appointments = (
-            Appointments.objects.filter(
-                facility=facility,
+        scheduled_appointments = [
+            attach_donor_avatar(appt)
+            for appt in (
+                Appointments.objects.filter(
+                    facility=facility,
+                )
+                .exclude(
+                    appointment_source="EMERGENCY",
+                )
+                .select_related(
+                    "donor",
+                    "donor__user",
+                )
+                .order_by("scheduled_at")
             )
-            .exclude(
-                appointment_source="EMERGENCY",
-            )
-            .select_related(
-                "donor",
-                "donor__user",
-            )
-            .order_by("scheduled_at")
-        )
+        ]
 
         emergency_requests = EmergencyRequests.objects.filter(
             facility=facility,
         ).order_by("-created_at")
 
-        responding_emergency_donors = (
-            Appointments.objects.filter(
-                facility=facility,
-                appointment_source="EMERGENCY",
+        responding_emergency_donors = [
+            attach_donor_avatar(appt)
+            for appt in (
+                Appointments.objects.filter(
+                    facility=facility,
+                    appointment_source="EMERGENCY",
+                )
+                .select_related(
+                    "donor",
+                    "donor__user",
+                )
+                .order_by("-id")
             )
-            .select_related(
-                "donor",
-                "donor__user",
-            )
-            .order_by("-id")
-        )
+        ]
 
     context = {
         "scheduled_appointments": scheduled_appointments,
@@ -549,7 +570,6 @@ def staff_appointments_view(request):
         "organization/appointment.html",
         context,
     )
-
 
 def staff_confirm_appointment_view(request, appointment_id):
     # Only hospital staff can confirm appointments.

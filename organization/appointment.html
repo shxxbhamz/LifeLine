@@ -39,7 +39,7 @@
     <nav class="sub-nav">
         <ul>
             <li><a href="{% url 'staff_dashboard' %}">Home</a></li>
-            <li><a href="{% url 'staff_appointments' %}"class="active">Appointments</a></li>
+            <li><a href="{% url 'staff_appointments' %}" class="active">Appointments</a></li>
             <li><a href="{% url 'staff_emergencies' %}">Active Emergency Dispatches</a></li>
             <li><a href="{% url 'staff_inventory' %}">Blood & Plasma Inventory</a></li>
             <li><a href="{% url 'staff_audit_log' %}">Broadcast Audit Log</a></li>
@@ -54,68 +54,74 @@
         </section>
 
         <!-- Dashboard Grid Layout -->
-       <div class="dashboard-grid" style="grid-template-columns: 1fr; gap: 20px;">
+        <div class="dashboard-grid" style="grid-template-columns: 1fr; gap: 20px;">
             
             <!-- TOP CARD: Emergency Requests -->
             <section class="dash-card" id="emergency-dispatches">
-    <div class="card-header">
-        <h3>Responding Emergency Donors</h3>
-        <span class="badge red-pulse" style="background: #fee2e2; color: #dc2626; padding: 4px 10px; border-radius: 12px; font-weight: bold;">{{ responding_emergency_donors|length }} Responding</span>
-    </div>
-    
-    <div class="appointment-list">
-        {% if responding_emergency_donors %}
-            {% for donor_appt in responding_emergency_donors %}
-            <div class="appointment-item" style="border-left: 4px solid var(--primary-red); display: flex; justify-content: space-between; align-items: center; padding: 12px; margin-bottom: 10px; background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                <div class="donor-profile-group" style="display: flex; align-items: center; gap: 12px;">
-                    {% if donor_appt.donor and donor_appt.donor.profile_picture %}
-                        <img src="{{ donor_appt.donor.profile_picture.url }}" alt="donor" class="donor-avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-                    {% else %}
-                        <img src="{% static 'organization/img/default-avatar.png' %}" alt="donor" class="donor-avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-                    {% endif %}
-                    
-                    <div class="appt-info">
-                        <strong style="font-size: 0.95rem; color: #1f2937;">
-                            {% if donor_appt.donor and donor_appt.donor.user %}
-                                {{ donor_appt.donor.user.first_name }} {{ donor_appt.donor.user.last_name }}
-                            {% else %}
-                                Emergency Donor
-                            {% endif %}
-                            <span class="badge blood-badge" style="background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-left: 6px;">
-                                {% if donor_appt.donor and donor_appt.donor.blood_type %}
-                                    {{ donor_appt.donor.blood_type }}
+                <div class="card-header">
+                    <h3>Responding Emergency Donors</h3>
+                    <span class="badge red-pulse" style="background: #fee2e2; color: #dc2626; padding: 4px 10px; border-radius: 12px; font-weight: bold;">{{ responding_emergency_donors|length }} Responding</span>
+                </div>
+                
+                <div class="appointment-list">
+                    {% if responding_emergency_donors %}
+                        {% for donor_appt in responding_emergency_donors %}
+                        <div class="appointment-item" style="border-left: 4px solid var(--primary-red); display: flex; justify-content: space-between; align-items: center; padding: 12px; margin-bottom: 10px; background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <div class="donor-profile-group" style="display: flex; align-items: center; gap: 12px;">
+                                {% if donor_appt.avatar_url %}
+                                    <img src="{{ donor_appt.avatar_url }}" alt="donor" class="donor-avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
                                 {% else %}
-                                    O+
+                                    <div class="donor-avatar" style="display: flex; align-items: center; justify-content: center; background: #fee2e2; color: #dc2626; font-weight: bold; border-radius: 50%; width: 40px; height: 40px;">
+                                        {% if donor_appt.donor and donor_appt.donor.user %}
+                                            {{ donor_appt.donor.user.first_name|slice:":1"|upper }}{{ donor_appt.donor.user.last_name|slice:":1"|upper }}
+                                        {% else %}
+                                            ED
+                                        {% endif %}
+                                    </div>
                                 {% endif %}
-                            </span>
-                        </strong>
-                        <div style="margin-top: 2px;">
-                            <span class="donor-contact" style="font-size: 0.85rem; color: #4b5563;">
-                                {% if donor_appt.donor and donor_appt.donor.phone %}
-                                    {{ donor_appt.donor.phone }}
-                                {% else %}
-                                    Contact on file
-                                {% endif %}
-                            </span>
+                                
+                                <div class="appt-info">
+                                    <strong style="font-size: 0.95rem; color: #1f2937;">
+                                        {% if donor_appt.donor and donor_appt.donor.user %}
+                                            {{ donor_appt.donor.user.first_name }} {{ donor_appt.donor.user.last_name }}
+                                        {% else %}
+                                            Emergency Donor
+                                        {% endif %}
+                                        <span class="badge blood-badge" style="background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-left: 6px;">
+                                            {% if donor_appt.donor and donor_appt.donor.blood_type %}
+                                                {{ donor_appt.donor.blood_type }}
+                                            {% else %}
+                                                O+
+                                            {% endif %}
+                                        </span>
+                                    </strong>
+                                    <div style="margin-top: 2px;">
+                                        <span class="donor-contact" style="font-size: 0.85rem; color: #4b5563;">
+                                            {% if donor_appt.donor and donor_appt.donor.phone %}
+                                                {{ donor_appt.donor.phone }}
+                                            {% else %}
+                                                Contact on file
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    <small style="display: block; margin-top: 3px; color: #6b7280; font-size: 0.75rem;">
+                                        Scheduled: {{ donor_appt.scheduled_at|date:"M d, Y, P" }}
+                                    </small>
+                                </div>
+                            </div>
+                            <span class="badge emergency-appt-badge" style="background: #fee2e2; color: #dc2626; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">Emergency</span>
                         </div>
-                        <small style="display: block; margin-top: 3px; color: #6b7280; font-size: 0.75rem;">
-                            Scheduled: {{ donor_appt.scheduled_at|date:"M d, Y, P" }}
-                        </small>
-                    </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="appointment-item" style="justify-content: center; text-align: center; color: var(--text-muted); padding: 16px;">
+                            <div class="appt-info">
+                                <strong>No Active Emergency Responses</strong>
+                                <small>No donors have accepted or scheduled emergency slots for your facility yet.</small>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
-                <span class="badge emergency-appt-badge" style="background: #fee2e2; color: #dc2626; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">Emergency</span>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="appointment-item" style="justify-content: center; text-align: center; color: var(--text-muted); padding: 16px;">
-                <div class="appt-info">
-                    <strong>No Active Emergency Responses</strong>
-                    <small>No donors have accepted or scheduled emergency slots for your facility yet.</small>
-                </div>
-            </div>
-        {% endif %}
-    </div>
-</section>
+            </section>
 
             <!-- BOTTOM CARD: Normal Scheduled Appointments -->
             <section class="dash-card" id="normal-appointments">
@@ -129,12 +135,17 @@
                         {% for appt in scheduled_appointments %}
                         <div class="appointment-item">
                             <div class="donor-profile-group">
-                                <div class="donor-avatar" style="display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #475569; font-weight: bold; border-radius: 50%; width: 40px; height: 40px;">
-                                    {% if appt.donor and appt.donor.user %}
-                                        {{ appt.donor.user.first_name|slice:":1" }}{{ appt.donor.user.last_name|slice:":1" }}
-                                    {% else %}
-                                    {% endif %}
-                                </div>
+                                {% if appt.avatar_url %}
+                                    <img src="{{ appt.avatar_url }}" alt="donor" class="donor-avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                {% else %}
+                                    <div class="donor-avatar" style="display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #475569; font-weight: bold; border-radius: 50%; width: 40px; height: 40px;">
+                                        {% if appt.donor and appt.donor.user %}
+                                            {{ appt.donor.user.first_name|slice:":1"|upper }}{{ appt.donor.user.last_name|slice:":1"|upper }}
+                                        {% else %}
+                                            SD
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
                                 <div class="appt-info">
                                     <strong>
                                         {% if appt.donor and appt.donor.user %}
