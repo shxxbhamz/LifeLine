@@ -65,15 +65,15 @@
                 
                 <div class="appointment-list">
                     {% if responding_emergency_donors %}
-                        {% for donor_appt in responding_emergency_donors %}
+                        {% for donor_match in responding_emergency_donors %}
                         <div class="appointment-item" style="border-left: 4px solid var(--primary-red); display: flex; justify-content: space-between; align-items: center; padding: 12px; margin-bottom: 10px; background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                             <div class="donor-profile-group" style="display: flex; align-items: center; gap: 12px;">
-                                {% if donor_appt.avatar_url %}
-                                    <img src="{{ donor_appt.avatar_url }}" alt="donor" class="donor-avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                {% if donor_match.avatar_url %}
+                                    <img src="{{ donor_match.avatar_url }}" alt="donor" class="donor-avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
                                 {% else %}
                                     <div class="donor-avatar" style="display: flex; align-items: center; justify-content: center; background: #fee2e2; color: #dc2626; font-weight: bold; border-radius: 50%; width: 40px; height: 40px;">
-                                        {% if donor_appt.donor and donor_appt.donor.user %}
-                                            {{ donor_appt.donor.user.first_name|slice:":1"|upper }}{{ donor_appt.donor.user.last_name|slice:":1"|upper }}
+                                        {% if donor_match.donor and donor_match.donor.user %}
+                                            {{ donor_match.donor.user.first_name|slice:":1"|upper }}{{ donor_match.donor.user.last_name|slice:":1"|upper }}
                                         {% else %}
                                             ED
                                         {% endif %}
@@ -82,41 +82,45 @@
                                 
                                 <div class="appt-info">
                                     <strong style="font-size: 0.95rem; color: #1f2937;">
-                                        {% if donor_appt.donor and donor_appt.donor.user %}
-                                            {{ donor_appt.donor.user.first_name }} {{ donor_appt.donor.user.last_name }}
+                                        {% if donor_match.donor and donor_match.donor.user %}
+                                            {{ donor_match.donor.user.first_name }} {{ donor_match.donor.user.last_name }}
                                         {% else %}
                                             Emergency Donor
                                         {% endif %}
                                         <span class="badge blood-badge" style="background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-left: 6px;">
-                                            {% if donor_appt.donor and donor_appt.donor.blood_type %}
-                                                {{ donor_appt.donor.blood_type }}
+                                            {% if donor_match.donor and donor_match.donor.blood_type %}
+                                                {{ donor_match.donor.blood_type }}
                                             {% else %}
                                                 O+
                                             {% endif %}
                                         </span>
                                     </strong>
-                                    <div style="margin-top: 2px;">
-                                        <span class="donor-contact" style="font-size: 0.85rem; color: #4b5563;">
-                                            {% if donor_appt.donor and donor_appt.donor.phone %}
-                                                {{ donor_appt.donor.phone }}
-                                            {% else %}
-                                                Contact on file
-                                            {% endif %}
-                                        </span>
+                                    <div style="margin-top: 2px; font-size: 0.85rem; color: #4b5563;">
+                                        {% if donor_match.request and donor_match.request.component_type %}
+                                            Component: {{ donor_match.request.component_type|title }}
+                                        {% endif %}
+                                        {% if donor_match.distance_km %}
+                                            &bull; {{ donor_match.distance_km }} km
+                                        {% endif %}
                                     </div>
                                     <small style="display: block; margin-top: 3px; color: #6b7280; font-size: 0.75rem;">
-                                        Scheduled: {{ donor_appt.scheduled_at|date:"M d, Y, P" }}
+                                        Responded:
+                                        {% if donor_match.responded_at %}
+                                            {{ donor_match.responded_at|date:"M d, Y, P" }}
+                                        {% else %}
+                                            Not recorded
+                                        {% endif %}
                                     </small>
                                 </div>
                             </div>
-                            <span class="badge emergency-appt-badge" style="background: #fee2e2; color: #dc2626; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">Emergency</span>
+                            <span class="badge emergency-appt-badge" style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">{{ donor_match.response_status }}</span>
                         </div>
                         {% endfor %}
                     {% else %}
                         <div class="appointment-item" style="justify-content: center; text-align: center; color: var(--text-muted); padding: 16px;">
                             <div class="appt-info">
                                 <strong>No Active Emergency Responses</strong>
-                                <small>No donors have accepted or scheduled emergency slots for your facility yet.</small>
+                                <small>No donors have accepted emergency requests for your facility yet.</small>
                             </div>
                         </div>
                     {% endif %}

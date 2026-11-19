@@ -503,25 +503,17 @@ def staff_appointments_view(request):
     emergency_requests = EmergencyRequests.objects.none()
     responding_emergency_donors = []
 
-    def attach_donor_avatar(appt):
-        appt.avatar_url = None
-        donor = getattr(appt, "donor", None)
-        image_key = getattr(donor, "profile_image_key", None) if donor else None
-        if image_key:
-            try:
-                appt.avatar_url = get_donor_profile_image_url(image_key)
-            except Exception:
-                logger.exception(
-                    "Could not generate donor avatar for appointment_id=%s",
-                    appt.id,
-                )
-        return appt
+    def attach_donor_avatar(obj):
+        obj.avatar_url = get_safe_donor_avatar_url(
+            getattr(obj, "donor", None)
+        )
+        return obj
 
     if staff_profile.facility:
         facility = staff_profile.facility
 
         # Normal and restock-request appointments.
-        # Emergency appointments are displayed separately below.
+        # Emergency responses are displayed separately above.
         scheduled_appointments = [
             attach_donor_avatar(appt)
             for appt in (
@@ -543,18 +535,20 @@ def staff_appointments_view(request):
             facility=facility,
         ).order_by("-created_at")
 
+        # Pull donors who accepted emergency requests for this facility.
         responding_emergency_donors = [
-            attach_donor_avatar(appt)
-            for appt in (
-                Appointments.objects.filter(
-                    facility=facility,
-                    appointment_source="EMERGENCY",
+            attach_donor_avatar(match)
+            for match in (
+                RequestMatches.objects.filter(
+                    request__facility=facility,
+                    response_status="ACCEPTED",
                 )
                 .select_related(
+                    "request",
                     "donor",
                     "donor__user",
                 )
-                .order_by("-id")
+                .order_by("-responded_at", "-id")
             )
         ]
 
