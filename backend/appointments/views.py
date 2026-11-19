@@ -164,6 +164,8 @@ def donor_active_requests_view(request):
             "user"
         ).get(user_id=user_id)
 
+        profile_image_url = get_safe_donor_avatar_url(donor_profile)
+
         emergency_requests = EmergencyRequests.objects.filter(
             required_blood_type__iexact=donor_profile.blood_type,
             status__iexact="ACTIVE",
@@ -174,6 +176,7 @@ def donor_active_requests_view(request):
         context = {
             "emergency_requests": emergency_requests,
             "donor_name": donor_profile.user.first_name or "Donor",
+            "profile_image_url": profile_image_url,
         }
 
         return render(
@@ -189,9 +192,9 @@ def donor_active_requests_view(request):
             {
                 "emergency_requests": [],
                 "donor_name": "Donor",
+                "profile_image_url": None,
             },
         )
-
 
 #Heer Patel#
 def donor_book_appointment_view(request):
@@ -212,6 +215,7 @@ def donor_book_appointment_view(request):
     except DonorProfiles.DoesNotExist:
         return redirect("donor_dashboard")
 
+    profile_image_url = get_safe_donor_avatar_url(donor_profile)
     donor_email = donor_profile.user.email
     donor_first_name = donor_profile.user.first_name or "Donor"
 
@@ -225,13 +229,13 @@ def donor_book_appointment_view(request):
             return False
 
         try:
-         return send_donor_booking_email(
-             user_email=donor_email,
-             first_name=donor_first_name,
-             facility_name="LifeLine",
-             scheduled_at=None,
-             donation_type=None,
-)
+            return send_donor_booking_email(
+                user_email=donor_email,
+                first_name=donor_first_name,
+                facility_name="LifeLine",
+                scheduled_at=None,
+                donation_type=None,
+            )
 
         except Exception:
             logger.exception(
@@ -420,6 +424,7 @@ def donor_book_appointment_view(request):
         "nearby_facilities": facilities,
         "donor_name": donor_profile.user.first_name,
         "donor_blood_type": donor_profile.blood_type,
+        "profile_image_url": profile_image_url,
     }
 
     return render(
@@ -427,7 +432,6 @@ def donor_book_appointment_view(request):
         "donor/book_an_appointment.html",
         context,
     )
-#Heer Patel#
 
 def donor_history_view(request):
 
@@ -441,7 +445,11 @@ def donor_history_view(request):
     user_id = request.session.get("user_id")
 
     # Get the logged-in donor's profile
-    donor_profile = DonorProfiles.objects.get(user_id=user_id)
+    donor_profile = DonorProfiles.objects.select_related(
+        "user"
+    ).get(user_id=user_id)
+
+    profile_image_url = get_safe_donor_avatar_url(donor_profile)
 
     # Get ALL appointments belonging to this donor
     appointments = Appointments.objects.filter(
@@ -461,13 +469,16 @@ def donor_history_view(request):
     context = {
         "appointments": appointments,
         "donor_name": donor_name,
+        "profile_image_url": profile_image_url,
     }
 
     return render(
         request,
         "donor/history.html",
-        context
+        context,
     )
+
+    # Heer Patel 
 
 
 def staff_appointments_view(request):
