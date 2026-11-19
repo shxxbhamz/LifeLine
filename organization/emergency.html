@@ -48,11 +48,11 @@
     </header>
 
     <!-- Sub Navigation Bar / Quick Links -->
-   <nav class="sub-nav">
+    <nav class="sub-nav">
         <ul>
             <li><a href="{% url 'staff_dashboard' %}">Home</a></li>
             <li><a href="{% url 'staff_appointments' %}">Appointments</a></li>
-            <li><a href="{% url 'staff_emergencies' %}"class="active">Active Emergency Dispatches</a></li>
+            <li><a href="{% url 'staff_emergencies' %}" class="active">Active Emergency Dispatches</a></li>
             <li><a href="{% url 'staff_inventory' %}">Blood & Plasma Inventory</a></li>
             <li><a href="{% url 'staff_audit_log' %}">Broadcast Audit Log</a></li>
         </ul>
@@ -102,146 +102,148 @@
                     Select an emergency request to view donor locations.
                 </p>
             </section>
-<div style="display: flex; gap: 20px; width: 100%;">
-            <!-- Below Map: Active Emergency Donor Profiles & Details -->
- <section class="dash-card" id="emergency-donors" style="flex: 1; min-width: 300px;">
-    <div class="card-header">
-        <h3>Responding Emergency Donors</h3>
-    </div>
-   
-    <div class="appointment-list">
-        {% if responding_emergency_donors %}
-            {% for donor_match in responding_emergency_donors %}
-            <div class="appointment-item" style="border-left: 4px solid var(--primary-red); display: flex; justify-content: space-between; align-items: center; padding: 12px; margin-bottom: 10px; background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                <div class="donor-profile-group" style="display: flex; align-items: center; gap: 12px;">
 
-                    {% if donor_match.donor and donor_match.donor.profile_picture %}
-                        <img src="{{ donor_match.donor.profile_picture.url }}"
-                            alt="donor"
-                            class="donor-avatar"
-                            style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;">
-                    {% else %}
-                        <img src="{% static 'organization/img/default-avatar.png' %}"
-                            alt="donor"
-                            class="donor-avatar"
-                            style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;">
-                    {% endif %}
-
-                    <div class="appt-info">
-                        <strong style="font-size: 0.95rem; color: #1f2937;">
-                            {% if donor_match.donor and donor_match.donor.user %}
-                                {{ donor_match.donor.user.first_name }} {{ donor_match.donor.user.last_name }}
-                            {% else %}
-                                Emergency Donor
-                            {% endif %}
-
-                            <span class="badge blood-badge"
-                                style="background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-left: 6px;">
-                                {{ donor_match.donor.blood_type }}
-                            </span>
-                        </strong>
-
-                        <div style="margin-top: 3px; font-size: 0.85rem; color: #4b5563;">
-                            Component:
-                            {{ donor_match.request.component_type|title }}
-                        </div>
-
-                        <div style="margin-top: 2px; font-size: 0.85rem; color: #4b5563;">
-                            Distance:
-                            {% if donor_match.distance_km %}
-                                {{ donor_match.distance_km }} km
-                            {% else %}
-                                Not available
-                            {% endif %}
-                        </div>
-
-                        <small style="display: block; margin-top: 3px; color: #6b7280; font-size: 0.75rem;">
-                            Responded:
-                            {% if donor_match.responded_at %}
-                                {{ donor_match.responded_at|date:"M d, Y, P" }}
-                            {% else %}
-                                Not recorded
-                            {% endif %}
-                        </small>
+            <div style="display: flex; gap: 20px; width: 100%;">
+                <!-- Below Map: Active Emergency Donor Profiles & Details -->
+                <section class="dash-card" id="emergency-donors" style="flex: 1; min-width: 300px;">
+                    <div class="card-header">
+                        <h3>Responding Emergency Donors</h3>
                     </div>
-                </div>
+                   
+                    <div class="appointment-list">
+                        {% if responding_emergency_donors %}
+                            {% for donor_match in responding_emergency_donors %}
+                            <div class="appointment-item" style="border-left: 4px solid var(--primary-red); display: flex; justify-content: space-between; align-items: center; padding: 12px; margin-bottom: 10px; background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                                <div class="donor-profile-group" style="display: flex; align-items: center; gap: 12px;">
 
-                <span class="badge emergency-appt-badge"
-                    style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
-                    {{ donor_match.response_status }}
-                </span>
-            </div>
-            {% endfor %}
-        {% else %}
-            <p style="padding: 16px; color: var(--text-muted); text-align: center;">No active emergency donor responses at this time.</p>
-        {% endif %}
-    </div>
-</section>
+                                    {% if donor_match.avatar_url %}
+                                        <img src="{{ donor_match.avatar_url }}"
+                                            alt="donor"
+                                            class="donor-avatar"
+                                            style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;">
+                                    {% else %}
+                                        <div class="donor-avatar"
+                                            style="display: flex; align-items: center; justify-content: center; background: #fee2e2; color: #dc2626; font-weight: bold; border-radius: 50%; width: 45px; height: 45px;">
+                                            {% if donor_match.donor and donor_match.donor.user %}
+                                                {{ donor_match.donor.user.first_name|slice:":1"|upper }}{{ donor_match.donor.user.last_name|slice:":1"|upper }}
+                                            {% else %}
+                                                ED
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
 
+                                    <div class="appt-info">
+                                        <strong style="font-size: 0.95rem; color: #1f2937;">
+                                            {% if donor_match.donor and donor_match.donor.user %}
+                                                {{ donor_match.donor.user.first_name }} {{ donor_match.donor.user.last_name }}
+                                            {% else %}
+                                                Emergency Donor
+                                            {% endif %}
 
+                                            <span class="badge blood-badge"
+                                                style="background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-left: 6px;">
+                                                {{ donor_match.donor.blood_type }}
+                                            </span>
+                                        </strong>
 
-<!-- RIGHT COLUMN: Organization Emergency Requests -->
-<section class="dash-card" id="organization-emergency-requests" style="flex: 1;">
-    <div class="card-header">
-        <h3>Organization Emergency Requests</h3>
-    </div>
+                                        <div style="margin-top: 3px; font-size: 0.85rem; color: #4b5563;">
+                                            Component:
+                                            {{ donor_match.request.component_type|title }}
+                                        </div>
 
-    <div class="appointment-list" id="generatedRequestsList">
+                                        <div style="margin-top: 2px; font-size: 0.85rem; color: #4b5563;">
+                                            Distance:
+                                            {% if donor_match.distance_km %}
+                                                {{ donor_match.distance_km }} km
+                                            {% else %}
+                                                Not available
+                                            {% endif %}
+                                        </div>
 
-        {% if emergency_requests %}
-            {% for req in emergency_requests %}
-                <div class="appointment-item generated-request-card">
-                    <div class="generated-request-content"
-                         style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; gap: 15px;">
+                                        <small style="display: block; margin-top: 3px; color: #6b7280; font-size: 0.75rem;">
+                                            Responded:
+                                            {% if donor_match.responded_at %}
+                                                {{ donor_match.responded_at|date:"M d, Y, P" }}
+                                            {% else %}
+                                                Not recorded
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
 
-                        <div>
-                            <strong class="generated-request-title">
-                                {{ req.component_type|title }}
-                                ({{ req.required_blood_type }})
-                            </strong>
+                                <span class="badge emergency-appt-badge"
+                                    style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+                                    {{ donor_match.response_status }}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="padding: 16px; color: var(--text-muted); text-align: center;">No active emergency donor responses at this time.</p>
+                        {% endif %}
+                    </div>
+                </section>
 
-                           <p class="generated-request-desc">{{ req.notes|default:"No notes available." }}</p>
+                <!-- RIGHT COLUMN: Organization Emergency Requests -->
+                <section class="dash-card" id="organization-emergency-requests" style="flex: 1;">
+                    <div class="card-header">
+                        <h3>Organization Emergency Requests</h3>
+                    </div>
 
-                            <small class="generated-request-time">
-                                Urgency: {{ req.urgency|title }}
-                                <br>
-                                Created: {{ req.created_at|date:"M j, Y, P" }}
-                                <br>
-                                Last Updated: {{ req.updated_at|date:"M j, Y, P" }}
-                                <br>
+                    <div class="appointment-list" id="generatedRequestsList">
 
-                                {% if req.expires_at %}
-                                    Expires: {{ req.expires_at|date:"M j, Y, P" }}
-                                    <br>
-                                {% endif %}
+                        {% if emergency_requests %}
+                            {% for req in emergency_requests %}
+                                <div class="appointment-item generated-request-card">
+                                    <div class="generated-request-content"
+                                         style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; gap: 15px;">
 
-                                {% if req.fulfilled_at %}
-                                    Fulfilled: {{ req.fulfilled_at|date:"M j, Y, P" }}
-                                {% endif %}
-                            </small>
-                        </div>
+                                        <div>
+                                            <strong class="generated-request-title">
+                                                {{ req.component_type|title }}
+                                                ({{ req.required_blood_type }})
+                                            </strong>
 
-                        <span class="badge {% if req.status == 'ACTIVE' %}red{% else %}secondary{% endif %}">
-                            {{ req.status|title }}
-                        </span>
+                                            <p class="generated-request-desc">{{ req.notes|default:"No notes available." }}</p>
+
+                                            <small class="generated-request-time">
+                                                Urgency: {{ req.urgency|title }}
+                                                <br>
+                                                Created: {{ req.created_at|date:"M j, Y, P" }}
+                                                <br>
+                                                Last Updated: {{ req.updated_at|date:"M j, Y, P" }}
+                                                <br>
+
+                                                {% if req.expires_at %}
+                                                    Expires: {{ req.expires_at|date:"M j, Y, P" }}
+                                                    <br>
+                                                {% endif %}
+
+                                                {% if req.fulfilled_at %}
+                                                    Fulfilled: {{ req.fulfilled_at|date:"M j, Y, P" }}
+                                                {% endif %}
+                                            </small>
+                                        </div>
+
+                                        <span class="badge {% if req.status == 'ACTIVE' %}red{% else %}secondary{% endif %}">
+                                            {{ req.status|title }}
+                                        </span>
+
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+                        {% else %}
+                            <div class="appointment-item generated-request-card">
+                                <p class="generated-request-desc"
+                                   style="color: #64748b; font-style: italic;">
+                                    No emergency requests found for this facility.
+                                </p>
+                            </div>
+                        {% endif %}
 
                     </div>
-                </div>
-            {% endfor %}
-
-        {% else %}
-            <div class="appointment-item generated-request-card">
-                <p class="generated-request-desc"
-                   style="color: #64748b; font-style: italic;">
-                    No emergency requests found for this facility.
-                </p>
+                </section>
             </div>
-        {% endif %}
-
-    </div>
-</section>
-
-</div>
 
         </div>
     </main>
@@ -286,7 +288,6 @@
             document.getElementById("globalEmergencyModal").style.display = "none";
             document.getElementById("emergencyRequestForm").reset();
         }
-
     </script>
 
     <!-- Emergency data provided by Django -->
