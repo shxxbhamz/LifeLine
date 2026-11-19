@@ -403,7 +403,7 @@ def staff_dashboard_view(request):
             emergency_history = list(
                 EmergencyRequests.objects.filter(
                     facility=facility,
-                ).select_related("donor__user").order_by("-created_at")
+                ).order_by("-created_at")
             )
 
             for em in emergency_history:
@@ -492,8 +492,6 @@ def staff_dashboard_view(request):
         return HttpResponseServerError(
             "Staff dashboard template failed. Please check application logs."
         )
-
-
 def logout_view(request):
     request.session.flush()
     return redirect("login")
