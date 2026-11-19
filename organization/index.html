@@ -53,7 +53,7 @@
     <!-- Sub Navigation Bar / Quick Links -->
    <nav class="sub-nav">
         <ul>
-            <li><a href="{% url 'staff_dashboard' %}"class="active">Home</a></li>
+            <li><a href="{% url 'staff_dashboard' %}" class="active">Home</a></li>
             <li><a href="{% url 'staff_appointments' %}">Appointments</a></li>
             <li><a href="{% url 'staff_emergencies' %}">Active Emergency Dispatches</a></li>
             <li><a href="{% url 'staff_inventory' %}">Blood & Plasma Inventory</a></li>
@@ -180,27 +180,62 @@
                     <h3>Recent Emergency History</h3>
                     <span class="badge red-pulse">Live Dispatches</span>
                 </div>
-        
+
                 <div class="appointment-list">
                     {% if emergency_history %}
                     {% for em in emergency_history %}
                     <div class="appointment-item" style="border-left: 4px solid var(--primary-red);">
                         <div class="donor-profile-group">
-                            <!-- Donor Avatar / Fallback Initials -->
+                            <!-- Donor Profile Image / Fallback Initials -->
+                            {% if em.avatar_url %}
+                            <img
+                                src="{{ em.avatar_url }}"
+                                alt="Donor Profile"
+                                class="donor-avatar"
+                                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"
+                            >
+                            {% else %}
                             <div class="donor-avatar"
                                 style="display: flex; align-items: center; justify-content: center; background: #fee2e2; color: #dc2626; font-weight: bold; border-radius: 50%; width: 40px; height: 40px;">
-                                {{ em.donor.user.first_name|slice:":1" }}{{ em.donor.user.last_name|slice:":1" }}
+                                {% if em.donor and em.donor.user %}
+                                    {{ em.donor.user.first_name|slice:":1"|upper }}{{ em.donor.user.last_name|slice:":1"|upper }}
+                                {% else %}
+                                    {{ em.required_blood_type|slice:":1"|upper|default:"E" }}
+                                {% endif %}
                             </div>
+                            {% endif %}
+
                             <div class="appt-info">
-                                <strong>{{ em.donor.user.first_name }} {{ em.donor.user.last_name }} <span
-                                        class="badge blood-badge">{{ em.donor.blood_type }}</span></strong>
+                                {% if em.donor and em.donor.user %}
+                                <strong>
+                                    {{ em.donor.user.first_name }} {{ em.donor.user.last_name }}
+                                    <span class="badge blood-badge">{{ em.donor.blood_type }}</span>
+                                </strong>
+                                {% else %}
+                                <strong>
+                                    Emergency Request ({{ em.required_blood_type|default:"All Types" }})
+                                    {% if em.urgency %}
+                                    <span class="badge blood-badge">{{ em.urgency|title }}</span>
+                                    {% endif %}
+                                </strong>
+                                {% endif %}
+
                                 <div>
+                                    {% if em.donor %}
                                     <span class="donor-contact">{{ em.donor.phone|default:"Contact on file" }}</span> •
-                                    <span class="donation-type-tag">Emergency {{ em.component_type|title|default:"Blood"
-                                        }}</span>
+                                    {% endif %}
+                                    <span class="donation-type-tag">Emergency {{ em.component_type|default:"Blood" }}</span>
                                 </div>
+
                                 <small style="color: var(--text-muted); display: block; margin-top: 2px;">
-                                     {{ em.donor.street_address }}, {{ em.donor.city }} (Requested: {{ em.created_at|date:"Mj, g:i A" }})
+                                    {% if em.donor %}
+                                        {{ em.donor.street_address }}, {{ em.donor.city }}
+                                    {% elif em.notes %}
+                                        {{ em.notes }}
+                                    {% else %}
+                                        Status: {{ em.status|default:"ACTIVE" }}
+                                    {% endif %}
+                                    (Requested: {{ em.created_at|date:"M j, g:i A" }})
                                 </small>
                             </div>
                         </div>
@@ -219,9 +254,7 @@
                     </div>
                     {% endif %}
                 </div>
-</section>
-
-        </div>
+            </section>
 
         </div>
     </main>
@@ -267,7 +300,6 @@
             document.getElementById("globalEmergencyModal").style.display = "none";
             document.getElementById("emergencyRequestForm").reset();
         }
-
     </script>
 
     <!-- Facility location data supplied by Django -->
