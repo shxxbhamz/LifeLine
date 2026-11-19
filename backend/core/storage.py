@@ -136,3 +136,15 @@ def get_donor_profile_image_url(image_key):
         },
         ExpiresIn=3600,
     )
+# Heer Patel
+def get_safe_donor_avatar_url(donor_profile):
+    if not donor_profile or not getattr(donor_profile, "profile_image_key", None):
+        return None
+    try:
+        return get_donor_profile_image_url(donor_profile.profile_image_key)
+    except Exception:
+        logger.exception(
+            "Failed to generate presigned URL for key: %s",
+            donor_profile.profile_image_key,
+        )
+        return None
