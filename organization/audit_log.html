@@ -1,4 +1,3 @@
-
 {% load static %}
 
 <!DOCTYPE html>
@@ -161,9 +160,21 @@
 
                                     <div class="donor-profile-cell">
 
-                                        <img src="{% static 'organization/img/default-avatar.png' %}"
-                                             alt="Donor Avatar"
-                                             class="donor-avatar">
+                                        {% if appointment.avatar_url %}
+                                            <img src="{{ appointment.avatar_url }}"
+                                                 alt="Donor Avatar"
+                                                 class="donor-avatar"
+                                                 style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                        {% else %}
+                                            <div class="donor-avatar"
+                                                 style="display: inline-flex; align-items: center; justify-content: center; background: #e2e8f0; color: #475569; font-weight: bold; border-radius: 50%; width: 40px; height: 40px;">
+                                                {% if appointment.donor and appointment.donor.user %}
+                                                    {{ appointment.donor.user.first_name|slice:":1"|upper }}{{ appointment.donor.user.last_name|slice:":1"|upper }}
+                                                {% else %}
+                                                    DN
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
 
                                         <div>
 
