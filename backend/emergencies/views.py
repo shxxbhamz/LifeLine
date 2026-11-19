@@ -86,7 +86,7 @@ def staff_emergencies_view(request):
         return redirect("login")
 
     emergency_requests = EmergencyRequests.objects.none()
-    responding_emergency_donors = RequestMatches.objects.none()
+    responding_emergency_donors = []
     emergency_map_data = []
 
     if staff_profile.facility:
@@ -96,7 +96,7 @@ def staff_emergencies_view(request):
             facility=facility,
         ).order_by("-created_at")
 
-        responding_emergency_donors = (
+        responding_emergency_donors = list(
             RequestMatches.objects.filter(
                 request__facility=facility,
                 response_status="ACCEPTED",
@@ -108,6 +108,21 @@ def staff_emergencies_view(request):
             )
             .order_by("-responded_at", "-id")
         )
+
+        for donor_match in responding_emergency_donors:
+            donor_match.avatar_url = None
+            donor = getattr(donor_match, "donor", None)
+            image_key = getattr(donor, "profile_image_key", None) if donor else None
+            if image_key:
+                try:
+                    donor_match.avatar_url = get_donor_profile_image_url(
+                        image_key
+                    )
+                except Exception:
+                    logger.exception(
+                        "Could not generate donor avatar for match_id=%s",
+                        donor_match.id,
+                    )
 
         # Prepare map data only for ongoing emergency requests.
         if facility.latitude is not None and facility.longitude is not None:
@@ -165,7 +180,6 @@ def staff_emergencies_view(request):
         "organization/emergency.html",
         context,
     )
-
 
 
 @require_POST
