@@ -110,19 +110,9 @@ def staff_emergencies_view(request):
         )
 
         for donor_match in responding_emergency_donors:
-            donor_match.avatar_url = None
-            donor = getattr(donor_match, "donor", None)
-            image_key = getattr(donor, "profile_image_key", None) if donor else None
-            if image_key:
-                try:
-                    donor_match.avatar_url = get_donor_profile_image_url(
-                        image_key
-                    )
-                except Exception:
-                    logger.exception(
-                        "Could not generate donor avatar for match_id=%s",
-                        donor_match.id,
-                    )
+            donor_match.avatar_url = get_safe_donor_avatar_url(
+                getattr(donor_match, "donor", None)
+            )
 
         # Prepare map data only for ongoing emergency requests.
         if facility.latitude is not None and facility.longitude is not None:
@@ -290,12 +280,12 @@ def staff_audit_log(request):
         request.session.flush()
         return redirect("login")
 
-    confirmed_appointments = Appointments.objects.none()
+    confirmed_appointments = []
     donated_appointment_ids = set()
 
     if staff_profile.facility:
 
-        confirmed_appointments = (
+        confirmed_appointments = list(
             Appointments.objects.filter(
                 facility=staff_profile.facility,
                 status="CONFIRMED",
@@ -308,6 +298,11 @@ def staff_audit_log(request):
             )
             .order_by("-scheduled_at")
         )
+
+        for appointment in confirmed_appointments:
+            appointment.avatar_url = get_safe_donor_avatar_url(
+                getattr(appointment, "donor", None)
+            )
 
         donated_appointment_ids = set(
             Donations.objects.filter(
