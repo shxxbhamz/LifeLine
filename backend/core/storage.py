@@ -148,3 +148,40 @@ def get_safe_donor_avatar_url(donor_profile):
             donor_profile.profile_image_key,
         )
         return None
+
+        def test_donor_profile_image(image_key):
+    """
+    Check whether a donor profile image actually exists in Neon.
+    Does not expose storage credentials.
+    """
+
+    if not image_key:
+        return {
+            "exists": False,
+            "reason": "Image key is empty",
+        }
+
+    try:
+        client = get_neon_storage_client()
+
+        response = client.head_object(
+            Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+            Key=image_key,
+        )
+
+        return {
+            "exists": True,
+            "content_type": response.get("ContentType"),
+            "content_length": response.get("ContentLength"),
+        }
+
+    except Exception:
+        logger.exception(
+            "NEON IMAGE OBJECT CHECK FAILED: key=%s",
+            image_key,
+        )
+
+        return {
+            "exists": False,
+            "reason": "Storage object check failed",
+        }

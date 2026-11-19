@@ -28,15 +28,15 @@
         <div class="dropdown" tabindex="0">
           {% if profile_image_url %}
             <img
-                src="{{ profile_image_url }}"
-                alt="Donor Profile"
-                class="donor-avatar"
-                style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;"
+              src="{{ profile_image_url }}"
+              alt="Donor Profile"
+              class="donor-avatar"
+              style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;"
             >
           {% else %}
             <span
-                class="donor-avatar"
-                style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #ffffff; color: #0f766e; font-weight: bold; cursor: pointer;"
+              class="donor-avatar"
+              style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #ffffff; color: #0f766e; font-weight: bold; cursor: pointer;"
             >
               {{ donor_name|slice:":1"|upper|default:"D" }}
             </span>
